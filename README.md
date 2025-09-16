@@ -33,13 +33,29 @@
 ---
 
 ## Features  
+
 Current sprint features:  
+
 - **Basic Book Search**  
-  - Search for books using the Google Books API.  
+  - **Description:** Search for books using the Google Books API by title, author, or keyword.  
+  - **Who uses it:** End users who want to discover books.  
+  - **User Stories:**  
+    - As a user, I want to search for a book by title so that I can find specific books I’m interested in.  
+    - As a user, I want to search for books by author so that I can see all works by a particular author.  
+
 - **To-Read List**  
-  - Save books to read later.  
+  - **Description:** Save books to a personal “to-read” list to keep track of books to read later.  
+  - **Who uses it:** End users keeping track of reading goals.  
+  - **User Stories:**  
+    - As a user, I want to add a book to my to-read list so that I can remember to read it later.  
+    - As a user, I want to view my to-read list so that I can see all the books I plan to read.  
+
 - **Community Discussion Spaces (Prototype)**  
-  - Each book has a placeholder page for user discussions.  
+  - **Description:** Each book has a placeholder page where users can discuss it.  
+  - **Who uses it:** End users who want to engage with other readers.  
+  - **User Stories:**  
+    - As a user, I want to view a discussion space for a book so that I can see what others are saying about it.  
+    - As a user, I want to post comments in a discussion space so that I can share my thoughts and opinions on a book.  
 
 ---
 
