@@ -1,111 +1,74 @@
-# **BookHive**
+# BookHive  
+> BookHive is an AI-powered social platform for book lovers. It helps users discover new books based on their reading preferences, find like-minded readers, and engage in community-driven discussions. Think of it as Goodreads meets Reddit, with a dash of AI magic.  
+> Live demo [_coming soon_](#). <!-- Replace # with your hosted link when available -->
 
-BookHive is an AI-powered social platform for book lovers. It helps users discover new books based on their reading preferences, find like-minded readers, and engage in community-driven discussions. Think of it as Goodreads meets Reddit, with a dash of AI magic.
-
----
-
-### **What is this repository for?**
-
-**Version:** 0.1 (First sprint prototype)
-
-**Quick Summary:**  
- BookHive uses AI and external data (e.g., Google Books API) to recommend books and connect readers through shared interests. Each book can have its own discussion space — like a subreddit — where users can:
-
-* Discuss the book
-
-* Post memes, fan art, or theories
-
-* Chat in real time with other fans
+## Table of Contents  
+* [General Information](#general-information)  
+* [Technologies Used](#technologies-used)  
+* [Features](#features)  
+* [Setup](#setup)  
+* [Usage](#usage)  
+* [Project Status](#project-status)  
+* [Room for Improvement](#room-for-improvement)  
+* [Acknowledgements](#acknowledgements)  
+* [Contact](#contact)  
 
 ---
 
-### **Description (Vision Questions)**
-
-* **Who we’re working with:** Team members- Nirajan Banjade, Alan Garcia, Aevin Tweedie, Prashant Panta, and Prajwal Kunwar
-
-* **What we’re creating:** A book discovery and community platform powered by AI and social features.
-
-* **Who we’re doing it for:** Readers who want personalized recommendations and a fun, engaging way to connect with other book lovers.
-
-* **Why we’re doing this:** To combine book discovery with community, helping readers find their next favorite story while building meaningful connections.
+## General Information  
+- **Version:** 0.1 (First sprint prototype)  
+- **Purpose:** BookHive combines book discovery with community-driven discussions, helping readers find their next favorite story while building meaningful connections.  
+- **Team Members:** Nirajan Banjade, Alan Garcia, Aevin Tweedie, Prashant Panta, Prajwal Kunwar  
+- **Logo/Image:** _Placeholder_  
 
 ---
 
-### **General Info**
-
-Logo/image: 
-
-We may need additional expertise in large-scale backend deployment and UI/UX design later in the project.
-
----
-
-### **Technologies**
-
-We are still finalizing frameworks, but likely options include:
-
-* **Backend (Python-based options):** [Flask](https://flask.palletsprojects.com/) or [FastAPI](https://fastapi.tiangolo.com/) (simple, lightweight)
-
-* **Frontend:** [React](https://react.dev/) (popular, component-based) or plain [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML)/[CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)/[JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) for MVP
-
-* **Database:** [MongoDB](https://www.mongodb.com/) (flexible document storage for book/user data)
-
-* **External API:** [Google Books API](https://developers.google.com/books) for book data
-
-* **Version Control & Tools:** [Bitbucket](https://bitbucket.org/), [Jira](https://www.atlassian.com/software/jira), [Git](https://git-scm.com/)
+## Technologies Used  
+- **Backend:** [Flask](https://flask.palletsprojects.com/) or [FastAPI](https://fastapi.tiangolo.com/)  
+- **Frontend:** [React](https://react.dev/) or [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML)/[CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)/[JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)  
+- **Database:** [MongoDB](https://www.mongodb.com/)  
+- **External API:** [Google Books API](https://developers.google.com/books)  
+- **Version Control & Tools:** [Bitbucket](https://bitbucket.org/), [Jira](https://www.atlassian.com/software/jira), [Git](https://git-scm.com/)  
 
 ---
 
-### **Features (First Sprint)**
-
-1. **Basic Book Search**
-
-   * Allows users to search for books using the Google Books API.
-
-   * User story: *As a book lover, I want to search for books so I can find titles that interest me.*
-
-2. **To-Read List**
-
-   * Users can save books they want to read later.
-
-   * User story: *As a book lover, I want to save books to a “to-read” list so I can track recommendations.*
-
-3. **Community Discussion Spaces (Prototype)**
-
-   * Each book has a placeholder page for user discussion.
-
-   * User story: *As a book lover, I want to join communities for books so I can connect with others.*
+## Features  
+Current sprint features:  
+- **Basic Book Search**  
+  - Search for books using the Google Books API.  
+- **To-Read List**  
+  - Save books to read later.  
+- **Community Discussion Spaces (Prototype)**  
+  - Each book has a placeholder page for user discussions.  
 
 ---
 
-### **How do I get set up?**
+## Setup  
+**Dependencies:** Listed in `requirements.txt` (to be added).  
+**Database:** MongoDB (local or Atlas).  
 
-* **Dependencies:** Listed in `requirements.txt` (to be added).
+Clone and install:  
+```bash
+git clone <repo-url>
+cd bookhive
+pip install -r requirements.txt
+## **Usage**
 
-* **Database Configuration:** MongoDB (local or Atlas).
+Run the app (Flask example):
 
-**Setup:**
-
- `git clone <repo-url>`  
-`cd bookhive`  
-`pip install -r requirements.txt`
-
-* 
-
-**Running the app (Flask example):**
-
- `flask run`
-
-* 
+`flask run`
 
 ---
 
-### **Project Status**
+## **Project Status**
 
-Project is: **In Progress (Sprint 1\)**
+Project is: *In Progress (Sprint 1\)*
 
 ---
 
-### **Room for Improvement**
+## **Room for Improvement**
+
+Areas for improvement:
 
 * Expanded AI-generated recommendations
 
@@ -113,7 +76,7 @@ Project is: **In Progress (Sprint 1\)**
 
 * Smarter community curation tools
 
-**Future To-Dos:**
+Future To-Dos:
 
 * Implement AI-based character/setting visualizations
 
@@ -123,7 +86,7 @@ Project is: **In Progress (Sprint 1\)**
 
 ---
 
-### **Acknowledgements**
+## **Acknowledgements**
 
 * Inspired by Goodreads, Reddit, and modern AI tools.
 
@@ -133,12 +96,16 @@ Project is: **In Progress (Sprint 1\)**
 
 ---
 
-### **Who do I talk to?**
+## **Contact**
 
-* **Team members:**  
-* \- Nirajan Banjade — lra84@txstate.edu    
-* \- Alan Garcia — iwt5@txstate.edu    
-* \- Aevin Tweedie — lav115@txstate.edu    
-* \- Prashant Panta — uyw13@txstate.edu    
-* \- Prajwal Kunwar — kzw17@txstate.edu    
-  
+Created by:
+
+* Nirajan Banjade — lra84@txstate.edu
+
+* Alan Garcia — iwt5@txstate.edu
+
+* Aevin Tweedie — lav115@txstate.edu
+
+* Prashant Panta — uyw13@txstate.edu
+
+* Prajwal Kunwar — kzw17@txstate.edu
