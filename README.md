@@ -42,6 +42,7 @@ Current sprint features:
   - **User Stories:**  
     - As a user, I want to search for a book by title so that I can find specific books I’m interested in.  
     - As a user, I want to search for books by author so that I can see all works by a particular author.  
+    - As a user, I want to search for book by keywords so that I can discover books on subjects that I am interested in.
 
 - **To-Read List**  
   - **Description:** Save books to a personal “to-read” list to keep track of books to read later.  
