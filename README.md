@@ -50,6 +50,7 @@ Current sprint features:
   - **User Stories:**  
     - As a user, I want to add a book to my to-read list so that I can remember to read it later.  
     - As a user, I want to view my to-read list so that I can see all the books I plan to read.  
+    - As a user, I want to remove a book my from to-read list and move it to collections so that I can remember all the books that I have read.
 
 - **Community Discussion Spaces (Prototype)**  
   - **Description:** Each book has a placeholder page where users can discuss it.  
@@ -57,6 +58,7 @@ Current sprint features:
   - **User Stories:**  
     - As a user, I want to view a discussion space for a book so that I can see what others are saying about it.  
     - As a user, I want to post comments in a discussion space so that I can share my thoughts and opinions on a book.  
+    - As a user, I want to post memes, gifs regarding the book to the discussion space so that I can have new path for discussion.
 
 ---
 
