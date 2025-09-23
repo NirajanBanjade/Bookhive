@@ -23,12 +23,12 @@
 
 ---
 
-## Technologies Used  
-- **Backend:** [Flask](https://flask.palletsprojects.com/) or [FastAPI](https://fastapi.tiangolo.com/)  
+## Technologies Used
+- **Backend:** [Node.js](https://nodejs.org/) with [Express](https://expressjs.com/)  
 - **Frontend:** [React](https://react.dev/) or [HTML](https://developer.mozilla.org/en-US/docs/Web/HTML)/[CSS](https://developer.mozilla.org/en-US/docs/Web/CSS)/[JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript)  
 - **Database:** [MongoDB](https://www.mongodb.com/)  
 - **External API:** [Google Books API](https://developers.google.com/books)  
-- **Version Control & Tools:** [Bitbucket](https://bitbucket.org/), [Jira](https://www.atlassian.com/software/jira), [Git](https://git-scm.com/)  
+- **Version Control & Tools:** [Bitbucket](https://bitbucket.org/), [Jira](https://www.atlassian.com/software/jira), [Git](https://git-scm.com/)
 
 ---
 
@@ -62,20 +62,24 @@ Current sprint features:
 
 ---
 
-## Setup  
-**Dependencies:** Listed in `requirements.txt` (to be added).  
-**Database:** MongoDB (local or Atlas).  
+## Setup
+Dependencies: Listed in `package.json`.
 
-Clone and install:  
+Database: [MongoDB](https://www.mongodb.com/) (local or Atlas).
+
+Clone and install:
 ```bash
 git clone <repo-url>
 cd bookhive
-pip install -r requirements.txt
-## **Usage**
+npm install
 
-Run the app (Flask example):
+## Usage
 
-`flask run`
+Run the app:
+
+**For development (with live reload):**
+```bash
+npm run dev
 
 ---
 
