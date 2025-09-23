@@ -19,7 +19,7 @@
 - **Version:** 0.1 (First sprint prototype)  
 - **Purpose:** BookHive combines book discovery with community-driven discussions, helping readers find their next favorite story while building meaningful connections.  
 - **Team Members:** Nirajan Banjade, Alan Garcia, Aevin Tweedie, Prashant Panta, Prajwal Kunwar  
-- **Logo/Image:** _Placeholder_  
+- **Logo/Image:**   ![alt text](<book demo.gif>)
 
 ---
 
