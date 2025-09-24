@@ -1,5 +1,8 @@
 const ToRead = require('../models/ToRead');
 
+// Load Google Books API key from environment
+const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
+
 exports.getToReadList = async (req, res) => {
   try {
     const userId = req.params.userId;
