@@ -23,8 +23,13 @@ app.get('/', (req, res) => res.send('BookHive API running'));
 const toReadRoutes = require('./routes/toReadRoutes');
 app.use('/api/to-read', toReadRoutes);
 
+
 // Register user routes
 const toGetUserRoutes = require('./routes/toGetUserRoutes');
 app.use('/api/users', toGetUserRoutes);
+
+const bookRoutes = require('./routes/bookRoutes');
+app.use(express.json()); //Middleware to parse JSON
+app.use('/api/books', bookRoutes);
 
 module.exports = app;
