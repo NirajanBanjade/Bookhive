@@ -1,65 +1,68 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import "./Profile.css";
 
 const Profile = () => {
-  // State for user data
+  // State for user data (note: store a URL for the image)
   const [userData, setUserData] = useState({
     name: "John Doe",
     email: "john.doe@example.com",
     bio: "Avid reader and book enthusiast. Love fantasy, sci-fi, and mystery novels.",
-    profileImage: null,
+    profileImageUrl: null, // <— data URL we can render
   });
 
-  // State for edit mode
   const [isEditing, setIsEditing] = useState(false);
   const [tempData, setTempData] = useState(userData);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null); // preview while editing
 
-  // Handle input changes
   const handleInputChange = (field, value) => {
-    setTempData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setTempData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Handle profile image upload
+  // Upload → create a data URL we can render & save
   const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target.result);
-        setTempData((prev) => ({
-          ...prev,
-          profileImage: file,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      setImagePreview(dataUrl);
+      setTempData((prev) => ({ ...prev, profileImageUrl: dataUrl }));
+    };
+    reader.readAsDataURL(file);
   };
 
-  // Save changes
   const handleSave = () => {
-    setUserData(tempData);
+    // persist preview if available
+    setUserData((prev) => ({
+      ...tempData,
+      profileImageUrl:
+        imagePreview ?? tempData.profileImageUrl ?? prev.profileImageUrl,
+    }));
     setIsEditing(false);
     setImagePreview(null);
-    // TODO: Send data to backend when ready
-    console.log("Saving user data:", tempData);
+    console.log("Saving user data:", {
+      ...tempData,
+      profileImageUrl: imagePreview ?? tempData.profileImageUrl,
+    });
   };
 
-  // Cancel changes
   const handleCancel = () => {
     setTempData(userData);
     setIsEditing(false);
     setImagePreview(null);
   };
 
-  // Start editing
   const handleEdit = () => {
     setIsEditing(true);
     setTempData(userData);
   };
+
+  // Choose what to display
+  const imgSrc =
+    imagePreview ||
+    tempData.profileImageUrl ||
+    userData.profileImageUrl ||
+    "/api/placeholder/300/300";
 
   return (
     <div className="profile-container">
@@ -77,30 +80,24 @@ const Profile = () => {
           {/* Profile Image Section */}
           <div className="profile-image-section">
             <div className="profile-image-container">
-              <img
-                src={
-                  imagePreview ||
-                  userData.profileImage ||
-                  "/api/placeholder/150/150"
-                }
-                alt="Profile"
-                className="profile-image"
-              />
-              {isEditing && (
-                <div className="image-upload-overlay">
-                  <input
-                    type="file"
-                    id="profileImage"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="image-input"
-                  />
-                  <label htmlFor="profileImage" className="upload-label">
-                    📷 Change Photo
-                  </label>
-                </div>
-              )}
+              <img src={imgSrc} alt="Profile" className="profile-image" />
             </div>
+
+            {/* ⬇️ Button BELOW the circle (not overlayed) */}
+            {isEditing && (
+              <div className="image-upload-below">
+                <input
+                  type="file"
+                  id="profileImage"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="image-input"
+                />
+                <label htmlFor="profileImage" className="upload-label">
+                   Change Photo
+                </label>
+              </div>
+            )}
           </div>
 
           {/* User Info Section */}
@@ -168,7 +165,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Action Buttons */}
           {isEditing && (
             <div className="action-buttons">
               <button className="save-btn" onClick={handleSave}>

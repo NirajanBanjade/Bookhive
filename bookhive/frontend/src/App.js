@@ -1,4 +1,3 @@
-// In your frontend/src/App.js
 import React from "react";
 import Profile from "./components/Profile";
 
