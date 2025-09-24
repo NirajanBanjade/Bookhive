@@ -1,6 +1,11 @@
 const ToRead = require('../models/ToRead'); // make sure this is correct
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 
+const clamp = (v, min, max, d) => {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : d;
+};
+
 exports.getToReadList = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -16,3 +21,72 @@ exports.getToReadList = async (req, res) => {
   }
 };
 
+ /* Keyword search inside the user's embedded books[] with pagination.
+ */
+exports.searchToReadBooks = async (req, res) => {
+  const userId = req.params.userId;
+  const q = (req.query.q || '').trim();
+  const page = clamp(req.query.page, 1, 10000, 1);
+  const limit = clamp(req.query.limit, 1, 50, 10);
+  const skip = (page - 1) * limit;
+
+  // If keyword exists, match title or any author (case-insensitive)
+  const keywordMatch = q
+    ? {
+        $or: [
+          { 'books.title':   { $regex: q, $options: 'i' } },
+          { 'books.authors': { $elemMatch: { $regex: q, $options: 'i' } } }
+        ]
+      }
+    : {};
+
+  const pipeline = [
+    { $match: { userId } },
+    { $unwind: '$books' },
+    ...(q ? [{ $match: keywordMatch }] : []),
+    {
+      $facet: {
+        data: [
+          { $sort: { 'books.title': 1, _id: 1 } }, // sort A→Z; adjust if needed
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 0,
+              googleBookId: '$books.googleBookId',
+              title: '$books.title',
+              authors: '$books.authors',
+              thumbnail: '$books.thumbnail'
+            }
+          }
+        ],
+        totalDocs: [{ $count: 'count' }]
+      }
+    }
+  ];
+
+  try {
+    const result = await ToRead.aggregate(pipeline).exec();
+    const data = result[0]?.data ?? [];
+    const total = result[0]?.totalDocs?.[0]?.count ?? 0;
+
+    return res.json({
+      data,
+      meta: {
+        page,
+        limit,
+        returned: data.length,
+        total,
+        has_next: skip + data.length < total,
+        has_prev: page > 1,
+        next_page: skip + data.length < total ? page + 1 : null,
+        prev_page: page > 1 ? page - 1 : null,
+        q: q || undefined,
+        userId
+      }
+    });
+  } catch (err) {
+    console.error('ToRead search error:', err);
+    return res.status(500).json({ error: 'server error' });
+  }
+};
