@@ -22,7 +22,14 @@ const User = new mongoose.Schema(
       passwordHash: { type: String, 
         required: true, 
         select: false },
+        role: {
+            type:[String],
+            enum:['User','Admin'],
+            default: ['User']
+        },
+        emailVerifiedAt: { type: Date, default: null },
     },
+
     { timestamps: true }
   );
 
