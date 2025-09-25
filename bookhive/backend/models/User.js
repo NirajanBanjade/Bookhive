@@ -24,10 +24,10 @@ const User = new mongoose.Schema(
         select: false },
         role: {
             type:[String],
-            enum:['User','Admin'],
+            enum:['User','Admin'],  // Guest users are not authentic users. so haven't made any roles for them.
             default: ['User']
         },
-        emailVerifiedAt: { type: Date, default: null },
+        emailVerifiedAt: { type: Date, default: null }, 
     },
 
     { timestamps: true }
@@ -40,5 +40,8 @@ User.methods.setPassword = async function (plain) {
 User.methods.verifyPassword = function (plain) {
     return bcrypt.compare(plain, this.passwordHash);
 };
+
+// email verified at: function still is not made. need to figure out to send tokens during registration.
+
   
 module.exports = mongoose.model('User', User);
