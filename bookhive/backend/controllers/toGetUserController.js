@@ -6,6 +6,15 @@ const registerUser = async (req, res) => {
         if (!username || !email || !password) {
             return res.status(400).json({ message: 'Name, email, and password are required.' });
         }
+        if (!User.emailValidator(email)) {
+            return res.status(400).json({ message: 'Email is invalid' });
+        }
+        if (!User.passwordValidator(password)) {
+            return res.status(400).json({
+              message: `Password doesn't match the criteria.`,
+            });
+        }
+      
         
         // Check if user already exists
         const existingUser = await getUser.findOne({ $or: [{ username }, { email }] });
