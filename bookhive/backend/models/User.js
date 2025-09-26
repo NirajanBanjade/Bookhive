@@ -34,6 +34,7 @@ const User = new mongoose.Schema(
   );
 
 User.methods.setPassword = async function (plain) {
+
     const rounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
     this.passwordHash = await bcrypt.hash(plain, rounds);
 };
@@ -42,6 +43,5 @@ User.methods.verifyPassword = function (plain) {
 };
 
 // email verified at: function still is not made. need to figure out to send tokens during registration.
-
   
 module.exports = mongoose.model('User', User);
