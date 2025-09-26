@@ -1,30 +1,58 @@
 const axios = require('axios');
 
-const searchBooks = async (req, res) => {
-  try {
-    const { title } = req.query; // grab the search term from the query string
-    if (!title) return res.status(400).json({ error: 'Title is required' });
+const GOOGLE_BOOKS_BASE = 'https://www.googleapis.com/books/v1/volumes';
 
-    // Call Google Books API
-    const response = await axios.get('https://www.googleapis.com/books/v1/volumes', {
-      params: { q: title }
-    });
+// Helper function: normalize Google Books response
+function mapVolumeItem(item) {
+  const vi = item.volumeInfo || {};
+  return {
+    id: item.id,
+    title: vi.title || 'No title',
+    authors: vi.authors || [],
+    publisher: vi.publisher || null,
+    publishedDate: vi.publishedDate || null,
+    description: vi.description || null,
+    thumbnail: vi.imageLinks?.thumbnail || null,
+    infoLink: vi.infoLink || null,
+  };
+}
 
-    // Map the results to only the fields we want
-    const books = response.data.items.map(item => ({
-      googleBookId: item.id,
-      title: item.volumeInfo.title,
-      authors: item.volumeInfo.authors || [],
-      publishedDate: item.volumeInfo.publishedDate,
-      description: item.volumeInfo.description,
-      thumbnail: item.volumeInfo.imageLinks?.thumbnail || ''
-    }));
-
-    res.json(books); // send the array of books to the frontend
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error fetching books from Google API' });
+// Controller function: GET /api/books?title=...
+async function searchBooks(req, res) {
+  const title = (req.query.title || req.query.q || '').trim();
+  if (!title) {
+    return res
+      .status(400)
+      .json({ error: 'Missing query parameter: title (example: /api/books?title=harry+potter)' });
   }
-};
+
+  try {
+    const q = `intitle:${title}`;
+    const params = {
+      q,
+      maxResults: 20,
+      fields:
+        'items(id,volumeInfo(title,authors,publisher,publishedDate,description,imageLinks/thumbnail,infoLink))',
+    };
+
+    if (process.env.GOOGLE_BOOKS_API_KEY) {
+      params.key = process.env.GOOGLE_BOOKS_API_KEY;
+    }
+
+    const resp = await axios.get(GOOGLE_BOOKS_BASE, { params });
+    const items = (resp.data.items || []).map(mapVolumeItem);
+
+    res.json({ total: items.length, items });
+  } catch (err) {
+    console.error(
+      'Google Books API error:',
+      err.response?.status,
+      err.response?.data || err.message
+    );
+    const status = err.response?.status || 500;
+    const message = err.response?.data?.error?.message || 'Failed to fetch books';
+    res.status(status).json({ error: message });
+  }
+}
 
 module.exports = { searchBooks };
