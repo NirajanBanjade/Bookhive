@@ -1,5 +1,5 @@
 const getUser = require('../models/User');
-
+const jwt = require('jsonwebtoken');
 const emailValidator = (email)=>{
     if (typeof email !== 'string') return false;
     if(/\s/.test(email)) return false;
@@ -67,7 +67,11 @@ const loginUser= async (req, res) => {
         if(!isPasswordValid){
             return res.status(400).json({error: 'Invalid username/email or password!!'});
         }
-        res.status(200).json({message: 'Successfully Logged in!!', userId: user._id, username: user.username, email: user.email, role: user.role});
+
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // res.status(200).json({message: 'Successfully Logged in!!', userId: user._id, username: user.username, email: user.email, role: user.role});
+        res.json({ message: 'Login successful', token }); // currently sending just the token for testing.
 
     } catch (err) {
         res.status(500).json({ error: err.message });
