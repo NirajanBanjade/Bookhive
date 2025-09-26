@@ -1,21 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const emailValidator = (email)=>{
-  if (typeof email !== 'string') return false;
-  if(/\s/.test(email)) return false;
-  if((email.length<6)||(email.length>50)) return false;
-  const basicShape = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/; 
-  return basicShape.test(email);
-}
-
-const passwordValidator = (password) => {
-  if (typeof password !== 'string') return false;
-  if (/\s/.test(password)) return false;
-  const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s])[^\s]{8,64}$/; 
-  return re.test(password);
-};
-
 const User = new mongoose.Schema(
     {
       username: {
@@ -32,10 +17,6 @@ const User = new mongoose.Schema(
         unique: true,
         lowercase: true,
         trim: true,
-        validate: {
-          validator: emailValidator,
-          message: 'Email is not valid',
-        },
       },
       // store ONLY a hash
       passwordHash: { type: String, 
@@ -58,11 +39,6 @@ User.methods.setPassword = async function (plain) {
     this.passwordHash = await bcrypt.hash(plain, rounds);
 };
 User.methods.verifyPassword = function (plain) {
-    if (!passwordValidator(plain)) {
-      throw new Error(
-        `Password doesn't match the criteria.`
-      );
-    }
     return bcrypt.compare(plain, this.passwordHash);
 };
 

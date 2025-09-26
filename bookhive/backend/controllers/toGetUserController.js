@@ -1,15 +1,30 @@
 const getUser = require('../models/User');
 
+const emailValidator = (email)=>{
+    if (typeof email !== 'string') return false;
+    if(/\s/.test(email)) return false;
+    if((email.length<6)||(email.length>50)) return false;
+    const basicShape = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/; 
+    return basicShape.test(email);
+  }
+  
+  const passwordValidator = (password) => {
+    if (typeof password !== 'string') return false;
+    if (/\s/.test(password)) return false;
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s])[^\s]{8,64}$/; 
+    return re.test(password);
+  };
+
 const registerUser = async (req, res) => {
     try {
         const { username, email, password } = req.body;
         if (!username || !email || !password) {
             return res.status(400).json({ message: 'Name, email, and password are required.' });
         }
-        if (!User.emailValidator(email)) {
+        if (!emailValidator(email)) {
             return res.status(400).json({ message: 'Email is invalid' });
         }
-        if (!User.passwordValidator(password)) {
+        if (!passwordValidator(password)) {
             return res.status(400).json({
               message: `Password doesn't match the criteria.`,
             });
