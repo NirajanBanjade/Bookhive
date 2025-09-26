@@ -28,6 +28,7 @@ app.use('/api/to-read', toReadRoutes);
 const toGetUserRoutes = require('./routes/toGetUserRoutes');
 app.use('/api/users', toGetUserRoutes);
 
+// Import and register books routes
 const bookRoutes = require('./routes/bookRoutes');
 app.use(express.json()); //Middleware to parse JSON
 app.use('/api/books', bookRoutes);
