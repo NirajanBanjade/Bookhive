@@ -34,5 +34,5 @@ async function sendEmail({ to }) {
 }
 
 // example
-sendEmail({ to: 'nirajanbanjade123@gmail.com' }).then(console.log);
+sendEmail({ to: '' }).then(console.log);
 module.exports = { sendEmail, generateNumericToken };
