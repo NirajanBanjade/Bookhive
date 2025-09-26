@@ -19,6 +19,11 @@ mongoose.connect(process.env.MONGO_URI, {
 // Placeholder root route
 app.get('/', (req, res) => res.send('BookHive API running'));
 
+// Placeholder test endpoint for Google Books
+app.get('/api/test-google-books', (req, res) => {
+  res.json({ message: 'Google Books test endpoint working!' });
+});
+
 // Import and register routes
 const toReadRoutes = require('./routes/toReadRoutes');
 app.use('/api/to-read', toReadRoutes);
