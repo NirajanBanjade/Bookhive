@@ -5,7 +5,10 @@ const ToRead = require('../models/ToRead');
 
 (async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI);
+    await mongoose.connect(process.env.MONGO_URI, {
+     dbName: process.env.MONGO_DB_NAME || 'Bookhive',
+  });
+
     const userId = 'demo-user-123';
 
     await ToRead.deleteMany({ userId });
@@ -20,7 +23,7 @@ const ToRead = require('../models/ToRead');
       ]
     });
 
-    console.log('Seeded demo-user-123');
+    console.log(`Seeding into DB: ${mongoose.connection.name}`);
     process.exit(0);
   } catch (e) {
     console.error(e);
