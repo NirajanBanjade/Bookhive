@@ -1,38 +1,38 @@
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
-const sendgrid = require('nodemailer-sendgrid');
-require('dotenv').config();
 
+const path = require("path");
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+const nodemailer = require("nodemailer");
 
-// 6-digit crypto-secure token
-function generateNumericToken() {
-  // 100000–999999
-  return String(crypto.randomInt(100000, 1000000));
+function must(name) {
+  const v = process.env[name];
+  if (!v) throw new Error(`Missing env var: ${name}`);
+  return v;
 }
 
-const transport = nodemailer.createTransport(
-  sendgrid({ apiKey: process.env.SENDGRID_API_KEY })
-);
+async function notifyAdmin() {
+  const user = must("GMAIL_USER");
+  const appPass = must("GMAIL_APP_PASSWORD");
 
-async function sendEmail({ to }) {
-  const token = generateNumericToken();
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true, 
+    auth: { user, pass: appPass },
+  });
 
-  try {
-    const info = await transport.sendMail({
-      from: process.env.EMAIL_FROM,             // must be a verified sender
-      to,                                       // e.g., user email
-      subject: 'Your verification code',
-      text: `Use this code to verify your email: ${token}`,
-      html: `<h1>Your verification code</h1>
-             <p>Use this code to verify your email: <b>${token}</b></p>`
-    });
-    return { token, messageId: info.messageId };
-  } catch (err) {
-    console.error('Email send failed:', err);
-    throw err;
-  }
+  const info = await transporter.sendMail({
+    from: `"Bookhive" <${user}>`,       // must be the same Gmail account
+    to: "nirajanbanjade321@gmail.com",  // test recipient
+    subject: "New User Registered",
+    text: "A new user has registered on Bookhive.",
+    html: "<b>Greeting!</b><br>A new user has registered on Bookhive.",
+  });
+
+  console.log("Message sent:", info.messageId, "accepted:", info.accepted, "rejected:", info.rejected);
 }
 
-// example
-sendEmail({ to: '' }).then(console.log);
-module.exports = { sendEmail, generateNumericToken };
+notifyAdmin().catch((err) => {
+  console.error("Send failed:", err);
+  process.exit(1);
+});
+
