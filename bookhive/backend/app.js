@@ -43,6 +43,9 @@ const bookRoutes = require('./routes/bookRoutes');
 app.use(express.json()); //Middleware to parse JSON
 app.use('/api/books', bookRoutes);
 
-const toUserProfile=require('./controllers/toUserProfile');
-app.get('/api/profile/me', requireAuth, toUserProfile);
+const toUserProfile=require('./routes/toUserData');
+app.use('/api/profile', requireAuth, toUserProfile);
+
+
+// const toUpdateUserPassword=require('./routes/toUpdatePassword');
 module.exports = app;
