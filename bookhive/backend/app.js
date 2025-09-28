@@ -1,4 +1,7 @@
 require('dotenv').config();
+// Load Google Books API key from environment
+const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -16,8 +19,14 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.log(err));
 
-// Placeholder root route
-app.get('/', (req, res) => res.send('BookHive API running'));
+// Placeholder root route for tempporary test of google books api key
+app.get('/api/test-google-books', (req, res) => {
+  if (GOOGLE_BOOKS_API_KEY) {
+    res.send(`Google Books API key loaded: ${GOOGLE_BOOKS_API_KEY.substring(0, 5)}...`);
+  } else {
+    res.status(500).send('API key not loaded');
+  }
+});
 
 // Import and register routes
 const toReadRoutes = require('./routes/toReadRoutes');
