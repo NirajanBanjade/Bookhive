@@ -1,7 +1,7 @@
 const User = require('../models/User');
-const { issueResetCode } = require('../util/token_util.js');
+const { issueResetCode } = require('../utils/token_util.js');
 
-const sendMail = require('../models/SendGrid.js');
+const {sendMail} = require('../models/SendGrid.js');
 async function requestPasswordReset(req, res) {
     try {
         const user = await User.findOne({ email: req.body.email });
@@ -17,7 +17,8 @@ async function requestPasswordReset(req, res) {
             text: `Your code is ${code}. It expires in 10 minutes.`,
         });
         return res.json({ ok: true });
-    } catch {
+    } catch (err){
+        console.error('requestPasswordReset error:', err);
         return res.status(500).json({ error: 'Internal server error!' });
     }
 }
@@ -43,7 +44,8 @@ async function resetPasswordAfterCode(req, res) {
         return res.json({ ok: true });
 
     }
-    catch {
+    catch (err){
+        console.error('requestPasswordaftercode error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
 }

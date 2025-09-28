@@ -47,5 +47,6 @@ const toUserProfile=require('./routes/toUserData');
 app.use('/api/profile', requireAuth, toUserProfile);
 
 
-// const toUpdateUserPassword=require('./routes/toUpdatePassword');
+const toUpdateUserPassword=require('./routes/toUpdatePassword');
+app.use('/api/update-password', toUpdateUserPassword);
 module.exports = app;
