@@ -1,6 +1,5 @@
-
 const path = require("path");
-require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 const nodemailer = require("nodemailer");
 
 function must(name) {
@@ -9,30 +8,32 @@ function must(name) {
   return v;
 }
 
-async function notifyAdmin() {
-  const user = must("GMAIL_USER");
-  const appPass = must("GMAIL_APP_PASSWORD");
+// create one reusable transporter
+const GMAIL_USER = must("GMAIL_USER");
+const GMAIL_APP_PASSWORD = must("GMAIL_APP_PASSWORD");
 
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true, 
-    auth: { user, pass: appPass },
-  });
-
-  const info = await transporter.sendMail({
-    from: `"Bookhive" <${user}>`,       // must be the same Gmail account
-    to: "nirajanbanjade321@gmail.com",  // test recipient
-    subject: "New User Registered",
-    text: "A new user has registered on Bookhive.",
-    html: "<b>Greeting!</b><br>A new user has registered on Bookhive.",
-  });
-
-  console.log("Message sent:", info.messageId, "accepted:", info.accepted, "rejected:", info.rejected);
-}
-
-notifyAdmin().catch((err) => {
-  console.error("Send failed:", err);
-  process.exit(1);
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: { user: GMAIL_USER, pass: GMAIL_APP_PASSWORD },
 });
 
+async function sendMail({ to, subject, text, html, replyTo }) {
+  const info = await transporter.sendMail({
+    from: `"Bookhive" <${GMAIL_USER}>`, 
+    to, // leaving it dyanamic.(in prevous version it was hardcoded)
+    subject,
+    text,
+    html,
+    ...(replyTo ? { replyTo } : {}),
+  });
+  return {
+    messageId: info.messageId,
+    accepted: info.accepted,
+    rejected: info.rejected,
+    response: info.response,
+  };
+}
+
+module.exports = { sendMail };
