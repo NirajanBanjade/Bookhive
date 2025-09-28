@@ -28,6 +28,10 @@ const User = new mongoose.Schema(
             default: ['User']
         },
         emailVerifiedAt: { type: Date, default: null }, 
+        resetOtpHash: { type: String, select: false },
+        resetOtpExpiresAt: { type: Date, select: false },
+        passwordHistory:    [{ type: String, select: false }],
+
     },
 
     { timestamps: true }
