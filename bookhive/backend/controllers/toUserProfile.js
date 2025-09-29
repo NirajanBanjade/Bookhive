@@ -12,4 +12,4 @@ const toUserProfile=async(req,res)=>{
     }
 }
 
-module.exports=toUserProfile;
+module.exports={toUserProfile};

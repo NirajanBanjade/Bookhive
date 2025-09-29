@@ -4,6 +4,6 @@ const { toUserProfile } = require('../controllers/toUserProfile');
 
 const authMiddleware = require('../middleware/jwt_auth');
 
-router.get('/profile', authMiddleware, toUserProfile);
+router.get('/', authMiddleware, toUserProfile);
 
 module.exports = router;
