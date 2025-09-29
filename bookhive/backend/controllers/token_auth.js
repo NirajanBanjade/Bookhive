@@ -27,21 +27,27 @@ async function resetPasswordAfterCode(req, res) {
     try {
 
         const { email, code, newPassword } = req.body;
-        if (typeof email !== 'string' || typeof code !== 'string' || typeof newPassword !== 'string') {
+        if ((typeof email !== 'string')  || (typeof code !== 'string') || (typeof newPassword !== 'string') ){
             return res.status(400).json({ error: 'Invalid input types' });
         }
 
         const user = await User.findOne({ email }).select('+passwordHash +resetOtpPlain +resetOtpExpiresAt');
-        if (!user || user.resetOtpPlain !== code || user.resetOtpExpiresAt < new Date()) {
-            return res.status(400).json({ error: 'Invalid or expired code!' });
+        if ((!user) || (user.resetOtpPlain !== code) || (user.resetOtpExpiresAt < new Date())) {
+            return res.status(400).json({
+                 error: 'Invalid or expired code!' 
+                });
         }
 
         await user.setPassword(newPassword); // its caling setpassword method in user model.
-        user.resetOtpPlain = undefined;
-        user.resetOtpExpiresAt = undefined;
+        user.resetOtpPlain = undefined;   // after resetting, invalidate the token code. so that it cant be reused.
+        user.resetOtpExpiresAt = undefined; //
         await user.save();
 
-        return res.json({ ok: true });
+        return res.status(200).json({
+            ok: true,
+            message: 'Password updated successfully. Please sign in again!',
+          });
+        
 
     }
     catch (err){
