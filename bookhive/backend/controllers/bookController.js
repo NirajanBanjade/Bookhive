@@ -1,57 +1,49 @@
-const axios = require('axios');
+// controllers/bookController.js
+const { searchVolumes, mapToToReadBook } = require('../services/googleBooks');
 
-const GOOGLE_BOOKS_BASE = 'https://www.googleapis.com/books/v1/volumes';
-
-// Helper function: normalize Google Books response
-function mapVolumeItem(item) {
-  const vi = item.volumeInfo || {};
-  return {
-    id: item.id,
-    title: vi.title || 'No title',
-    authors: vi.authors || [],
-    publisher: vi.publisher || null,
-    publishedDate: vi.publishedDate || null,
-    description: vi.description || null,
-    thumbnail: vi.imageLinks?.thumbnail || null,
-    infoLink: vi.infoLink || null,
-  };
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
 }
 
-// Controller function: GET /api/books?title=...
 async function searchBooks(req, res) {
-  const title = (req.query.title || req.query.q || '').trim();
-  if (!title) {
-    return res
-      .status(400)
-      .json({ error: 'Missing query parameter: title (example: /api/books?title=harry+potter)' });
-  }
-
   try {
-    const q = `intitle:${title}`;
-    const params = {
-      q,
-      maxResults: 20,
-      fields:
-        'items(id,volumeInfo(title,authors,publisher,publishedDate,description,imageLinks/thumbnail,infoLink))',
-    };
-
-    if (process.env.GOOGLE_BOOKS_API_KEY) {
-      params.key = process.env.GOOGLE_BOOKS_API_KEY;
+    const q = (req.query.q || '').trim();
+    if (!q) {
+      return res.status(400).json({ error: 'Missing q' });
     }
 
-    const resp = await axios.get(GOOGLE_BOOKS_BASE, { params });
-    const items = (resp.data.items || []).map(mapVolumeItem);
+    const page = clamp(parseInt(req.query.page || '1', 10) || 1, 1, 1_000_000);
+    const limit = clamp(parseInt(req.query.limit || '20', 10) || 20, 1, 40); // Google max 40
+    const startIndex = (page - 1) * limit;
 
-    res.json({ total: items.length, items });
+    const data = await searchVolumes(q, { startIndex, maxResults: limit });
+    const items = (data.items || []).map(mapToToReadBook);
+
+    const total = typeof data.totalItems === 'number' ? data.totalItems : items.length;
+    const rawTotalPages = Math.max(Math.ceil(total / limit), 1);
+
+    const MAX_PAGES = 50;
+    const totalPages = Math.min(rawTotalPages, MAX_PAGES);
+
+    const hasMore = page < rawTotalPages;
+
+    const nextPage = hasMore ? page + 1 : null;
+    const prevPage = page > 1 ? page - 1 : null;
+
+    return res.json({
+      q,
+      page,
+      limit,
+      total,
+      totalPages,
+      hasMore,
+      nextPage,
+      prevPage,
+      items
+    });
   } catch (err) {
-    console.error(
-      'Google Books API error:',
-      err.response?.status,
-      err.response?.data || err.message
-    );
-    const status = err.response?.status || 500;
-    const message = err.response?.data?.error?.message || 'Failed to fetch books';
-    res.status(status).json({ error: message });
+    console.error('Books search error:', err?.response?.data || err.message);
+    return res.status(500).json({ error: 'server error' });
   }
 }
 
