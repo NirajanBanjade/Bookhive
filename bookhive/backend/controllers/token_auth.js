@@ -8,12 +8,17 @@ async function requestPasswordReset(req, res) {
         if (!user) {
             return res.status(200).json({ ok: true });
         }
-
+        // const otp_expires_time=user.resetOtpExpiresAt;
+        // if (otp_expires_time-new Date()){
+        //     return res.status(429).json({ error: 'Code was recently sent. Please try again later.' });
+        // }
         const code = await issueResetCode(user);
         //   console.log(code);
+        
+
         await sendMail({
             to: user.email,
-            subject: 'Your password reset code',
+            subject: 'Your password reset code.',
             text: `Your code is ${code}. It expires in 10 minutes.`,
         });
         return res.json({ ok: true });
@@ -31,7 +36,7 @@ async function resetPasswordAfterCode(req, res) {
             return res.status(400).json({ error: 'Invalid input types' });
         }
 
-        const user = await User.findOne({ email }).select('+passwordHash +resetOtpPlain +resetOtpExpiresAt');
+        const user = await User.findOne({ email }).select('+passwordHash +resetOtpPlain +resetOtpExpiresAt');// these are selected false so need to call separately..
         if ((!user) || (user.resetOtpPlain !== code) || (user.resetOtpExpiresAt < new Date())) {
             return res.status(400).json({
                  error: 'Invalid or expired code!' 
