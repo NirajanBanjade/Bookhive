@@ -18,4 +18,6 @@ router.post('/:userId', addBookToToRead);
 // Remove a book from list
 router.delete('/:userId/:googleBookId', removeBookFromToRead);
 
+router.get('/:userId/search', searchToReadBooks);
+
 module.exports = router;
