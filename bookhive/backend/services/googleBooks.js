@@ -16,14 +16,17 @@ async function searchVolumes(q, { startIndex = 0, maxResults = 20 } = {}) {
 // Map Google API result to your ToRead schema
 function mapToToReadBook(volume) {
   const info = volume?.volumeInfo || {};
+   const thumb =
+    info.imageLinks?.thumbnail ||
+    info.imageLinks?.smallThumbnail ||
+    '';
+  const thumbnail = typeof thumb === 'string' ? thumb.replace(/^http:/, 'https:') : '';
+
   return {
     googleBookId: volume?.id || '',
     title: info.title || 'Untitled',
-    authors: info.authors || [],
-    thumbnail:
-      info.imageLinks?.thumbnail ||
-      info.imageLinks?.smallThumbnail ||
-      ''
+    authors: Array.isArray(info.authors) ? info.authors : [],
+    thumbnail
   };
 }
 
