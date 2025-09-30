@@ -13,14 +13,21 @@ async function searchBooks(req, res) {
     }
 
     const page = clamp(parseInt(req.query.page || '1', 10) || 1, 1, 1_000_000);
-    const limit = clamp(parseInt(req.query.limit || '20', 10) || 20, 1, 40); 
+    const limit = clamp(parseInt(req.query.limit || '20', 10) || 20, 1, 40); // Google max 40
     const startIndex = (page - 1) * limit;
 
     const data = await searchVolumes(q, { startIndex, maxResults: limit });
     const items = (data.items || []).map(mapToToReadBook);
 
+    const total = typeof data.totalItems === 'number' ? data.totalItems : items.length;
+    const totalPages = Math.max(Math.ceil(total / limit), 1);
+
     return res.json({
-      total: data.totalItems || 0,
+      q,
+      page,
+      limit,
+      total,
+      totalPages,
       items
     });
   } catch (err) {
