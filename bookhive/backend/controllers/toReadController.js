@@ -1,4 +1,5 @@
 const ToRead = require('../models/ToRead'); // make sure this is correct
+const Notification = require('../models/Notification');
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 
 const clamp = (v, min, max, d) => {
@@ -184,8 +185,6 @@ exports.addBookToToRead = async (req, res) => {
 };
 
 // Remove a book from the to-read list
-const Notification = require('../models/Notification');
-
 exports.removeBookFromToRead = async (req, res) => {
   try {
     const { userId, googleBookId } = req.params;
@@ -208,6 +207,18 @@ exports.removeBookFromToRead = async (req, res) => {
 
     res.status(200).json({ message: 'Book removed', list });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Fetch notifications for a user
+exports.getNotifications = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const notifications = await Notification.find({ userId }).sort({ createdAt: -1 });
+    res.status(200).json(notifications);
+  } catch (err) {
+    console.error('Error fetching notifications:', err);
     res.status(500).json({ error: err.message });
   }
 };

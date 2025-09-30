@@ -20,4 +20,7 @@ router.delete('/:userId/:googleBookId', removeBookFromToRead);
 
 router.get('/:userId/search', searchToReadBooks);
 
+// Get notifications for a user
+router.get('/:userId/notifications', getNotifications);
+
 module.exports = router;
