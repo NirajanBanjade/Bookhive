@@ -29,6 +29,67 @@ exports.searchToReadBooks = async (req, res) => {
   const page = clamp(req.query.page, 1, 10000, 1);
   const limit = clamp(req.query.limit, 1, 50, 10);
   const skip = (page - 1) * limit;
+
+  // If keyword exists, match title or any author (case-insensitive)
+  const keywordMatch = q
+    ? {
+        $or: [
+          { 'books.title':   { $regex: q, $options: 'i' } },
+          { 'books.authors': { $elemMatch: { $regex: q, $options: 'i' } } }
+        ]
+      }
+    : {};
+
+  const pipeline = [
+    { $match: { userId } },
+    { $unwind: '$books' },
+    ...(q ? [{ $match: keywordMatch }] : []),
+    {
+      $facet: {
+        data: [
+          { $sort: { 'books.title': 1, _id: 1 } }, // sort A→Z; adjust if needed
+          { $skip: skip },
+          { $limit: limit },
+          {
+            $project: {
+              _id: 0,
+              googleBookId: '$books.googleBookId',
+              title: '$books.title',
+              authors: '$books.authors',
+              thumbnail: '$books.thumbnail'
+            }
+          }
+        ],
+        totalDocs: [{ $count: 'count' }]
+      }
+    }
+  ];
+
+  try {
+    const result = await ToRead.aggregate(pipeline).exec();
+    const data = result[0]?.data ?? [];
+    const total = result[0]?.totalDocs?.[0]?.count ?? 0;
+
+    return res.json({
+      data,
+      meta: {
+        page,
+        limit,
+        returned: data.length,
+        total,
+        has_next: skip + data.length < total,
+        has_prev: page > 1,
+        next_page: skip + data.length < total ? page + 1 : null,
+        prev_page: page > 1 ? page - 1 : null,
+        q: q || undefined,
+        userId
+      }
+    });
+  } catch (err) {
+    console.error('ToRead search error:', err);
+    return res.status(500).json({ error: 'server error' });
+  }
+};
 exports.addBookToToRead = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -122,20 +183,30 @@ exports.addBookToToRead = async (req, res) => {
   }
 };
 
+// Remove a book from the to-read list
+const Notification = require('../models/Notification');
+
 exports.removeBookFromToRead = async (req, res) => {
   try {
     const { userId, googleBookId } = req.params;
-    const updated = await ToRead.findOneAndUpdate(
-      { userId },
-      { $pull: { books: { googleBookId } } },
-      { new: true }
-    );
 
-    if (!updated) {
-      return res.status(404).json({ message: 'To-read list not found for user' });
-    }
+    const list = await ToRead.findOne({ userId });
+    if (!list) return res.status(404).json({ error: 'User to-read list not found' });
 
-    res.json(updated);
+    const bookToRemove = list.books.find(b => b.googleBookId === googleBookId);
+    if (!bookToRemove) return res.status(404).json({ error: 'Book not found' });
+
+    list.books = list.books.filter(b => b.googleBookId !== googleBookId);
+    await list.save();
+
+    // ✅ Create notification
+    await Notification.create({
+      userId,
+      message: `Book "${bookToRemove.title}" was removed from your to-read list.`,
+      type: 'info'
+    });
+
+    res.status(200).json({ message: 'Book removed', list });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
