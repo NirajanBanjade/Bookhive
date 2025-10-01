@@ -48,3 +48,7 @@ const toUserProfile = require('./controllers/toUserProfile');
 app.get('/api/profile/me', requireAuth, toUserProfile);
 
 module.exports = app;
+
+// Profile API routes - handles user profile viewing and editing
+const profileRoutes = require('./routes/profileRoutes');
+app.use('/api/profile', profileRoutes);
