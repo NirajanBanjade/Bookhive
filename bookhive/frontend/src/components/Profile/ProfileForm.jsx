@@ -142,8 +142,9 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 <input
                   type="email"
                   value={tempData.email}
-                  onChange={(e) => handleInputChange("email", e.target.value)}
                   className="info-input"
+                  disabled
+                  style={{ backgroundColor: "#f5f5f5", cursor: "not-allowed" }}
                 />
               ) : (
                 <p className="info-value">{userInfo.email}</p>
