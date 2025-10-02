@@ -44,11 +44,11 @@ User.methods.setPassword = async function (plain) {
     const passwordHash=await bcrypt.hash(plain, rounds);
     this.passwordHistory = this.passwordHistory || [];
 
-    if (sameAsCurrent) {
-      const e = new Error('New password must be different from the current password!');
-      e.statusCode = 400;                     
-      e.code = 'PASSWORD_SAME_AS_CURRENT';    
-      throw e;
+    if (this.passwordHash) { // compares the newly set password with the current one..
+      const sameAsCurrent = await bcrypt.compare(plain, this.passwordHash);
+      if (sameAsCurrent) {
+        throw new Error('New password must be different from the current password!');
+      }
     }
     
     for(let pass in this.passwordHistory){
