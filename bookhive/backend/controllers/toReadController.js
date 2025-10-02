@@ -1,4 +1,5 @@
 const ToRead = require('../models/ToRead'); // make sure this path is correct
+const Collection = require('../models/Collection');
 const Notification = require('../models/Notification');
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 
@@ -151,6 +152,56 @@ exports.removeBookFromToRead = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Move a book from the user's to-read list into collections
+exports.moveBookToCollections = async (req, res) => {
+  try {
+    const { userId, googleBookId } = req.params;
+
+    // Find the user's To-Read document
+    const toReadList = await ToRead.findOne({ userId });
+    if (!toReadList) {
+      return res.status(404).json({ error: 'User to-read list not found' });
+    }
+
+    // Find the book object inside the toRead list (we need the full book fields)
+    const book = toReadList.books.find(b => b.googleBookId === googleBookId);
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found in to-read list' });
+    }
+
+    // add to collections if not already present
+    const collection = await Collection.findOneAndUpdate(
+      { userId, 'books.googleBookId': { $ne: googleBookId } }, // only match if book not present
+      { $push: { books: book }, $setOnInsert: { userId } },
+      { upsert: true, new: true }
+    );
+
+    //    Using updateOne with $pull avoids fetching the whole doc again for the write.
+    await ToRead.updateOne({ userId }, { $pull: { books: { googleBookId } } });
+
+    // Create a notification for the user that book is moved
+    await Notification.create({
+      userId,
+      message: `Book "${book.title}" moved from To-Read to Collections.`,
+      type: 'success',
+    });
+
+    // return the updated lists
+    const updatedToRead = (await ToRead.findOne({ userId })) || { userId, books: [] };
+    const updatedCollection = (await Collection.findOne({ userId })) || { userId, books: [] };
+
+    return res.status(200).json({
+      message: 'Book moved to collections',
+      toRead: updatedToRead.books,
+      collections: updatedCollection.books,
+    });
+  } catch (err) {
+    console.error('Error moving book to collections:', err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
 
 // Fetch notifications for a user
 exports.getNotifications = async (req, res) => {
