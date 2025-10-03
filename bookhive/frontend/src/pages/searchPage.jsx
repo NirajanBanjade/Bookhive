@@ -4,7 +4,7 @@ import { searchBooks } from "../api/books";
 
 export default function SearchPage() { 
   const [title, setTitle] = useState("");
-  const [keywords, setKeyword] = useState("");     
+  const [keywords, setKeywords] = useState("");     
   const [q, setQ] = useState({ title: "", keywords: "" });            
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
@@ -77,7 +77,7 @@ export default function SearchPage() {
       {/* Keywords input */}
       <input
         value={keywords}
-        onChange={(e) => setKeyword(e.target.value)}
+        onChange={(e) => setKeywords(e.target.value)}
         placeholder="Type keywords separated by commas (e.g., magic, wizard)…"
         style={{width: "100%", marginButtom: 16}}
       />
