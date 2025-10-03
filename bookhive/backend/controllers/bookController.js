@@ -5,11 +5,38 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
+function buildQuery({q, title, keywords}){
+  const parts = [];
+
+  if(title){
+    parts.push(`intitle:${title.trim()}`);
+  }
+
+  if(keywords){
+    const kws = keywords.split(',').map(kw => kw.trim()).filter(Boolean); // split by comma and clean
+    if(kws.length){
+      parts.push(kws.join(' '));
+    }
+  }
+
+  if(parts.length > 0){
+    return parts.join(' '); // combine all parts
+  }
+
+  return q || ''; // fallback to q
+}
+
 async function searchBooks(req, res) {
   try {
-    const q = (req.query.q || '').trim();
+    /*const q = (req.query.q || '').trim();
     if (!q) {
       return res.status(400).json({ error: 'Missing q' });
+    }*/
+   const { q = '', title = '', keywords = '' } = req.query;
+    const finalQ = buildQuery({ q, title, keywords });
+
+    if (!finalQ) {
+      return res.status(400).json({ error: 'Missing search query' });
     }
 
     const page = clamp(parseInt(req.query.page || '1', 10) || 1, 1, 1_000_000);
