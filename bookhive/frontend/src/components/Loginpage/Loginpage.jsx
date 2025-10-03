@@ -1,6 +1,6 @@
 import React from 'react';
-
-export default function LoginPage() {
+import './Loginpage.css';
+const Loginpage = () => {
   return (
     <div className="loginContainer">
       <div className="loginBox">
@@ -33,3 +33,4 @@ export default function LoginPage() {
     </div>
   );
 }
+export default Loginpage; 
