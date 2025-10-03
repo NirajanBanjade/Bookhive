@@ -2,9 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 import { searchBooks } from "../api/books";
 
-export default function SearchPage() {
-  const [typed, setTyped] = useState("");       
-  const [q, setQ] = useState("");               
+export default function SearchPage() { 
+  const [title, setTitle] = useState("");
+  const [keywords, setKeyword] = useState("");     
+  const [q, setQ] = useState({ title: "", keywords: "" });            
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -16,14 +17,14 @@ export default function SearchPage() {
   useEffect(() => {
     const t = setTimeout(() => {
       setPage(1);         // reset pagination on new query
-      setQ(typed.trim());
+      setQ({ title: title.trim(), keywords: keywords.trim() });
     }, 300);
     return () => clearTimeout(t);
-  }, [typed]);
+  }, [title, keywords]);
 
-  // Fetch whenever q or page changes
+  // Fetch whenever q.title, q.keywords, or page changes
   useEffect(() => {
-    if (!q) {
+    if (!q.title) {
       setItems([]);
       setHasMore(false);
       setNextPage(null);
@@ -35,7 +36,7 @@ export default function SearchPage() {
     setLoading(true);
     setError("");
 
-    searchBooks({ q, page, limit: 12, signal: ac.signal })
+    searchBooks({ ...q, page, limit: 12, signal: ac.signal })
       .then((data) => {
         // Replace on first page, append on subsequent pages
         setItems((prev) => (page === 1 ? data.items : [...prev, ...data.items]));
@@ -59,10 +60,11 @@ export default function SearchPage() {
     <div style={{ maxWidth: 860, margin: "32px auto", padding: "0 16px" }}>
       <h1 style={{ marginBottom: 12 }}>Search Books</h1>
 
+      {/* Title search input */}
       <input
-        value={typed}
-        onChange={(e) => setTyped(e.target.value)}
-        placeholder="Type keywords (e.g., harry potter)…"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Type a title (e.g., harry potter)…"
         style={{
           width: "100%",
           padding: "10px 12px",
@@ -72,6 +74,14 @@ export default function SearchPage() {
         }}
       />
 
+      {/* Keywords input */}
+      <input
+        value={keywords}
+        onChange={(e) => setKeyword(e.target.value)}
+        placeholder="Type keywords separated by commas (e.g., magic, wizard)…"
+        style={{width: "100%", marginButtom: 16}}
+      />
+
       {/* States */}
       {loading && page === 1 && (
         <p style={{ marginTop: 16 }}>Loading…</p>
@@ -79,8 +89,8 @@ export default function SearchPage() {
       {error && (
         <p style={{ marginTop: 16, color: "crimson" }}>Error: {error}</p>
       )}
-      {q && !loading && items.length === 0 && !error && (
-        <p style={{ marginTop: 16 }}>No results for “{q}”.</p>
+      {q.title && !loading && items.length === 0 && !error && (
+        <p style={{ marginTop: 16 }}>No results for “{q.title}”.</p>
       )}
 
       {/* Results */}
