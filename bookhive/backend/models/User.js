@@ -42,17 +42,26 @@ User.methods.setPassword = async function (plain) {
     const rounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
     // this.passwordHash = await bcrypt.hash(plain, rounds);
     const passwordHash=await bcrypt.hash(plain, rounds);
+    this.passwordHistory = this.passwordHistory || [];
+
+    if (this.passwordHash) { // compares the newly set password with the current one..
+      const sameAsCurrent = await bcrypt.compare(plain, this.passwordHash);
+      if (sameAsCurrent) {
+        throw new Error('New password must be different from the current password!');
+      }
+    }
     
     for(let pass in this.passwordHistory){
         const match= await bcrypt.compare(plain, this.passwordHistory[pass]);
         if(match) throw new Error('New password must be different from last three passwords!');
     }
-    this.passwordHash = passwordHash;
-    this.passwordHistory.unshift(passwordHash); // added the new password hash to the start of the array.
-
-    if(this.passwordHistory.length>3){
-        this.passwordHistory.pop(); // keep only last three passwords.
+    if (this.passwordHash) { // this if exist for update if not exist then during register wont be executed.
+      this.passwordHistory.unshift(this.passwordHash);
+      if (this.passwordHistory.length > 3) {
+        this.passwordHistory = this.passwordHistory.slice(0, 3);
+      }
     }
+    this.passwordHash=passwordHash;
 
 };
 User.methods.verifyPassword = function (plain) {
