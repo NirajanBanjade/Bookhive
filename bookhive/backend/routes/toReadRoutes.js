@@ -1,26 +1,30 @@
 const express = require('express');
 const router = express.Router();
+
+// Import controller functions
 const {
   getToReadList,
   addBookToToRead,
   removeBookFromToRead,
   searchToReadBooks,
+  moveBookToCollections,
   getNotifications
 } = require('../controllers/toReadController');
 
-// Get a user’s to-read list
+
+// get routes
 router.get('/:userId', getToReadList);
+
 router.get('/:userId/search', searchToReadBooks);
 
-// Add a book (body: { googleBookId, title, authors, thumbnail })
+router.get('/:userId/notifications', getNotifications);
+
+// post routes
 router.post('/:userId', addBookToToRead);
 
-// Remove a book from list
+router.post('/:userId/:googleBookId/move-to-collections', moveBookToCollections);
+
+// delete routes
 router.delete('/:userId/:googleBookId', removeBookFromToRead);
-
-router.get('/:userId/search', searchToReadBooks);
-
-// Get notifications for a user
-router.get('/:userId/notifications', getNotifications);
 
 module.exports = router;
