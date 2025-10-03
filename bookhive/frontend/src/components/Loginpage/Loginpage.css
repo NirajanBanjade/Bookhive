@@ -1,0 +1,93 @@
+.loginContainer {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f5f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+}
+
+.loginBox {
+    background: #fff;
+    padding: 24px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+    padding:50px;
+}
+
+.logoSection {
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.logoH1 {
+    font-size: 24px;
+    margin: 0 0 6px;
+    color: #333;
+}
+
+.logoP {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.formSection {
+    margin-top: 12px;
+}
+
+.inputGroup {
+    margin-bottom: 14px;
+}
+
+.label {
+    display: block;
+    margin-bottom: 6px;
+    color: #333;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.submitBtn {
+    width: 100%;
+    padding: 12px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.toggleMode {
+    text-align: center;
+    margin-top: 16px;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+}
+
+.toggleP {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.toggleBtn {
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    color: #333;
+    font-weight: 600;
+    margin-left: 6px;
+}
