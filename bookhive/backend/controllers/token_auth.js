@@ -36,7 +36,7 @@ async function resetPasswordAfterCode(req, res) {
             return res.status(400).json({ error: 'Invalid input types' });
         }
 
-        const user = await User.findOne({ email }).select('+passwordHash +resetOtpPlain +resetOtpExpiresAt');// these are selected false so need to call separately..
+        const user = await User.findOne({ email }).select('+passwordHash +passwordHistory +resetOtpPlain +resetOtpExpiresAt');
         if ((!user) || (user.resetOtpPlain !== code) || (user.resetOtpExpiresAt < new Date())) {
             return res.status(400).json({
                  error: 'Invalid or expired code!' 
@@ -56,6 +56,13 @@ async function resetPasswordAfterCode(req, res) {
 
     }
     catch (err){
+        const msg = String(err?.message || '');
+        if (
+          msg === 'New password must be different from the current password!' ||
+          msg === 'New password must be different from last three passwords!'
+        ) {
+          return res.status(400).json({ error: msg }); // <-- 400 with your exact message
+        }
         console.error('requestPasswordaftercode error:', err);
         return res.status(500).json({ error: 'Internal server error' });
     }
