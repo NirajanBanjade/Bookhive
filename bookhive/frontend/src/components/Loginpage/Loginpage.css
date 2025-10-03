@@ -67,3 +67,26 @@
     font-weight: 600;
     cursor: pointer;
 }
+
+.toggleMode {
+    text-align: center;
+    margin-top: 16px;
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+}
+
+.toggleP {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.toggleBtn {
+    background: none;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    color: #333;
+    font-weight: 600;
+    margin-left: 6px;
+}
