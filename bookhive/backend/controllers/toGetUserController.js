@@ -1,4 +1,19 @@
 const getUser = require('../models/User');
+const jwt = require('jsonwebtoken');
+const emailValidator = (email)=>{
+    if (typeof email !== 'string') return false;
+    if(/\s/.test(email)) return false;
+    if((email.length<6)||(email.length>50)) return false;
+    const basicShape = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/; 
+    return basicShape.test(email);
+  }
+  
+  const passwordValidator = (password) => {
+    if (typeof password !== 'string') return false;
+    if (/\s/.test(password)) return false;
+    const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s])[^\s]{8,64}$/; 
+    return re.test(password);
+  };
 
 const registerUser = async (req, res) => {
     try {
@@ -6,6 +21,15 @@ const registerUser = async (req, res) => {
         if (!username || !email || !password) {
             return res.status(400).json({ message: 'Name, email, and password are required.' });
         }
+        if (!emailValidator(email)) {
+            return res.status(400).json({ message: 'Email is invalid' });
+        }
+        if (!passwordValidator(password)) {
+            return res.status(400).json({
+              message: `Password doesn't match the criteria.`,
+            });
+        }
+      
         
         // Check if user already exists
         const existingUser = await getUser.findOne({ $or: [{ username }, { email }] });
@@ -43,7 +67,11 @@ const loginUser= async (req, res) => {
         if(!isPasswordValid){
             return res.status(400).json({error: 'Invalid username/email or password!!'});
         }
-        res.status(200).json({message: 'Successfully Logged in!!', userId: user._id, username: user.username, email: user.email, role: user.role});
+
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+        // res.status(200).json({message: 'Successfully Logged in!!', userId: user._id, username: user.username, email: user.email, role: user.role});
+        res.json({ message: 'Login successful', token }); // currently sending just the token for testing.
 
     } catch (err) {
         res.status(500).json({ error: err.message });
