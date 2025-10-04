@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import React, { useState } from "react";
 import Profile from "./components/Profile";
+import Loginpage from "./components/Loginpage/Loginpage";
+import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
 import SearchPage from "./pages/searchPage"; 
 
