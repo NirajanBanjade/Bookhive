@@ -1,5 +1,5 @@
-export async function searchBooks({ q, page = 1, limit = 20, signal }) {
-  const params = new URLSearchParams({ q, page, limit });
+export async function searchBooks({ title, keywords, page = 1, limit = 20, signal }) {
+  const params = new URLSearchParams({ title, keywords, page, limit });
   const res = await fetch(`/api/books/search?${params.toString()}`, { signal });
 
   if (!res.ok) {

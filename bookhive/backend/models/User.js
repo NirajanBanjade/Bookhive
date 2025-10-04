@@ -2,14 +2,36 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const User = new mongoose.Schema(
-  {
-    username: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true,
-      minlength: 6,
-      maxlength: 25,
+    {
+      username: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        minlength: 6,
+        maxlength: 25,
+      },
+      email: {
+        type: String,
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+      },
+      // store ONLY a hash
+      passwordHash: { type: String, 
+        required: true, 
+        select: false },
+        role: {
+            type:[String],
+            enum:['User','Admin'],  // Guest users are not authentic users. so haven't made any roles for them.
+            default: ['User']
+        },
+        emailVerifiedAt: { type: Date, default: null }, 
+        resetOtpPlain: { type: String, select: false },
+        resetOtpExpiresAt: { type: Date, select: false },
+        passwordHistory:    [{ type: String, select: false }],
+
     },
     email: {
       type: String,

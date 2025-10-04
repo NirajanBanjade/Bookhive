@@ -44,9 +44,12 @@ app.use('/api/users', toGetUserRoutes);
 const booksRoutes = require('./routes/booksRoutes');
 app.use('/api/books', booksRoutes);
 
-const toUserProfile = require('./controllers/toUserProfile');
-app.get('/api/profile/me', requireAuth, toUserProfile);
+const toUserProfile=require('./routes/toUserData');
+app.use('/api/profile', requireAuth, toUserProfile);
 
+
+const toUpdateUserPassword=require('./routes/toUpdatePassword');
+app.use('/api/update-password', toUpdateUserPassword);
 module.exports = app;
 
 // Profile API routes - handles user profile viewing and editing
