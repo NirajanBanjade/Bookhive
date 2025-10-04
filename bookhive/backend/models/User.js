@@ -31,31 +31,6 @@ const User = new mongoose.Schema(
         resetOtpPlain: { type: String, select: false },
         resetOtpExpiresAt: { type: Date, select: false },
         passwordHistory:    [{ type: String, select: false }],
-
-    },
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
-    },
-    // store ONLY a hash
-    passwordHash: {
-      type: String,
-      required: true,
-      select: false,
-    },
-    role: {
-      type: [String],
-      enum: ["User", "Admin"],
-      default: ["User"],
-    },
-    emailVerifiedAt: {
-      type: Date,
-      default: null,
-    },
-
     // === PROFILE FIELDS ADDED FOR USER PROFILE FEATURE === //
     // Display name (can be different from username)
     name: {
@@ -95,9 +70,6 @@ const User = new mongoose.Schema(
 
 // Hash password before saving to database
 User.methods.setPassword = async function (plain) {
-  const rounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || "12", 10);
-  this.passwordHash = await bcrypt.hash(plain, rounds);
-};
 
     const rounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
     // this.passwordHash = await bcrypt.hash(plain, rounds);
