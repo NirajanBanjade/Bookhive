@@ -18,7 +18,7 @@ async function searchBooks(req, res) {
     const limit = clamp(parseInt(req.query.limit || '20', 10) || 20, 1, 40); // Google max 40
     const startIndex = (page - 1) * limit;
 
-    // Always build the query with title
+    // Construct final query based on searchType
     let finalQ = '';
     if (searchType === 'title') {
       finalQ = `intitle:${q.trim()}`;
