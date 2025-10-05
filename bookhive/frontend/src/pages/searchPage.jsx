@@ -3,9 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { searchBooks } from "../api/books";
 
 export default function SearchPage() { 
-  const [title, setTitle] = useState("");
-  const [keywords, setKeywords] = useState("");     
-  const [q, setQ] = useState({ title: "", keywords: "" });            
+  const [typed, setTyped] = useState(""); //for title/author search
+  const [searchType, setSearchType] = useState("title"); // new dropdown state: 'title', 'author', 'both'
+  const [keywords, setKeywords] = useState(""); // for keyword filtering
+  const [q, setQ] = useState({}); // actual query used for searching      
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -17,14 +18,14 @@ export default function SearchPage() {
   useEffect(() => {
     const t = setTimeout(() => {
       setPage(1);         // reset pagination on new query
-      setQ({ title: title.trim(), keywords: keywords.trim() });
+      setQ({ q: typed.trim(), keywords: keywords.trim() });
     }, 300);
     return () => clearTimeout(t);
-  }, [title, keywords]);
+  }, [typed, keywords]);
 
-  // Fetch whenever q.title, q.keywords, or page changes
+  // Fetch whenever q, keywords, or page changes
   useEffect(() => {
-    if (!q.title) {
+    if (!q.q) { // no title/author query
       setItems([]);
       setHasMore(false);
       setNextPage(null);
@@ -36,7 +37,7 @@ export default function SearchPage() {
     setLoading(true);
     setError("");
 
-    searchBooks({ ...q, page, limit: 12, signal: ac.signal })
+    searchBooks({ ...q, searchType, page, limit: 12, signal: ac.signal })
       .then((data) => {
         // Replace on first page, append on subsequent pages
         setItems((prev) => (page === 1 ? data.items : [...prev, ...data.items]));
@@ -50,7 +51,7 @@ export default function SearchPage() {
       .finally(() => setLoading(false));
 
     return () => ac.abort();
-  }, [q, page]);
+  }, [q, searchType, page]);
 
   const onLoadMore = () => {
     if (hasMore && nextPage) setPage(nextPage);
@@ -60,19 +61,37 @@ export default function SearchPage() {
     <div style={{ maxWidth: 860, margin: "32px auto", padding: "0 16px" }}>
       <h1 style={{ marginBottom: 12 }}>Search Books</h1>
 
-      {/* Title search input */}
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Type a title (e.g., harry potter)…"
-        style={{
-          width: "100%",
-          padding: "10px 12px",
-          borderRadius: 8,
-          border: "1px solid #ddd",
-          outline: "none",
-        }}
-      />
+      <div style={{display: "flex", gap: 8, marginBottom: 8}}>
+        {/* Title/Author input */}
+        <input
+          value={typed}
+          onChange={(e) => setTyped(e.target.value)}
+          placeholder="Type a title (e.g., harry potter)…"
+          style={{
+            width: "100%",
+            padding: "10px 12px",
+            borderRadius: 8,
+            border: "1px solid #ddd",
+            outline: "none",
+          }}
+        />
+
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+          style={{
+            padding: "8px",
+            borderRadius: 6,
+            border: "1px solid #ddd",
+            marginBottom: 8,
+          }}
+        >
+          <option value="title">Title</option>
+          <option value="author">Author</option>
+          <option value="both">Both</option>
+
+        </select>
+      </div>
 
       {/* Keywords input */}
       <input
