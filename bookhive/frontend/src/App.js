@@ -4,6 +4,7 @@ import Profile from "./components/Profile";
 import Loginpage from "./components/Loginpage/Loginpage";
 import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
+import Homepage from "./components/Homepage/Homepage"
 
 function App() {
   const [viewMode, setViewMode] = useState("own"); // 'own' or 'other'
@@ -14,16 +15,20 @@ function App() {
         <div className="App" style={{ maxWidth: 980, margin: "0 auto" }}>
           {/* simple nav so you can click around */}
           <nav style={{ display: "flex", gap: 12, padding: "12px 0" }}>
-            <Link to="/">Profile</Link>
-            <Link to="/search">Search</Link>
-            <Link to="/to-read">To-Read</Link>
-          </nav>
+          <Link to="/">Home</Link>
+          <Link to="/profile">Profile</Link>
+          <Link to="/search">Search</Link>
+          <Link to="/to-read">To-Read</Link>
+          <Link to="/login">Login</Link>
+        </nav>
 
-          <Routes>
-            <Route path="/" element={<Profile />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/to-read" element={<ToReadPage />} />
-          </Routes>
+        <Routes>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/login" element={<Loginpage />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/to-read" element={<ToReadPage />} />
+        </Routes>
         </div>
       </Router>
       <div className="App">
