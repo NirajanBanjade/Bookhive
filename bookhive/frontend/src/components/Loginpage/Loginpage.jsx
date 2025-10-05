@@ -8,6 +8,8 @@ const Loginpage = () => {
   const [password, setpassword] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
 
   const BASE_URL =
     process.env.REACT_APP_API_URL ||
@@ -31,27 +33,38 @@ const Loginpage = () => {
     return data;
   }
   const onSubmit = async (e) => {
+    setErrorMsg("");
     e.preventDefault();
     try {
       if (mode === "login") {
-        if (!identifier || !password) return alert("Please fill all fields.");
+        if (!identifier || !password) return alert("Please fill all fields."); // this is specifically for login field only.
         console.log("Login", { identifier, password });
         const res = await fetch(`${BASE_URL}/api/users/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ name_email: identifier, password }),
         });
-        const data = await handle(res); 
+        const data = await handle(res);
         localStorage.setItem("jwt_token", data.token);
         alert("Logged in !!!");
-      } else {
+      } else { // this is specifically for register field only.
         if (!user || !email || !password || !confirmPassword)
           return alert("Please fill all fields.");
         if (password !== confirmPassword)
           return alert("Passwords do not match.");
         console.log("Register", { username: user, email, password });
+
+        const res = await fetch(`${BASE_URL}/api/users/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: user, email, password }),
+        });
+        const data = await handle(res);
+        alert("Registered successfully !!! Please login now.");
       }
-    } catch (err){
+      setErrorMsg("");
+    } catch (err) {
+      setErrorMsg(err.message || "Something went wrong. Please try again.");
       console.error(err);
     }
   };
@@ -65,6 +78,11 @@ const Loginpage = () => {
         </div>
 
         <form className="formSection" onSubmit={onSubmit}>
+          {errorMsg && (
+            <div className="formError" role="alert" aria-live="polite">
+              {errorMsg}
+            </div>
+          )}
           {mode === "login" ? (
             <>
               <div className="inputGroup">

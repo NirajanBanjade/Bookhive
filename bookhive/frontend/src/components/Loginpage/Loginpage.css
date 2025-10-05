@@ -91,3 +91,13 @@
     font-weight: 600;
     margin-left: 6px;
 }
+.formError {
+    color: #b00020;          /* red text */
+    background: #fdecea;     /* soft red bg */
+    border: 1px solid #f5c2c7;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+  }
+  
