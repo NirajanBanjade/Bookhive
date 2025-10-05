@@ -9,6 +9,7 @@ const Loginpage = () => {
   const [identifier, setIdentifier] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
 
   const BASE_URL =
@@ -33,8 +34,9 @@ const Loginpage = () => {
     return data;
   }
   const onSubmit = async (e) => {
-    setErrorMsg("");
     e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
     try {
       if (mode === "login") {
         if (!identifier || !password) return alert("Please fill all fields."); // this is specifically for login field only.
@@ -46,7 +48,7 @@ const Loginpage = () => {
         });
         const data = await handle(res);
         localStorage.setItem("jwt_token", data.token);
-        alert("Logged in !!!");
+        setSuccessMsg("Log in successful!!!");
       } else { // this is specifically for register field only.
         if (!user || !email || !password || !confirmPassword)
           return alert("Please fill all fields.");
@@ -60,7 +62,7 @@ const Loginpage = () => {
           body: JSON.stringify({ username: user, email, password }),
         });
         const data = await handle(res);
-        alert("Registered successfully !!! Please login now.");
+        setSuccessMsg("Registered successfully. Please log in!!!");
       }
       setErrorMsg("");
     } catch (err) {
@@ -78,9 +80,14 @@ const Loginpage = () => {
         </div>
 
         <form className="formSection" onSubmit={onSubmit}>
-          {errorMsg && (
+          {errorMsg && ( // red letters of error functionality.
             <div className="formError" role="alert" aria-live="polite">
               {errorMsg}
+            </div>
+          )}
+          {successMsg && ( // green letters of success functionality.
+            <div className="formSuccess" role="status" aria-live="polite">
+              {successMsg}
             </div>
           )}
           {mode === "login" ? (
