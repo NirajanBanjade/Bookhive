@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import React, { useState } from "react";
 import Profile from "./components/Profile";
+import Loginpage from "./components/Loginpage/Loginpage";
+import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
-import SearchPage from "./pages/searchPage"; 
 
 function App() {
   const [viewMode, setViewMode] = useState("own"); // 'own' or 'other'
@@ -25,21 +26,7 @@ function App() {
           </Routes>
         </div>
       </Router>
-      <div className="App">
-        <div style={{ padding: "20px", textAlign: "center" }}>
-          <button onClick={() => setViewMode("own")}>
-            View My Profile (Editable)
-          </button>
-          <button
-            onClick={() => setViewMode("other")}
-            style={{ marginLeft: "10px" }}
-          >
-            View Other Profile (Read-Only)
-          </button>
-        </div>
-
-        <Profile isOwnProfile={viewMode === "own"} />
-      </div>
+  
     </div>
   );
 }
