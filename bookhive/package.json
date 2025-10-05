@@ -1,0 +1,19 @@
+{
+  "name": "bookhive",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "client": "npm start --prefix frontend",
+    "server": "node backend/server.js",
+    "server:watch": "nodemon backend/server.js",
+    "dev": "concurrently -k -n CLIENT,SERVER -c blue,green \"npm run client\" \"npm run server:watch\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "nodemon": "^3.1.10"
+  }
+}

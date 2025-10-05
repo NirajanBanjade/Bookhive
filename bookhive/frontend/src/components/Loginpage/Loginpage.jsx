@@ -9,6 +9,11 @@ const Loginpage = () => {
   const [identifier, setIdentifier] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const BASE_URL =
+    process.env.REACT_APP_API_URL ||
+    "http://localhost:5050";
+
+
   const handleModeSwitch = () => {
     setMode((m) => (m === "login" ? "register" : "login"));
     setuser("");
@@ -17,17 +22,37 @@ const Loginpage = () => {
     setIdentifier("");
     setConfirmPassword("");
   }
-  const onSubmit = (e) => {
+  async function handle(res) {
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const msg = data?.message || data?.error || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+    return data;
+  }
+  const onSubmit = async (e) => {
     e.preventDefault();
-    if (mode === "login") {
-      if (!identifier || !password) return alert("Please fill all fields.");
-      console.log("Login", { identifier, password });
-    } else {
-      if (!user || !email || !password || !confirmPassword)
-        return alert("Please fill all fields.");
-      if (password !== confirmPassword)
-        return alert("Passwords do not match.");
-      console.log("Register", { username: user, email, password });
+    try {
+      if (mode === "login") {
+        if (!identifier || !password) return alert("Please fill all fields.");
+        console.log("Login", { identifier, password });
+        const res = await fetch(`${BASE_URL}/api/users/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name_email: identifier, password }),
+        });
+        const data = await handle(res); 
+        localStorage.setItem("jwt_token", data.token);
+        alert("Logged in !!!");
+      } else {
+        if (!user || !email || !password || !confirmPassword)
+          return alert("Please fill all fields.");
+        if (password !== confirmPassword)
+          return alert("Passwords do not match.");
+        console.log("Register", { username: user, email, password });
+      }
+    } catch (err){
+      console.error(err);
     }
   };
 

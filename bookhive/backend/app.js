@@ -1,4 +1,7 @@
-require('dotenv').config();
+const path = require('path');
+// require('dotenv').config();
+
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 // Load Google Books API key from environment
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 
