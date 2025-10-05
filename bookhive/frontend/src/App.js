@@ -4,7 +4,6 @@ import Profile from "./components/Profile";
 import Loginpage from "./components/Loginpage/Loginpage";
 import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
-import SearchPage from "./pages/searchPage"; 
 
 function App() {
   const [viewMode, setViewMode] = useState("own"); // 'own' or 'other'
