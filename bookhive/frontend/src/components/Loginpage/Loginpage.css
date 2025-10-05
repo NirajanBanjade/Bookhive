@@ -100,4 +100,12 @@
     margin-bottom: 12px;
     font-size: 0.95rem;
   }
-  
+  .formSuccess {
+    color: #188653;           
+    background: #d1e7dd;      
+    border: 1px solid #badbcc;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+  }
