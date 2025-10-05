@@ -1,12 +1,17 @@
 // frontend/src/pages/SearchPage.jsx
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { searchBooks } from "../api/books";
 
-export default function SearchPage() { 
-  const [typed, setTyped] = useState(""); //for title/author search
-  const [searchType, setSearchType] = useState("title"); // new dropdown state: 'title', 'author', 'both'
-  const [keywords, setKeywords] = useState(""); // for keyword filtering
-  const [q, setQ] = useState({}); // actual query used for searching      
+// Any token with ≥3 letters counts as meaningful (auto-search)
+const hasMeaningfulToken = (s) => {
+  const cleaned = (s || "").replace(/[^a-z0-9\s]/gi, " ").trim();
+  if (!cleaned) return false;
+  return cleaned.split(/\s+/).some((t) => /[a-z]{3,}/i.test(t));
+};
+
+export default function SearchPage() {
+  const [typed, setTyped] = useState("");
+  const [q, setQ] = useState("");
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -14,11 +19,12 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Debounce the input (300ms)
+  // Debounce input: auto-search when there's any ≥3-letter word
   useEffect(() => {
     const t = setTimeout(() => {
-      setPage(1);         // reset pagination on new query
-      setQ({ q: typed.trim(), keywords: keywords.trim() });
+      const val = typed.trim();
+      setPage(1);
+      setQ(hasMeaningfulToken(val) ? val : ""); // auto-fire for single real words too
     }, 300);
     return () => clearTimeout(t);
   }, [typed, keywords]);
@@ -39,14 +45,13 @@ export default function SearchPage() {
 
     searchBooks({ ...q, searchType, page, limit: 12, signal: ac.signal })
       .then((data) => {
-        // Replace on first page, append on subsequent pages
         setItems((prev) => (page === 1 ? data.items : [...prev, ...data.items]));
         setHasMore(Boolean(data.hasMore));
         setNextPage(data.nextPage ?? null);
       })
       .catch((e) => {
-        if (e.name === "AbortError") return;
-        setError(e.message || "Something went wrong.");
+        if (e.name !== "AbortError")
+          setError(e.message || "Something went wrong.");
       })
       .finally(() => setLoading(false));
 
@@ -61,61 +66,52 @@ export default function SearchPage() {
     <div style={{ maxWidth: 860, margin: "32px auto", padding: "0 16px" }}>
       <h1 style={{ marginBottom: 12 }}>Search Books</h1>
 
-      <div style={{display: "flex", gap: 8, marginBottom: 8}}>
-        {/* Title/Author input */}
-        <input
-          value={typed}
-          onChange={(e) => setTyped(e.target.value)}
-          placeholder="Type a title (e.g., harry potter)…"
-          style={{
-            width: "100%",
-            padding: "10px 12px",
-            borderRadius: 8,
-            border: "1px solid #ddd",
-            outline: "none",
-          }}
-        />
-
-        <select
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-          style={{
-            padding: "8px",
-            borderRadius: 6,
-            border: "1px solid #ddd",
-            marginBottom: 8,
-          }}
-        >
-          <option value="title">Title</option>
-          <option value="author">Author</option>
-          <option value="both">Both</option>
-
-        </select>
-      </div>
-
-      {/* Keywords input */}
+      {/* Title search input */}
       <input
-        value={keywords}
-        onChange={(e) => setKeywords(e.target.value)}
-        placeholder="Type keywords separated by commas (e.g., magic, wizard)…"
-        style={{width: "100%", marginButtom: 16}}
+        value={typed}
+        onChange={(e) => setTyped(e.target.value)}
+        placeholder="Enter a keyword (≥3 letters)…"
+        style={{
+          width: "100%",
+          padding: "10px 12px",
+          borderRadius: 8,
+          border: "1px solid #ddd",
+          outline: "none",
+        }}
       />
 
-      {/* States */}
-      {loading && page === 1 && (
-        <p style={{ marginTop: 16 }}>Loading…</p>
-      )}
-      {error && (
-        <p style={{ marginTop: 16, color: "crimson" }}>Error: {error}</p>
-      )}
-      {q.title && !loading && items.length === 0 && !error && (
-        <p style={{ marginTop: 16 }}>No results for “{q.title}”.</p>
+      {/* Hint when input isn't meaningful yet */}
+      {typed && !hasMeaningfulToken(typed) && (
+        <p style={{ marginTop: 8, opacity: 0.7 }}>
+          Enter a keyword with at least 3 letters. Results load automatically.
+        </p>
       )}
 
-      {/* Results */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12, marginTop: 16 }}>
+      {loading && page === 1 && <p style={{ marginTop: 16 }}>Loading…</p>}
+      {error && <p style={{ marginTop: 16, color: "crimson" }}>Error: {error}</p>}
+      {q && !loading && items.length === 0 && !error && (
+        <p style={{ marginTop: 16 }}>No results for “{q}”.</p>
+      )}
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          gap: 12,
+          marginTop: 16,
+        }}
+      >
         {items.map((b) => (
-          <div key={b.googleBookId} style={{ display: "flex", gap: 12, padding: 12, border: "1px solid #eee", borderRadius: 10 }}>
+          <div
+            key={b.googleBookId}
+            style={{
+              display: "flex",
+              gap: 12,
+              padding: 12,
+              border: "1px solid #eee",
+              borderRadius: 10,
+            }}
+          >
             {b.thumbnail ? (
               <img src={b.thumbnail} alt={b.title} width={60} height={90} />
             ) : (
@@ -131,7 +127,6 @@ export default function SearchPage() {
         ))}
       </div>
 
-      {/* Load More */}
       {items.length > 0 && (
         <div style={{ marginTop: 16 }}>
           <button
@@ -145,7 +140,11 @@ export default function SearchPage() {
               cursor: hasMore && !loading ? "pointer" : "not-allowed",
             }}
           >
-            {loading && page > 1 ? "Loading…" : hasMore ? "Load More" : "No more results"}
+            {loading && page > 1
+              ? "Loading…"
+              : hasMore
+              ? "Load More"
+              : "No more results"}
           </button>
         </div>
       )}
