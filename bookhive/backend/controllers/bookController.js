@@ -5,12 +5,14 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
-
 async function searchBooks(req, res) {
   try {
-    const { q = '', searchType = 'title', keywords = '' } = req.query;
-    
-    if(!q.trim()){
+    // Normalize inputs: accept q OR title OR keywords for the main query
+    const { searchType = 'title' } = req.query;                           
+    const qRaw = (req.query.q || req.query.title || req.query.keywords || '').trim(); 
+    const keywords = (req.query.keywords || '').trim();                   // keep keywords for filtering
+
+    if (!qRaw) {
       return res.status(400).json({ error: 'Please input a search' });
     }
 
@@ -21,13 +23,13 @@ async function searchBooks(req, res) {
     // Construct final query based on searchType
     let finalQ = '';
     if (searchType === 'title') {
-      finalQ = `intitle:${q.trim()}`;
+      finalQ = `intitle:${qRaw}`;
     } else if (searchType === 'author') {
-      finalQ = `inauthor:${q.trim()}`;
+      finalQ = `inauthor:${qRaw}`;
     } else if (searchType === 'both') {
-      finalQ = `intitle:${q.trim()}+inauthor:${q.trim()}`;
+      finalQ = qRaw;
     } else {
-      finalQ = q.trim();
+      finalQ = qRaw;
     }
 
     console.log(`Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
@@ -39,9 +41,8 @@ async function searchBooks(req, res) {
     let rawItems = data.items || [];
 
     // If keywords provided, filter results by checking if all keywords are in the description
-    if(keywords.trim()){
+    if (keywords) {
       const kws = keywords.split(',').map(kw => kw.trim().toLowerCase()).filter(Boolean);
-      
       rawItems = rawItems.filter(volume => {
         const desc = (volume.volumeInfo?.description || '').toLowerCase();
         return kws.every(kw => desc.includes(kw));
@@ -58,15 +59,14 @@ async function searchBooks(req, res) {
     const totalPages = Math.min(rawTotalPages, MAX_PAGES);
 
     const hasMore = page < rawTotalPages;
-
     const nextPage = hasMore ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
 
     return res.json({
-      q,
+      q: qRaw,                 
       searchType,
       keywords,
-      finalQ, // for debugging
+      finalQ,                   // for debugging
       page,
       limit,
       total,

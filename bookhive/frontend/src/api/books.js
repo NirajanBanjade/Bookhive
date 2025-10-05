@@ -1,5 +1,5 @@
 // frontend/src/api/books.js
-export async function searchBooks({ title, keywords, page = 1, limit = 20, signal }) {
+export async function searchBooks({ title, keywords, searchType, page = 1, limit = 20, signal }) {
   const params = new URLSearchParams();
 
   const t = (title ?? "").trim();
@@ -7,6 +7,7 @@ export async function searchBooks({ title, keywords, page = 1, limit = 20, signa
 
   if (t) params.set("title", t);
   if (k) params.set("keywords", k);
+  if (searchType) params.set("searchType", searchType);
   params.set("page", String(page));
   params.set("limit", String(limit));
 

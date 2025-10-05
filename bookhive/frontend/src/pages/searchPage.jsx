@@ -2,9 +2,10 @@
 import { useEffect, useState } from "react";
 import { searchBooks } from "../api/books";
 
-export default function SearchPage() { 
-  const [query, setQuery] = useState("");               
+export default function SearchPage() {
+  const [query, setQuery] = useState("");
   const [q, setQ] = useState({ title: "", keywords: "" });
+  const [searchType, setSearchType] = useState("both"); 
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -17,12 +18,12 @@ export default function SearchPage() {
     const t = setTimeout(() => {
       const v = (query || "").trim();
       setPage(1);
-      setQ({ title: v, keywords: v });                  
+      setQ({ title: v, keywords: v });
     }, 300);
     return () => clearTimeout(t);
   }, [query]);
 
-  // Fetch whenever q or page changes
+  // Fetch whenever q/searchType/page change
   useEffect(() => {
     if (!q.title && !q.keywords) {
       setItems([]);
@@ -36,7 +37,15 @@ export default function SearchPage() {
     setLoading(true);
     setError("");
 
-    searchBooks({ title: q.title, keywords: q.keywords, page, limit: 12, signal: ac.signal })
+    // ⬅️ include searchType in the request
+    searchBooks({
+      title: q.title,
+      keywords: q.keywords,
+      searchType,
+      page,
+      limit: 12,
+      signal: ac.signal,
+    })
       .then((data) => {
         setItems((prev) => (page === 1 ? data.items : [...prev, ...data.items]));
         setHasMore(Boolean(data.hasMore));
@@ -48,7 +57,7 @@ export default function SearchPage() {
       .finally(() => setLoading(false));
 
     return () => ac.abort();
-  }, [q, searchType, page]);
+  }, [q, searchType, page]); // ⬅️ keep searchType here
 
   const onLoadMore = () => {
     if (hasMore && nextPage) setPage(nextPage);
@@ -58,30 +67,62 @@ export default function SearchPage() {
     <div style={{ maxWidth: 860, margin: "32px auto", padding: "0 16px" }}>
       <h1 style={{ marginBottom: 12 }}>Search Books</h1>
 
-      
-      <input
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search by title or keywords…"
-        style={{
-          width: "100%",
-          padding: "10px 12px",
-          borderRadius: 8,
-          border: "1px solid #ddd",
-          outline: "none",
-          marginBottom: 16,
-        }}
-      />
+      {/* Input + dropdown (optional UI for searchType) */}
+      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by title or keywords…"
+          style={{
+            flex: 1,
+            padding: "10px 12px",
+            borderRadius: 8,
+            border: "1px solid #ddd",
+            outline: "none",
+          }}
+        />
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+          style={{
+            padding: "8px",
+            borderRadius: 6,
+            border: "1px solid #ddd",
+          }}
+        >
+          <option value="title">Title</option>
+          <option value="author">Author</option>
+          <option value="both">Both</option>
+        </select>
+      </div>
 
       {loading && page === 1 && <p style={{ marginTop: 16 }}>Loading…</p>}
       {error && <p style={{ marginTop: 16, color: "crimson" }}>Error: {error}</p>}
       {(q.title || q.keywords) && !loading && items.length === 0 && !error && (
-        <p style={{ marginTop: 16 }}>No results for “{q.title || q.keywords}”.</p>
+        <p style={{ marginTop: 16 }}>
+          No results for “{q.title || q.keywords}”.
+        </p>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 12, marginTop: 16 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+          gap: 12,
+          marginTop: 16,
+        }}
+      >
         {items.map((b) => (
-          <div key={b.googleBookId} style={{ display: "flex", gap: 12, padding: 12, border: "1px solid #eee", borderRadius: 10 }}>
+          <div
+            key={b.googleBookId}
+            style={{
+              display: "flex",
+              gap: 12,
+              padding: 12,
+              border: "1px solid #eee",
+              borderRadius: 10,
+            }}
+          >
             {b.thumbnail ? (
               <img src={b.thumbnail} alt={b.title} width={60} height={90} />
             ) : (
