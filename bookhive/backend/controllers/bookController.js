@@ -8,19 +8,31 @@ function clamp(n, min, max) {
 
 async function searchBooks(req, res) {
   try {
-    const { title = '', keywords = '' } = req.query;
+    const { q = '', searchType = 'title', keywords = '' } = req.query;
     
-    if(!title.trim()){
-      return res.status(400).json({ error: 'Title is required' });
+    if(!q.trim()){
+      return res.status(400).json({ error: 'Please input a search' });
     }
 
     const page = clamp(parseInt(req.query.page || '1', 10) || 1, 1, 1_000_000);
     const limit = clamp(parseInt(req.query.limit || '20', 10) || 20, 1, 40); // Google max 40
     const startIndex = (page - 1) * limit;
 
-    // Always build the query with title
-    const finalQ = `intitle:${title.trim()}`;
+    // Construct final query based on searchType
+    let finalQ = '';
+    if (searchType === 'title') {
+      finalQ = `intitle:${q.trim()}`;
+    } else if (searchType === 'author') {
+      finalQ = `inauthor:${q.trim()}`;
+    } else if (searchType === 'both') {
+      finalQ = `intitle:${q.trim()}+inauthor:${q.trim()}`;
+    } else {
+      finalQ = q.trim();
+    }
 
+    console.log(`Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
+
+    // Call Google Books API
     const data = await searchVolumes(finalQ, { startIndex, maxResults: limit });
 
     // Raw items from Google API to get description for keyword filtering
@@ -51,7 +63,8 @@ async function searchBooks(req, res) {
     const prevPage = page > 1 ? page - 1 : null;
 
     return res.json({
-      title,
+      q,
+      searchType,
       keywords,
       finalQ, // for debugging
       page,
