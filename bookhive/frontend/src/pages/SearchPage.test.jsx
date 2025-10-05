@@ -7,35 +7,33 @@ import SearchPage from "./SearchPage";
 jest.mock("../api/books", () => ({
   searchBooks: jest.fn(),
 }));
-
 import { searchBooks } from "../api/books";
 
-// use fake timers to control the 300ms debounce
-beforeAll(() => {
+// Use fake timers for the 300ms debounce
+beforeEach(() => {
   jest.useFakeTimers();
+  jest.clearAllMocks();
 });
 
-afterAll(() => {
+afterEach(() => {
+  jest.runOnlyPendingTimers();
   jest.useRealTimers();
-  jest.resetAllMocks();
 });
 
+// Helper: type into the input and advance past debounce
 const typeAndWaitDebounce = async (value) => {
-  fireEvent.change(screen.getByPlaceholderText(/harry potter/i), {
+  fireEvent.change(screen.getByPlaceholderText(/keyword/i), {
     target: { value },
   });
-  // advance past 300ms debounce
   await act(async () => {
-    jest.advanceTimersByTime(350);
+    jest.advanceTimersByTime(350); // > 300ms
   });
 };
 
 describe("SearchPage", () => {
   test("renders search input", () => {
     render(<SearchPage />);
-    expect(
-      screen.getByPlaceholderText(/harry potter/i)
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/keyword/i)).toBeInTheDocument();
   });
 
   test("shows results when API returns books", async () => {
@@ -75,9 +73,7 @@ describe("SearchPage", () => {
     render(<SearchPage />);
     await typeAndWaitDebounce("zzz");
 
-    expect(
-      await screen.findByText(/no results for/i)
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/no results for/i)).toBeInTheDocument();
   });
 
   test("shows error state on failure", async () => {
@@ -86,9 +82,7 @@ describe("SearchPage", () => {
     render(<SearchPage />);
     await typeAndWaitDebounce("error");
 
-    expect(
-      await screen.findByText(/error: server blew up/i)
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/error: server blew up/i)).toBeInTheDocument();
   });
 
   test("Load More appends items and disables when no more", async () => {
@@ -101,12 +95,7 @@ describe("SearchPage", () => {
         hasMore: true,
         nextPage: 2,
         items: [
-          {
-            googleBookId: "1",
-            title: "Page 1 Book",
-            authors: ["A1"],
-            thumbnail: "https://example.com/1.jpg",
-          },
+          { googleBookId: "1", title: "Page 1 Book", authors: ["A1"], thumbnail: "https://example.com/1.jpg" },
         ],
       })
       // Second page: end
@@ -117,12 +106,7 @@ describe("SearchPage", () => {
         hasMore: false,
         nextPage: null,
         items: [
-          {
-            googleBookId: "2",
-            title: "Page 2 Book",
-            authors: ["A2"],
-            thumbnail: "https://example.com/2.jpg",
-          },
+          { googleBookId: "2", title: "Page 2 Book", authors: ["A2"], thumbnail: "https://example.com/2.jpg" },
         ],
       });
 
@@ -136,7 +120,6 @@ describe("SearchPage", () => {
     const btn = screen.getByRole("button", { name: /load more/i });
     expect(btn).toBeEnabled();
 
-    // Trigger second fetch
     await act(async () => {
       btn.click();
     });
@@ -144,8 +127,7 @@ describe("SearchPage", () => {
     // second item appended
     expect(await screen.findByText("Page 2 Book")).toBeInTheDocument();
 
-    // after second page, button should say no more or be disabled
-    // (both acceptable depending on your UI)
+    // button either disappears or becomes disabled
     const maybeBtn = screen.queryByRole("button", { name: /load more/i });
     if (maybeBtn) {
       expect(maybeBtn).toBeDisabled();
