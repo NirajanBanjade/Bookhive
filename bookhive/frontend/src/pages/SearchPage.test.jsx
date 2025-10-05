@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import SearchPage from "./SearchPage";
+import SearchPage from "./searchPage";
 
 // Mock the API used by SearchPage
 jest.mock("../api/books", () => ({
@@ -22,7 +22,7 @@ afterEach(() => {
 
 // Helper: type into the input and advance past debounce
 const typeAndWaitDebounce = async (value) => {
-  fireEvent.change(screen.getByPlaceholderText(/keyword/i), {
+  fireEvent.change(screen.getByPlaceholderText(/title or keywords/i), {
     target: { value },
   });
   await act(async () => {
@@ -33,7 +33,7 @@ const typeAndWaitDebounce = async (value) => {
 describe("SearchPage", () => {
   test("renders search input", () => {
     render(<SearchPage />);
-    expect(screen.getByPlaceholderText(/keyword/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/title or keywords/i)).toBeInTheDocument();
   });
 
   test("shows results when API returns books", async () => {
