@@ -49,7 +49,7 @@ const Loginpage = () => {
         const data = await handle(res);
         localStorage.setItem("jwt_token", data.token);
         setSuccessMsg("Log in successful!!!");
-      } else { // this is specifically for register field only.
+      } else if (mode=="register"){ // this is specifically for register field only.
         if (!user || !email || !password || !confirmPassword)
           return alert("Please fill all fields.");
         if (password !== confirmPassword)
@@ -64,8 +64,21 @@ const Loginpage = () => {
         const data = await handle(res);
         setSuccessMsg("Registered successfully. Please log in!!!");
       }
-      setErrorMsg("");
-    } catch (err) {
+   
+    else {
+        if (!email) return setErrorMsg("Enter your email to send code.");
+        const res = await fetch(`${BASE_URL}/api/update-password/request-password-reset`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        await handle(res);
+        setSuccessMsg("If the email is registered, a reset code has been sent.");
+
+
+    }    
+    setErrorMsg("");
+  }catch (err) {
       setErrorMsg(err.message || "Something went wrong. Please try again.");
       console.error(err);
     }
