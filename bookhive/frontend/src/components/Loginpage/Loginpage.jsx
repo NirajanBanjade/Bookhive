@@ -1,6 +1,7 @@
 import React from 'react';
 import './Loginpage.css';
 import { useState } from 'react';
+import { set } from '../../../../backend/app';
 const Loginpage = () => {
   const [mode, setMode] = useState('login');
   const [user, setuser] = useState("");
@@ -11,6 +12,11 @@ const Loginpage = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  const [resetCode, setResetCode] = useState("");
+  const [newPw, setNewPw] = useState("");
+  const [newPw2, setNewPw2] = useState("");
+
+
 
   const BASE_URL =
     process.env.REACT_APP_API_URL ||
@@ -18,12 +24,15 @@ const Loginpage = () => {
 
 
   const handleModeSwitch = () => {
-    setMode((m) => (m === "login" ? "register" : "login"));
+    setMode((m) => (m === "login" ? "register" : "login")); // here the modes are: login, register, forgot, reset.
     setuser("");
     setemail("");
     setpassword("");
     setIdentifier("");
     setConfirmPassword("");
+    setResetCode(""); 
+    setNewPw(""); 
+    setNewPw2("");
   }
   async function handle(res) {
     const data = await res.json().catch(() => ({}));
@@ -49,7 +58,7 @@ const Loginpage = () => {
         const data = await handle(res);
         localStorage.setItem("jwt_token", data.token);
         setSuccessMsg("Log in successful!!!");
-      } else if (mode=="register"){ // this is specifically for register field only.
+      } else if (mode == "register") { // this is specifically for register field only.
         if (!user || !email || !password || !confirmPassword)
           return alert("Please fill all fields.");
         if (password !== confirmPassword)
@@ -64,8 +73,8 @@ const Loginpage = () => {
         const data = await handle(res);
         setSuccessMsg("Registered successfully. Please log in!!!");
       }
-   
-    else {
+
+      else if(mode=="forgot"){
         if (!email) return setErrorMsg("Enter your email to send code.");
         const res = await fetch(`${BASE_URL}/api/update-password/request-password-reset`, {
           method: "POST",
@@ -74,11 +83,23 @@ const Loginpage = () => {
         });
         await handle(res);
         setSuccessMsg("If the email is registered, a reset code has been sent.");
+        setMode("reset");
 
-
-    }    
-    setErrorMsg("");
-  }catch (err) {
+      }// three are like enums above so only one can be choosen. but reset is inside the forgot mode. so we need to handle it separately.
+      if(mode==="reset"){
+        if (!resetCode || !newPw || !newPw2) return setErrorMsg("Please fill all fields.");
+        if (newPw !== newPw2) return setErrorMsg("Passwords do not match.");
+        const res = await fetch(`${BASE_URL}/api/update-password/reset-password-after-code`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, code: resetCode, newPassword: newPw }),
+        });
+        await handle(res);
+        setSuccessMsg("Password reset successful. Please log in with your new password.");
+        setMode("login");
+      }
+      setErrorMsg("");
+    } catch (err) {
       setErrorMsg(err.message || "Something went wrong. Please try again.");
       console.error(err);
     }
@@ -117,10 +138,10 @@ const Loginpage = () => {
               </div>
               <button className="submitBtn" type="submit">Login</button>
               <div className="forgotRow">
-      <button type="button" className="forgotBtn" onClick={() => setMode('forgot')}>
-        Forgot password?
-      </button>
-    </div>
+                <button type="button" className="forgotBtn" onClick={() => setMode('forgot')}>
+                  Forgot password?
+                </button>
+              </div>
             </>
 
           ) : mode === "register" ? (
@@ -144,7 +165,7 @@ const Loginpage = () => {
               </div>
               <button className="submitBtn" type="submit">Create account</button>
             </>
-          ):(
+          ) : mode==="forgot" ?(
             <>
               <h4 className="fpTitle">Reset your password</h4>
               <div className="inputGroup">
@@ -155,6 +176,10 @@ const Loginpage = () => {
               <div className="fpActions">
                 <button className="submitBtn" type="submit">Send token</button>
               </div>
+            </>
+          ): mode==="reset" ? (
+            <>
+
             </>
           )}
         </form>
