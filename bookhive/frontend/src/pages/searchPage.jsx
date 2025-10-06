@@ -88,7 +88,7 @@ export default function SearchPage() {
     setPage(target);
   };
 
-  // Add to To-Read list
+  // Add to To-Read list (from your friend's code)
   const handleAddToRead = async (book) => {
     try {
       await axios.post(`http://localhost:5000/api/to-read/${userId}`, book);
@@ -103,7 +103,7 @@ export default function SearchPage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Search Books</h1>
 
-      {/* Refined Search - Optional additional search on page */}
+      {/* Refined Search - Works with navbar search */}
       <div className="flex gap-3 mb-6">
         <input
           value={query}
@@ -134,25 +134,35 @@ export default function SearchPage() {
         {items.map((b) => (
           <div
             key={b.googleBookId}
-            className="flex gap-3 p-3 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+            className="flex flex-col gap-3 p-3 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
           >
-            {b.thumbnail ? (
-              <img
-                src={b.thumbnail}
-                alt={b.title}
-                className="w-16 h-24 object-cover rounded"
-              />
-            ) : (
-              <div className="w-16 h-24 bg-gray-100 rounded" />
-            )}
-            <div className="flex-1">
-              <div className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                {b.title}
-              </div>
-              <div className="text-sm text-gray-600">
-                {(b.authors || []).join(", ") || "Unknown author"}
+            <div className="flex gap-3">
+              {b.thumbnail ? (
+                <img
+                  src={b.thumbnail}
+                  alt={b.title}
+                  className="w-16 h-24 object-cover rounded"
+                />
+              ) : (
+                <div className="w-16 h-24 bg-gray-100 rounded" />
+              )}
+              <div className="flex-1">
+                <div className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                  {b.title}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {(b.authors || []).join(", ") || "Unknown author"}
+                </div>
               </div>
             </div>
+
+            {/* Add to To-Read button (from your friend's code) */}
+            <button
+              onClick={() => handleAddToRead(b)}
+              className="w-full px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+            >
+              Add to To-Read
+            </button>
           </div>
         ))}
       </div>
