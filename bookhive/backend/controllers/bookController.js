@@ -5,6 +5,14 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
+// Simple in-memory cache
+const cache = new Map();
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+function makeCacheKey({ qRaw, searchType, keywords, page, limit }) {
+  return `${searchType}|${qRaw}|${keywords}|${page}|${limit}`;
+}
+
 async function searchBooks(req, res) {
   try {
     // Normalize inputs: accept q OR title OR keywords for the main query
@@ -34,7 +42,22 @@ async function searchBooks(req, res) {
 
     console.log(`Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
 
-    // Call Google Books API
+    // const cacheKey = makeCacheKey({ qRaw, searchType, keywords, page, limit });
+
+    // // Check cache
+    // if (cache.has(cacheKey)) {
+    //   const cached = cache.get(cacheKey);
+    //   if (Date.now() - cached.timestamp < CACHE_TTL) {
+    //     console.log(`Cache hit for: ${cacheKey}`);
+    //     return res.json(cached.data);
+    //   } else {
+    //     cache.delete(cacheKey); // expired
+    //   }
+    // }
+
+    // console.log(`Cache miss. Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
+
+    // Call Google Books API after cache miss
     const data = await searchVolumes(finalQ, { startIndex, maxResults: limit });
 
     // Raw items from Google API to get description for keyword filtering
@@ -62,7 +85,7 @@ async function searchBooks(req, res) {
     const nextPage = hasMore ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
 
-    return res.json({
+    {/*const responseData = {//*/}return res.json({
       q: qRaw,                 
       searchType,
       keywords,
@@ -76,6 +99,11 @@ async function searchBooks(req, res) {
       prevPage,
       items
     });
+
+    // // Save to cache
+    // cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+
+    // return res.json(responseData);
   } catch (err) {
     console.error('Books search error:', err?.response?.data || err.message);
     return res.status(500).json({ error: 'server error' });
