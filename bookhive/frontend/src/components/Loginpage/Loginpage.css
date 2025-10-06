@@ -91,3 +91,47 @@
     font-weight: 600;
     margin-left: 6px;
 }
+.formError {
+    color: #b00020;          /* red text */
+    background: #fdecea;     /* soft red bg */
+    border: 1px solid #f5c2c7;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+  }
+  .formSuccess {
+    color: #188653;           
+    background: #d1e7dd;      
+    border: 1px solid #badbcc;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+  }
+  .forgotRow {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .forgotBtn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px 6px;
+  }
+  
+  .forgotBtn:hover {
+    opacity: 0.8;
+  }
+  
+  .fpTitle {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+  }
+  

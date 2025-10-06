@@ -16,7 +16,7 @@ const ToReadPage = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5000/api/to-read/${userId}`,
+        `http://localhost:5050/api/to-read/${userId}`,
         demoBook // send fields directly, NOT wrapped in 'book'
       );
       console.log('Book added:', response.data.books || response.data.list?.books);
@@ -31,7 +31,7 @@ const ToReadPage = () => {
   const handleRemoveBook = async (bookId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:5000/api/to-read/${userId}/${bookId}`
+        `http://localhost:5050/api/to-read/${userId}/${bookId}`
       );
       setBooks(response.data.list.books);
       alert('Book removed from your To-Read list');
@@ -45,7 +45,7 @@ const ToReadPage = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/to-read/${userId}`);
+        const response = await axios.get(`http://localhost:5050/api/to-read/${userId}`);
         setBooks(response.data.books || []);
       } catch (err) {
         console.error('Error fetching to-read list:', err);

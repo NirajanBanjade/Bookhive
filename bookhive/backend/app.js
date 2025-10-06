@@ -1,6 +1,15 @@
-require('dotenv').config();
+const path = require('path');
+// require('dotenv').config();
+
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 // Load Google Books API key from environment
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
+console.log('=================================');
+console.log('🔑 API Key Check:');
+console.log('API Key loaded:', !!GOOGLE_BOOKS_API_KEY);
+console.log('API Key length:', GOOGLE_BOOKS_API_KEY?.length);
+console.log('API Key preview:', GOOGLE_BOOKS_API_KEY?.substring(0, 10) + '...');
+console.log('=================================');
 
 const express = require('express');
 const cors = require('cors');
@@ -8,6 +17,10 @@ const mongoose = require('mongoose');
 
 const app = express();
 app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 const requireAuth = require('./middleware/jwt_auth');
 

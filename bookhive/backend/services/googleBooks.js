@@ -1,5 +1,6 @@
 const axios = require('axios');
 const BASE = 'https://www.googleapis.com/books/v1/volumes';
+// require('dotenv').config();
 
 function withKey(params = {}, key = process.env.GOOGLE_BOOKS_API_KEY) {
   return key ? { ...params, key } : params;
@@ -7,6 +8,8 @@ function withKey(params = {}, key = process.env.GOOGLE_BOOKS_API_KEY) {
 
 // Search for books
 async function searchVolumes(q, { startIndex = 0, maxResults = 20 } = {}) {
+  console.log('API Key present:', !!process.env.GOOGLE_BOOKS_API_KEY);
+  console.log('API Key (first 10 chars):', process.env.GOOGLE_BOOKS_API_KEY?.substring(0, 10));
   const { data } = await axios.get(BASE, {
     params: withKey({ q, startIndex, maxResults, printType: 'books' })
   });

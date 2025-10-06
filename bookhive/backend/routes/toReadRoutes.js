@@ -13,18 +13,17 @@ const {
 
 
 // get routes
-router.get('/:userId', getToReadList);
-
 router.get('/:userId/search', searchToReadBooks);
-
 router.get('/:userId/notifications', getNotifications);
 
-// post routes
-router.post('/:userId', addBookToToRead);
+// ✅ THEN PUT GENERIC ROUTES
+router.get('/:userId', getToReadList);
 
+// POST routes
+router.post('/:userId', addBookToToRead);
 router.post('/:userId/:googleBookId/move-to-collections', moveBookToCollections);
 
-// delete routes
+// DELETE routes
 router.delete('/:userId/:googleBookId', removeBookFromToRead);
 
 module.exports = router;
