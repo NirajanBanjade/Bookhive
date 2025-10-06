@@ -145,6 +145,9 @@ const Navbar = () => {
             >
               To-Read
             </Link>
+             <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+                 Login
+               </Link>
           </div>
         </div>
       </div>
