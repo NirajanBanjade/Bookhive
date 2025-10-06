@@ -9,7 +9,7 @@ function clamp(n, min, max) {
 const cache = new Map();
 const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
 
-function makeCacheKey({ qRaw, searchType, keywords, page, limit }) {
+function makeCacheKey({ qRaw, searchType, keywords, page, limit }) { // include keywords in cache key
   return `${searchType}|${qRaw}|${keywords}|${page}|${limit}`;
 }
 
@@ -40,14 +40,13 @@ async function searchBooks(req, res) {
       finalQ = qRaw;
     }
 
-    console.log(`Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
 
     const cacheKey = makeCacheKey({ qRaw, searchType, keywords, page, limit });
 
-    // Check cache
+    // Check cache before making API call
     if (cache.has(cacheKey)) {
       const cached = cache.get(cacheKey);
-      if (Date.now() - cached.timestamp < CACHE_TTL) {
+      if (Date.now() - cached.timestamp < CACHE_TTL) {  //check if cache is still valid (less than 5 minutes old)
         console.log(`Cache hit for: ${cacheKey}`);
         return res.json(cached.data);
       } else {
