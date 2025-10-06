@@ -42,7 +42,7 @@ async function searchBooks(req, res) {
 
     console.log(`Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
 
-    // const cacheKey = makeCacheKey({ qRaw, searchType, keywords, page, limit });
+    const cacheKey = makeCacheKey({ qRaw, searchType, keywords, page, limit });
 
     // Check cache
     if (cache.has(cacheKey)) {
