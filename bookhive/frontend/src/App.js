@@ -1,40 +1,26 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React from "react";
+import Navbar from "./components/Navbar/Navbar";
 import Profile from "./components/Profile";
-import Loginpage from "./components/Loginpage/Loginpage";
 import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
 
 function App() {
-  const [viewMode, setViewMode] = useState("own"); // 'own' or 'other'
-
   return (
-    <div>
-      <Router>
-        <div className="App" style={{ maxWidth: 980, margin: "0 auto" }}>
-          {/* simple nav so you can click around */}
-          <nav style={{ display: "flex", gap: 12, padding: "12px 0" }}>
-            <Link to="/">Profile</Link>
-            <Link to="/search">Search</Link>
-            <Link to="/to-read">To-Read</Link>
-          </nav>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
 
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
             <Route path="/" element={<Profile />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/to-read" element={<ToReadPage />} />
           </Routes>
-        </div>
-      </Router>
-  
-    </div>
+        </main>
+      </div>
+    </Router>
   );
 }
 
 export default App;
-
-//// Future implementation with React Router
-//<Route path="/profile" element={<Profile isOwnProfile={true} />} />
-//<Route path="/profile/:userId" element={
-// <Profile isOwnProfile={userId === currentUser.id} />
-//} />
