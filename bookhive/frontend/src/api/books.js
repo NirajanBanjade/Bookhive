@@ -24,5 +24,15 @@ export async function searchBooks({ title, keywords, searchType, page = 1, limit
     throw new Error(errMsg);
   }
 
-  return res.json();
+
+  const data = await res.json();
+  const size = Array.isArray(data.items) ? data.items.length : 0;
+  const inferredNext = data.nextPage ?? (size === limit ? page + 1 : null);
+  const inferredHasMore = data.hasMore ?? (inferredNext != null);
+
+  return {
+    ...data,               
+    nextPage: inferredNext,
+    hasMore: inferredHasMore,
+  };
 }
