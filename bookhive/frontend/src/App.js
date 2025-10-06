@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import React, { useState } from "react";
-// import Profile from "./components/Profile";
+import Profile from "./components/Profile";
 import Loginpage from "./components/Loginpage/Loginpage";
 import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
@@ -16,7 +16,7 @@ function App() {
           {/* simple nav so you can click around */}
           <nav style={{ display: "flex", gap: 12, padding: "12px 0" }}>
           <Link to="/">Home</Link>
-          {/* <Link to="/profile">Profile</Link> */}
+          <Link to="/profile">Profile</Link>
           <Link to="/search">Search</Link>
           <Link to="/to-read">To-Read</Link>
           <Link to="/login">Login</Link>
@@ -25,7 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Loginpage />} />
-          {/* <Route path="/profile" element={<Profile />} /> */}
+          <Route path="/profile" element={<Profile />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/to-read" element={<ToReadPage />} />
         </Routes>
