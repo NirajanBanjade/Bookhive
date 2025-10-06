@@ -1,7 +1,6 @@
 import React from 'react';
 import './Loginpage.css';
 import { useState } from 'react';
-import Forgotpassword from './Forgotpassword';
 const Loginpage = () => {
   const [mode, setMode] = useState('login');
   const [user, setuser] = useState("");
@@ -104,11 +103,14 @@ const Loginpage = () => {
                   onChange={(e) => setpassword(e.target.value)} />
               </div>
               <button className="submitBtn" type="submit">Login</button>
-
-             <Forgotpassword />
+              <div className="forgotRow">
+      <button type="button" className="forgotBtn" onClick={() => setMode('forgot')}>
+        Forgot password?
+      </button>
+    </div>
             </>
 
-          ) : (
+          ) : mode === "register" ? (
             <>
               <div className="inputGroup">
                 <label className="label">Username</label>
@@ -128,6 +130,21 @@ const Loginpage = () => {
                 <input className="input" type="password" placeholder="Re-enter password" onChange={(e) => setConfirmPassword(e.target.value)} />
               </div>
               <button className="submitBtn" type="submit">Create account</button>
+            </>
+          ):(
+            <>
+              <h4 className="fpTitle">Reset your password</h4>
+              <div className="inputGroup">
+                <label className="label">Email</label>
+                <input className="input" type="email" placeholder="you@example.com" value={email}
+                  onChange={(e) => setemail(e.target.value)} />
+              </div>
+              <div className="fpActions">
+                <button className="submitBtn" type="submit">Send token</button>
+                <button className="toggleBtn" type="button" onClick={() => setMode('login')}>
+                  Back to Login
+                </button>
+              </div>
             </>
           )}
         </form>
