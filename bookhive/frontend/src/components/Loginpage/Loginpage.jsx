@@ -1,7 +1,6 @@
 import React from 'react';
 import './Loginpage.css';
 import { useState } from 'react';
-import { set } from '../../../../backend/app';
 const Loginpage = () => {
   const [mode, setMode] = useState('login');
   const [user, setuser] = useState("");
@@ -30,8 +29,8 @@ const Loginpage = () => {
     setpassword("");
     setIdentifier("");
     setConfirmPassword("");
-    setResetCode(""); 
-    setNewPw(""); 
+    setResetCode("");
+    setNewPw("");
     setNewPw2("");
   }
   async function handle(res) {
@@ -74,7 +73,7 @@ const Loginpage = () => {
         setSuccessMsg("Registered successfully. Please log in!!!");
       }
 
-      else if(mode=="forgot"){
+      else if (mode == "forgot") {
         if (!email) return setErrorMsg("Enter your email to send code.");
         const res = await fetch(`${BASE_URL}/api/update-password/request-password-reset`, {
           method: "POST",
@@ -86,10 +85,10 @@ const Loginpage = () => {
         setMode("reset");
 
       }// three are like enums above so only one can be choosen. but reset is inside the forgot mode. so we need to handle it separately.
-      if(mode==="reset"){
+      if (mode === "reset") {
         if (!resetCode || !newPw || !newPw2) return setErrorMsg("Please fill all fields.");
         if (newPw !== newPw2) return setErrorMsg("Passwords do not match.");
-        const res = await fetch(`${BASE_URL}/api/update-password/reset-password-after-code`, {
+        const res = await fetch(`${BASE_URL}/api/update-password/reset-password-with-code`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, code: resetCode, newPassword: newPw }),
@@ -165,7 +164,7 @@ const Loginpage = () => {
               </div>
               <button className="submitBtn" type="submit">Create account</button>
             </>
-          ) : mode==="forgot" ?(
+          ) : mode === "forgot" ? (
             <>
               <h4 className="fpTitle">Reset your password</h4>
               <div className="inputGroup">
@@ -177,11 +176,67 @@ const Loginpage = () => {
                 <button className="submitBtn" type="submit">Send token</button>
               </div>
             </>
-          ): mode==="reset" ? (
+          ) : mode === "reset" ? (
             <>
+              <h4 className="fpTitle">Enter code & new password</h4>
+
+              <div className="inputGroup">
+                <label className="label">Email</label>
+                <input
+                  className="input"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setemail(e.target.value)}
+                  disabled
+                />
+              </div>
+
+              <div className="inputGroup">
+                <label className="label">Verification code</label>
+                <input
+                  className="input"
+                  type="text"
+                  placeholder="6-digit code"
+                  value={resetCode}
+                  onChange={(e) => setResetCode(e.target.value)}
+                />
+              </div>
+
+              <div className="inputGroup">
+                <label className="label">New password</label>
+                <input
+                  className="input"
+                  type="password"
+                  placeholder="New password"
+                  value={newPw}
+                  onChange={(e) => setNewPw(e.target.value)}
+                />
+              </div>
+
+              <div className="inputGroup">
+                <label className="label">Confirm new password</label>
+                <input
+                  className="input"
+                  type="password"
+                  placeholder="Confirm password"
+                  value={newPw2}
+                  onChange={(e) => setNewPw2(e.target.value)}
+                />
+              </div>
+
+              <div className="fpActions">
+                <button className="submitBtn" type="submit">Update password</button>
+              </div>
+
+              <div className="forgotRow" style={{ marginTop: 8 }}>
+                <button type="button" className="toggleBtn" onClick={() => setMode('forgot')}>
+                  ← Back
+                </button>
+              </div>
+
 
             </>
-          )}
+          ):null}
         </form>
 
         <div className="toggleMode">
