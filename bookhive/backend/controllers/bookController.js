@@ -5,31 +5,66 @@ function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
 }
 
+// Simple in-memory cache
+const cache = new Map();
+const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
+
+function makeCacheKey({ qRaw, searchType, keywords, page, limit }) { // include keywords in cache key
+  return `${searchType}|${qRaw}|${keywords}|${page}|${limit}`;
+}
 
 async function searchBooks(req, res) {
   try {
-    const { title = '', keywords = '' } = req.query;
-    
-    if(!title.trim()){
-      return res.status(400).json({ error: 'Title is required' });
+    // Normalize inputs: accept q OR title OR keywords for the main query
+    const { searchType = 'title' } = req.query;                           
+    const qRaw = (req.query.q || req.query.title || req.query.keywords || '').trim(); 
+    const keywords = (req.query.keywords || '').trim();                   // keep keywords for filtering
+
+    if (!qRaw) {
+      return res.status(400).json({ error: 'Please input a search' });
     }
 
     const page = clamp(parseInt(req.query.page || '1', 10) || 1, 1, 1_000_000);
     const limit = clamp(parseInt(req.query.limit || '20', 10) || 20, 1, 40); // Google max 40
     const startIndex = (page - 1) * limit;
 
-    // Always build the query with title
-    const finalQ = `intitle:${title.trim()}`;
+    // Construct final query based on searchType
+    let finalQ = '';
+    if (searchType === 'title') {
+      finalQ = `intitle:${qRaw}`;
+    } else if (searchType === 'author') {
+      finalQ = `inauthor:${qRaw}`;
+    } else if (searchType === 'both') {
+      finalQ = qRaw;
+    } else {
+      finalQ = qRaw;
+    }
 
+
+    const cacheKey = makeCacheKey({ qRaw, searchType, keywords, page, limit });
+
+    // Check cache before making API call
+    if (cache.has(cacheKey)) {
+      const cached = cache.get(cacheKey);
+      if (Date.now() - cached.timestamp < CACHE_TTL) {  //check if cache is still valid (less than 5 minutes old)
+        console.log(`Cache hit for: ${cacheKey}`);
+        return res.json(cached.data);
+      } else {
+        cache.delete(cacheKey); // expired
+      }
+    }
+
+    console.log(`Cache miss. Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
+
+    // Call Google Books API after cache miss
     const data = await searchVolumes(finalQ, { startIndex, maxResults: limit });
 
     // Raw items from Google API to get description for keyword filtering
     let rawItems = data.items || [];
 
     // If keywords provided, filter results by checking if all keywords are in the description
-    if(keywords.trim()){
+    if (keywords) {
       const kws = keywords.split(',').map(kw => kw.trim().toLowerCase()).filter(Boolean);
-      
       rawItems = rawItems.filter(volume => {
         const desc = (volume.volumeInfo?.description || '').toLowerCase();
         return kws.every(kw => desc.includes(kw));
@@ -46,14 +81,14 @@ async function searchBooks(req, res) {
     const totalPages = Math.min(rawTotalPages, MAX_PAGES);
 
     const hasMore = page < rawTotalPages;
-
     const nextPage = hasMore ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
 
-    return res.json({
-      title,
+    const responseData = {
+      q: qRaw,                 
+      searchType,
       keywords,
-      finalQ, // for debugging
+      finalQ,                   // for debugging
       page,
       limit,
       total,
@@ -62,7 +97,12 @@ async function searchBooks(req, res) {
       nextPage,
       prevPage,
       items
-    });
+    };
+
+    // Save to cache
+    cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+
+    return res.json(responseData);
   } catch (err) {
     console.error('Books search error:', err?.response?.data || err.message);
     return res.status(500).json({ error: 'server error' });
