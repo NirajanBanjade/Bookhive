@@ -4,7 +4,6 @@ import Profile from "./components/Profile";
 import Loginpage from "./components/Loginpage/Loginpage";
 import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
-import Homepage from "./components/Homepage/Homepage"
 
 function App() {
   const [viewMode, setViewMode] = useState("own"); // 'own' or 'other'
@@ -23,7 +22,7 @@ function App() {
         </nav>
 
         <Routes>
-          <Route path="/" element={<Homepage />} />
+          {/* <Route path="/" element={<Homepage />} /> */}
           <Route path="/login" element={<Loginpage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/search" element={<SearchPage />} />
