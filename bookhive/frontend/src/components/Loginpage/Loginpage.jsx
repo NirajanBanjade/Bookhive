@@ -141,9 +141,6 @@ const Loginpage = () => {
               </div>
               <div className="fpActions">
                 <button className="submitBtn" type="submit">Send token</button>
-                <button className="toggleBtn" type="button" onClick={() => setMode('login')}>
-                  Back to Login
-                </button>
               </div>
             </>
           )}

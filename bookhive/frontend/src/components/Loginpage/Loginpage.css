@@ -109,3 +109,29 @@
     margin-bottom: 12px;
     font-size: 0.95rem;
   }
+  .forgotRow {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .forgotBtn {
+    background: none;
+    border: none;
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 4px 6px;
+  }
+  
+  .forgotBtn:hover {
+    opacity: 0.8;
+  }
+  
+  .fpTitle {
+    margin: 0 0 20px 0;
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
