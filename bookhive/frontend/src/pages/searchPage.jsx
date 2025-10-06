@@ -6,7 +6,7 @@ import axios from "axios";
 export default function SearchPage() {
   const [query, setQuery] = useState("");
   const [q, setQ] = useState({ title: "", keywords: "" });
-  const [searchType, setSearchType] = useState("both"); 
+  const [searchType, setSearchType] = useState("both");
   const [items, setItems] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -39,7 +39,6 @@ export default function SearchPage() {
     setLoading(true);
     setError("");
 
-    // ⬅️ include searchType in the request
     searchBooks({
       title: q.title,
       keywords: q.keywords,
@@ -50,6 +49,7 @@ export default function SearchPage() {
     })
       .then((data) => {
         setItems((prev) => (page === 1 ? data.items : [...prev, ...data.items]));
+
         setHasMore(Boolean(data.hasMore));
         setNextPage(data.nextPage ?? null);
       })
@@ -59,13 +59,15 @@ export default function SearchPage() {
       .finally(() => setLoading(false));
 
     return () => ac.abort();
-  }, [q, searchType, page]); // ⬅️ keep searchType here
+  }, [q, searchType, page]); // keep searchType & page here
 
   const onLoadMore = () => {
-    if (hasMore && nextPage) setPage(nextPage);
+    if (loading || !hasMore) return;          
+    const target = nextPage ?? (page + 1);    
+    setPage(target);
   };
 
-  // <-- NEW: Add to To-Read list
+  // Add to To-Read list
   const handleAddToRead = async (book) => {
     try {
       await axios.post(`http://localhost:5000/api/to-read/${userId}`, book);
@@ -93,6 +95,7 @@ export default function SearchPage() {
             border: "1px solid #ddd",
             outline: "none",
           }}
+          aria-label="Search query" 
         />
         <select
           value={searchType}
@@ -102,6 +105,7 @@ export default function SearchPage() {
             borderRadius: 6,
             border: "1px solid #ddd",
           }}
+          aria-label="Search type" 
         >
           <option value="title">Title</option>
           <option value="author">Author</option>
@@ -126,45 +130,45 @@ export default function SearchPage() {
         }}
       >
         {items.map((b) => (
-  <div
-    key={b.googleBookId}
-    style={{
-      display: "flex",
-      gap: 12,
-      padding: 12,
-      border: "1px solid #eee",
-      borderRadius: 10,
-      flexDirection: "column", // <-- make column so button appears below info
-    }}
-  >
-    {b.thumbnail ? (
-      <img src={b.thumbnail} alt={b.title} width={60} height={90} />
-    ) : (
-      <div style={{ width: 60, height: 90, background: "#f4f4f4" }} />
-    )}
-    <div>
-      <div style={{ fontWeight: 600, marginBottom: 4 }}>{b.title}</div>
-      <div style={{ color: "#555", fontSize: 14 }}>
-        {(b.authors || []).join(", ") || "Unknown author"}
-      </div>
-    </div>
+          <div
+            key={b.googleBookId}
+            style={{
+              display: "flex",
+              gap: 12,
+              padding: 12,
+              border: "1px solid #eee",
+              borderRadius: 10,
+              flexDirection: "column", // make column so button appears below info
+            }}
+          >
+            {b.thumbnail ? (
+              <img src={b.thumbnail} alt={b.title} width={60} height={90} />
+            ) : (
+              <div style={{ width: 60, height: 90, background: "#f4f4f4" }} />
+            )}
+            <div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>{b.title}</div>
+              <div style={{ color: "#555", fontSize: 14 }}>
+                {(b.authors || []).join(", ") || "Unknown author"}
+              </div>
+            </div>
 
-    {/* ← Add this button here */}
-    <button
-      onClick={() => handleAddToRead(b)}
-      style={{
-        marginTop: 8,
-        padding: "6px 10px",
-        borderRadius: 6,
-        border: "1px solid #ddd",
-        cursor: "pointer",
-      }}
-    >
-      Add to To-Read
-    </button>
-  </div>
-))}
-    </div>
+            <button
+              onClick={() => handleAddToRead(b)}
+              style={{
+                marginTop: 8,
+                padding: "6px 10px",
+                borderRadius: 6,
+                border: "1px solid #ddd",
+                cursor: "pointer",
+              }}
+              aria-label={`Add ${b.title} to To-Read`} 
+            >
+              Add to To-Read
+            </button>
+          </div>
+        ))}
+      </div>
 
       {items.length > 0 && (
         <div style={{ marginTop: 16 }}>
@@ -178,6 +182,7 @@ export default function SearchPage() {
               background: hasMore && !loading ? "#fff" : "#f3f3f3",
               cursor: hasMore && !loading ? "pointer" : "not-allowed",
             }}
+            aria-label="Load more results" 
           >
             {loading && page > 1 ? "Loading…" : hasMore ? "Load More" : "No more results"}
           </button>
