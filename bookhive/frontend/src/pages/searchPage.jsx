@@ -1,10 +1,14 @@
 // frontend/src/pages/SearchPage.jsx
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { searchBooks } from "../api/books";
 import axios from "axios";
 
 export default function SearchPage() {
-  const [query, setQuery] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlQuery = searchParams.get("q") || "";
+
+  const [query, setQuery] = useState(urlQuery);
   const [q, setQ] = useState({ title: "", keywords: "" });
   const [searchType, setSearchType] = useState("both");
   const [items, setItems] = useState([]);
@@ -15,15 +19,30 @@ export default function SearchPage() {
   const [error, setError] = useState("");
   const userId = "user123"; // replace with actual logged-in user ID
 
+  // Auto-search when URL query changes
+  useEffect(() => {
+    if (urlQuery) {
+      setQuery(urlQuery);
+      setQ({ title: urlQuery, keywords: urlQuery });
+    }
+  }, [urlQuery]);
+
   // Debounce the input (300ms) → feed BOTH title & keywords
   useEffect(() => {
     const t = setTimeout(() => {
       const v = (query || "").trim();
       setPage(1);
       setQ({ title: v, keywords: v });
+
+      // Update URL when user types
+      if (v) {
+        setSearchParams({ q: v });
+      } else {
+        setSearchParams({});
+      }
     }, 300);
     return () => clearTimeout(t);
-  }, [query]);
+  }, [query, setSearchParams]);
 
   // Fetch whenever q/searchType/page change
   useEffect(() => {
@@ -48,18 +67,20 @@ export default function SearchPage() {
       signal: ac.signal,
     })
       .then((data) => {
-        setItems((prev) => (page === 1 ? data.items : [...prev, ...data.items]));
-
+        setItems((prev) =>
+          page === 1 ? data.items : [...prev, ...data.items]
+        );
         setHasMore(Boolean(data.hasMore));
         setNextPage(data.nextPage ?? null);
       })
       .catch((e) => {
-        if (e.name !== "AbortError") setError(e.message || "Something went wrong.");
+        if (e.name !== "AbortError")
+          setError(e.message || "Something went wrong.");
       })
       .finally(() => setLoading(false));
 
     return () => ac.abort();
-  }, [q, searchType, page]); // keep searchType & page here
+  }, [q, searchType, page]);
 
   const onLoadMore = () => {
     if (loading || !hasMore) return;          
@@ -79,112 +100,79 @@ export default function SearchPage() {
   };
 
   return (
-    <div style={{ maxWidth: 860, margin: "32px auto", padding: "0 16px" }}>
-      <h1 style={{ marginBottom: 12 }}>Search Books</h1>
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Search Books</h1>
 
-      {/* Input + dropdown (optional UI for searchType) */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+      {/* Refined Search - Optional additional search on page */}
+      <div className="flex gap-3 mb-6">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by title or keywords…"
-          style={{
-            flex: 1,
-            padding: "10px 12px",
-            borderRadius: 8,
-            border: "1px solid #ddd",
-            outline: "none",
-          }}
-          aria-label="Search query" 
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
         />
         <select
           value={searchType}
           onChange={(e) => setSearchType(e.target.value)}
-          style={{
-            padding: "8px",
-            borderRadius: 6,
-            border: "1px solid #ddd",
-          }}
-          aria-label="Search type" 
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         >
+          <option value="both">Both</option>
           <option value="title">Title</option>
           <option value="author">Author</option>
-          <option value="both">Both</option>
         </select>
       </div>
 
-      {loading && page === 1 && <p style={{ marginTop: 16 }}>Loading…</p>}
-      {error && <p style={{ marginTop: 16, color: "crimson" }}>Error: {error}</p>}
+      {loading && page === 1 && <p className="text-gray-600">Loading…</p>}
+      {error && <p className="text-red-600">Error: {error}</p>}
       {(q.title || q.keywords) && !loading && items.length === 0 && !error && (
-        <p style={{ marginTop: 16 }}>
-          No results for “{q.title || q.keywords}”.
+        <p className="text-gray-600">
+          No results for "{q.title || q.keywords}".
         </p>
       )}
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-          gap: 12,
-          marginTop: 16,
-        }}
-      >
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         {items.map((b) => (
           <div
             key={b.googleBookId}
-            style={{
-              display: "flex",
-              gap: 12,
-              padding: 12,
-              border: "1px solid #eee",
-              borderRadius: 10,
-              flexDirection: "column", // make column so button appears below info
-            }}
+            className="flex gap-3 p-3 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
           >
             {b.thumbnail ? (
-              <img src={b.thumbnail} alt={b.title} width={60} height={90} />
+              <img
+                src={b.thumbnail}
+                alt={b.title}
+                className="w-16 h-24 object-cover rounded"
+              />
             ) : (
-              <div style={{ width: 60, height: 90, background: "#f4f4f4" }} />
+              <div className="w-16 h-24 bg-gray-100 rounded" />
             )}
-            <div>
-              <div style={{ fontWeight: 600, marginBottom: 4 }}>{b.title}</div>
-              <div style={{ color: "#555", fontSize: 14 }}>
+            <div className="flex-1">
+              <div className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                {b.title}
+              </div>
+              <div className="text-sm text-gray-600">
                 {(b.authors || []).join(", ") || "Unknown author"}
               </div>
             </div>
-
-            <button
-              onClick={() => handleAddToRead(b)}
-              style={{
-                marginTop: 8,
-                padding: "6px 10px",
-                borderRadius: 6,
-                border: "1px solid #ddd",
-                cursor: "pointer",
-              }}
-              aria-label={`Add ${b.title} to To-Read`} 
-            >
-              Add to To-Read
-            </button>
           </div>
         ))}
       </div>
 
       {items.length > 0 && (
-        <div style={{ marginTop: 16 }}>
+        <div className="mt-6">
           <button
             onClick={onLoadMore}
             disabled={!hasMore || loading}
-            style={{
-              padding: "10px 14px",
-              borderRadius: 8,
-              border: "1px solid #ddd",
-              background: hasMore && !loading ? "#fff" : "#f3f3f3",
-              cursor: hasMore && !loading ? "pointer" : "not-allowed",
-            }}
-            aria-label="Load more results" 
+            className={`px-6 py-2 rounded-lg border ${
+              hasMore && !loading
+                ? "bg-white border-gray-300 hover:bg-gray-50 cursor-pointer"
+                : "bg-gray-100 border-gray-200 cursor-not-allowed text-gray-500"
+            }`}
           >
-            {loading && page > 1 ? "Loading…" : hasMore ? "Load More" : "No more results"}
+            {loading && page > 1
+              ? "Loading…"
+              : hasMore
+              ? "Load More"
+              : "No more results"}
           </button>
         </div>
       )}
