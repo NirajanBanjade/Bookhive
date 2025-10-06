@@ -44,18 +44,18 @@ async function searchBooks(req, res) {
 
     // const cacheKey = makeCacheKey({ qRaw, searchType, keywords, page, limit });
 
-    // // Check cache
-    // if (cache.has(cacheKey)) {
-    //   const cached = cache.get(cacheKey);
-    //   if (Date.now() - cached.timestamp < CACHE_TTL) {
-    //     console.log(`Cache hit for: ${cacheKey}`);
-    //     return res.json(cached.data);
-    //   } else {
-    //     cache.delete(cacheKey); // expired
-    //   }
-    // }
+    // Check cache
+    if (cache.has(cacheKey)) {
+      const cached = cache.get(cacheKey);
+      if (Date.now() - cached.timestamp < CACHE_TTL) {
+        console.log(`Cache hit for: ${cacheKey}`);
+        return res.json(cached.data);
+      } else {
+        cache.delete(cacheKey); // expired
+      }
+    }
 
-    // console.log(`Cache miss. Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
+    console.log(`Cache miss. Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
 
     // Call Google Books API after cache miss
     const data = await searchVolumes(finalQ, { startIndex, maxResults: limit });
@@ -85,7 +85,7 @@ async function searchBooks(req, res) {
     const nextPage = hasMore ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
 
-    {/*const responseData = {//*/}return res.json({
+    const responseData = {
       q: qRaw,                 
       searchType,
       keywords,
@@ -98,12 +98,12 @@ async function searchBooks(req, res) {
       nextPage,
       prevPage,
       items
-    });
+    };
 
-    // // Save to cache
-    // cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+    // Save to cache
+    cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
 
-    // return res.json(responseData);
+    return res.json(responseData);
   } catch (err) {
     console.error('Books search error:', err?.response?.data || err.message);
     return res.status(500).json({ error: 'server error' });
