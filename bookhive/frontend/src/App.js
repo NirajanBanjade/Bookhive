@@ -30,7 +30,7 @@ function App() {
         </Routes>
         </div>
       </Router>
-      <div className="App">
+      {/* <div className="App">
         <div style={{ padding: "20px", textAlign: "center" }}>
           <button onClick={() => setViewMode("own")}>
             View My Profile (Editable)
@@ -41,10 +41,10 @@ function App() {
           >
             View Other Profile (Read-Only)
           </button>
-        </div>
+        </div> */}
 
         {/* <Profile isOwnProfile={viewMode === "own"} /> */}
-      </div>
+      {/* </div> */}
     </div>
   );
 }
