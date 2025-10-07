@@ -100,10 +100,12 @@
 - **Nirajan**
   - **Route protection & nav cleanup:** Public landing page for everyone; after login, unlock protected routes (Profile, To-Read, Search, Groups) with JWT checks and hide nav items for unauthenticated users.
   - **Book-based groups & discussions:** Create/join groups per book title and add discussion boards with posts and comments.
+
+  - **Prajwal**
+  - **Advanced search filters & refinement:** Add advanced filters such as Author, Genre, and Publish Year to the SearchPage. 
+  - **Enhanced pagination & UX improvements:** Improve the “Load More” functionality with smooth scrolling and loading indicators. 
   
-- 
-- 
-- 
+
 ---
 ## Setup
 Dependencies: Listed in `package.json`.
