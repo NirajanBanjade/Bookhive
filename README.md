@@ -72,8 +72,35 @@
   ◦ [KAN-48 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-48), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-48-comment-on-backend-code-for-clarification)
 -------
 
+
+**Nirajan Banjade:** "Set a common database cluster for all to interact, implemented backend login/register/password update and wired it with frontend, and implemented credentials security policy."
+
+
+- **Jira Task:** Nirajan - Implementation: signup/login/logout + password validator.
+  ◦ [KAN-24 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-24), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-24-design-auth-model-roles-and-password-policy/)
+
+- **Jira Task:** Nirajan - Implementation: signup/login/logout + password validator.
+  ◦ [KAN-25 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-25), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-25-implementation-signup-login-logout-password-validator/)
+
+- **Jira Task:** Nirajan - Implementation: email verification (single-use token 15 min).
+  ◦ [KAN-26 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-26)[Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-26-implementation-email-verification-single-use-token-30-60-min/)
+
+- **Jira Task:** Nirajan - Implementation: password reset (no reuse of old password) and start login/register page UI.
+  ◦ [KAN-27 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-27), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-27-implementation-password-reset-no-reuse-of-old-password/)
+
+- **Jira Task:** Nirajan - Wiring frontend and backend of Login/Register/Update section.
+  ◦ [KAN-28 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-28), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-28-wiring-frontend-and-backend-of-login-register-update-section/)
+
+- **Jira Task:** Nirajan - Implement JWT authentication for session storage and Userprofile API.
+  ◦ [KAN-52 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-52), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-52-implement-jwt-authentication-for-session-storage/)
+
+
+
 ### Next Sprint Goals
-- 
+- **Nirajan**
+  - **Route protection & nav cleanup:** Public landing page for everyone; after login, unlock protected routes (Profile, To-Read, Search, Groups) with JWT checks and hide nav items for unauthenticated users.
+  - **Book-based groups & discussions:** Create/join groups per book title and add discussion boards with posts and comments.
+  
 - 
 - 
 - 
