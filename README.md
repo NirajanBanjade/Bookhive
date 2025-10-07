@@ -70,6 +70,28 @@
 
 - **Jira Task:** Alan - Comment backend code for description and clarification.  
   ◦ [KAN-48 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-48), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-48-comment-on-backend-code-for-clarification)
+  
+  
+**Aevin Tweedie:** “Provided users a 'To Read' list to track books and add them directly from search results, connected it to the backend API, and implemented confirmation notifications for list actions.”
+
+- **Jira Task:** Aevin – Implement backend API to fetch 'To Read' list  
+  ◦ [KAN-7 (Jira)](https://cs3398-hutts-fall.atlassian.net/browse/KAN-7), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-7-implement-backend-api-fetch-to-read)
+
+- **Jira Task:** Aevin – Implement backend API endpoint to remove a book from 'To Read' and add to collections  
+  ◦ [KAN-13 (Jira)](https://cs3398-hutts-fall.atlassian.net/browse/KAN-13), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-13-implement-backend-api-endpoint-create-endpoint-to-remove-a-book-from-to-read-and-add-to-collections)
+
+- **Jira Task:** Aevin – Display confirmation notifications for add/delete actions on To Read list  
+  ◦ [KAN-15 (Jira)](https://cs3398-hutts-fall.atlassian.net/browse/KAN-15), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-15-display-confirmation-notifications-for-add-delete-actions-on-to-read-list)
+
+- **Jira Task:** Aevin – Design wireframe for To Read list page  
+  ◦ [KAN-6 (Jira)](https://cs3398-hutts-fall.atlassian.net/browse/KAN-6), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-6-design-wireframe-for-to-read-list-page)
+
+- **Jira Task:** Aevin – Connect frontend to API and add button functionality in React to update lists  
+  ◦ [KAN-14 (Jira)](https://cs3398-hutts-fall.atlassian.net/browse/KAN-14), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-14-connect-frontend-to-api-add-button-functionality-in-react-to-call-the-backend-and-update-lists)
+
+- **Jira Task:** Aevin – API endpoint tests using Postman (integration/functional tests)  
+  ◦ [KAN-10 (Jira)](https://cs3398-hutts-fall.atlassian.net/browse/KAN-10) *(No Bitbucket branch — tested locally via Postman)*
+  
 -------
 
 
