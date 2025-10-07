@@ -34,34 +34,33 @@
 
 ## Features  
 
-Current sprint features:  
+## Sprint 1 — Contributions
 
-- **Basic Book Search**  
-  - **Description:** Search for books using the Google Books API by title, author, or keyword.  
-  - **Who uses it:** End users who want to discover books.  
-  - **User Stories:**  
-    - As a user, I want to search for a book by title so that I can find specific books I’m interested in.  
-    - As a user, I want to search for books by author so that I can see all works by a particular author.  
-    - As a user, I want to search for book by keywords so that I can discover books on subjects that I am interested in.
+**Prajwal Kunwar:** “implemented the backend keyword search API with pagination, integrated it with the frontend React search page, and wrote unit tests for validation and error handling.”
 
-- **To-Read List**  
-  - **Description:** Save books to a personal “to-read” list to keep track of books to read later.  
-  - **Who uses it:** End users keeping track of reading goals.  
-  - **User Stories:**  
-    - As a user, I want to add a book to my to-read list so that I can remember to read it later.  
-    - As a user, I want to view my to-read list so that I can see all the books I plan to read.  
-    - As a user, I want to remove a book my from to-read list and move it to collections so that I can remember all the books that I have read.
+- **Jira Task:** Prajwal – design and document the keyword search API endpoint with pagination rules  
+  ◦ [KAN-31 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-31), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-31-search-api-design)  
+    
+- **Jira Task:** Prajwal – implement the Node.js backend route to fetch and normalize data from Google Books API  
+  ◦ [KAN-32 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-32), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-32-google-books-route)  
+    
+- **Jira Task:** Prajwal – build the React search page to display results, errors, and loading states  
+  ◦ [KAN-34 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-34), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-34-frontend-search-page)  
+   
+- **Jira Task:** Prajwal – create unit tests to validate search results, empty states, and error handling  
+  ◦ [KAN-33 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-33), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-33-frontend-test)  
 
-- **Community Discussion Spaces (Prototype)**  
-  - **Description:** Each book has a placeholder page where users can discuss it.  
-  - **Who uses it:** End users who want to engage with other readers.  
-  - **User Stories:**  
-    - As a user, I want to view a discussion space for a book so that I can see what others are saying about it.  
-    - As a user, I want to post comments in a discussion space so that I can share my thoughts and opinions on a book.  
-    - As a user, I want to post memes, gifs regarding the book to the discussion space so that I can have new path for discussion.
-
+- **Jira Task:** Prajwal – implement “Load More” functionality in the frontend to handle additional results  
+  ◦ [KAN-35 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-35), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-35-load-more)  
+   
 ---
 
+### Next Sprint Goals
+- 
+- 
+- 
+- 
+---
 ## Setup
 Dependencies: Listed in `package.json`.
 
