@@ -56,19 +56,19 @@
 
 **Alan Garcia:** "implemented the backend title and author search API with in-memory cache (alongside Prajwal's pagination) integrated it with the frontend React search page, and wrote error handling."
 
-- **Jira Task:** Alan - Implement backend API endpoint to fetch books on search tab (by title).
+- **Jira Task:** Alan - Implement backend API endpoint to fetch books on search tab (by title).  
   ◦ [KAN-21 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-21), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-21-define-book-schema-in-mongodb-tit)
 
-- **Jira Task:** Alan - Connect the frontend to the backend search endpoint.
+- **Jira Task:** Alan - Connect the frontend to the backend search endpoint.  
   ◦ [KAN-20 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-20), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-20-connect-the-frontend-to-the-backe)
 
-- **Jira Task:** Alan - Extend book controller to accept author query.
+- **Jira Task:** Alan - Extend book controller to accept author query.  
   ◦ [KAN-47 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-47), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-47-extend-book-controller-to-search-by-author)
 
-- **Jira Task:** Alan - Add Caching for Search Results.
+- **Jira Task:** Alan - Add Caching for Search Results.  
   ◦ [KAN-23 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-23), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-23-add-caching-for-search-results)
 
-- **Jira Task:** Alan - Comment backend code for description and clarification
+- **Jira Task:** Alan - Comment backend code for description and clarification.  
   ◦ [KAN-48 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-48), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feature%2FKAN-48-comment-on-backend-code-for-clarification)
 -------
 
