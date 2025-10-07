@@ -126,8 +126,11 @@
   - **Prajwal**
   - **Advanced search filters & refinement:** Add advanced filters such as Author, Genre, and Publish Year to the SearchPage. 
   - **Enhanced pagination & UX improvements:** Improve the “Load More” functionality with smooth scrolling and loading indicators. 
-  
 
+  - **Aevin**
+  - **Connect Collections to Frontend:** Allow users to add books they are currently reading or have finished, and view them in their collections with status indicators (Reading, Finished).  
+  - **Backend support for book ratings:** Store and retrieve user ratings for books.
+  
 ---
 ## Setup
 Dependencies: Listed in `package.json`.
