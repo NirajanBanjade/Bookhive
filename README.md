@@ -134,6 +134,10 @@
 - **Alan**  
   - **Recommendations** Give users a list of books related to or commonly included when adding the book they searched  
   - **Trending Books** Include a page (or on the search page before inputting a search) that displays trending books  
+
+  -**Prashant**
+  -**Home Page** Add a UI and home page to the existing UI and try to implement features like "Book You May Like", "Best of all time" etc
+  -**Fix functionalities and user Profile** Fix the logic of search bar(currently it takes us to the different page when we search), add editable sections to the user profile section lile add/remove photos and bio. 
   
 ---
 ## Setup
