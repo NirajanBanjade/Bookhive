@@ -130,6 +130,10 @@
   - **Aevin**
   - **Connect Collections to Frontend:** Allow users to add books they are currently reading or have finished, and view them in their collections with status indicators (Reading, Finished).  
   - **Backend support for book ratings:** Store and retrieve user ratings for books.
+
+- **Alan**  
+  - **Recommendations** Give users a list of books related to or commonly included when adding the book they searched  
+  - **Trending Books** Include a page (or on the search page before inputting a search) that displays trending books  
   
 ---
 ## Setup
