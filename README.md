@@ -92,6 +92,24 @@
 - **Jira Task:** Aevin – API endpoint tests using Postman (integration/functional tests)  
   ◦ [KAN-10 (Jira)](https://cs3398-hutts-fall.atlassian.net/browse/KAN-10) *(No Bitbucket branch — tested locally via Postman)*
   
+
+**Prashant Panta:** "Designed the UI for user profile with editable functions and created the Navigation bar with search and to-add books components."
+
+- **Jira Task:** Prashant – Build React Profile Components – Create ProfileForm (editable) and ProfileView (read-only for others) components. 
+  ◦ [KAN-38 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-38), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-38-ProfileViewProfileForm)
+
+- **Jira Task:** Prashant – Modify user profile where you cannot edit your user email.
+  ◦ [KAN-53 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-53), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-53-cannot-edit-user-email)
+
+  - **Jira Task:** Prashant-Design Profile Page UI – Create a profile layout with editable fields for bio and an option to upload a profile picture. 
+  ◦ [KAN-36 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-36), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/6dea60c5db6193e538c7566d40676b02a288fd68/?at=feature%2FKAN-36-profile-ui)
+
+- **Jira Task:** Prashant – Integrate Profile into Navigation—Create a Nav bar and add a “My Profile” link in the navbar 
+  ◦ [KAN-39 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-39), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-39-integrate-profile-into-navigation-create-a-nav-bar-and-add-a-my-profile-link-in-the-navbar)
+
+- **Jira Task:** Prashant - Updating the User Profile with better UI
+  ◦ [KAN-40 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-40), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-40-updating-the-user-profile-with-better-ui)
+
 -------
 
 
