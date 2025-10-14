@@ -134,6 +134,12 @@ const Navbar = () => {
               Profile
             </Link>
             <Link
+              to="/home"
+              className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+            >
+              Home
+            </Link>
+            <Link
               to="/search"
               className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
             >
@@ -145,9 +151,12 @@ const Navbar = () => {
             >
               To-Read
             </Link>
-             <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
-                 Login
-               </Link>
+            <Link
+              to="/login"
+              className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+            >
+              Login
+            </Link>
           </div>
         </div>
       </div>
