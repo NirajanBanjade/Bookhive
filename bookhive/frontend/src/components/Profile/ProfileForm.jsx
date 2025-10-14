@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Added useEffect
 import {
   MapPin,
   Calendar,
@@ -7,10 +7,17 @@ import {
   Users,
   UserPlus,
   Settings,
+  Heart, // Added for BookCard hover
 } from "lucide-react";
+
+import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService'; 
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
+
+  // New: To-Read specific state
+  const [wantToReadBooks, setWantToReadBooks] = useState([]);
+  const userId = 'user123'; // Demo; replace with real auth later
 
   // Default user data
   const defaultUser = {
@@ -28,6 +35,21 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempData, setTempData] = useState(initialUser);
   const [imagePreview, setImagePreview] = useState(null);
+
+  // New: Fetch To-Read books when tab is active
+  useEffect(() => {
+    if (activeTab === 'want-to-read') {
+      const fetchBooks = async () => {
+        try {
+          const books = await getToReadBooks(userId);
+          setWantToReadBooks(books);
+        } catch (err) {
+          console.error('Error fetching to-read list:', err);
+        }
+      };
+      fetchBooks();
+    }
+  }, [activeTab, userId]);
 
   // Get initials for avatar
   const getInitials = (name) => {
@@ -87,6 +109,29 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     setImagePreview(null);
   };
 
+  // New: Ported from ToReadPage - Add demo book
+  const handleAddDemo = async () => {
+    try {
+      const updatedBooks = await addDemoBookToRead(userId);
+      setWantToReadBooks(updatedBooks);
+    } catch (err) {
+      console.error('Error adding book:', err.response?.data || err);
+      alert(err.response?.data?.message || 'Failed to add book');
+    }
+  };
+
+  // New: Ported from ToReadPage - Remove book
+  const handleRemove = async (googleBookId) => {
+    try {
+      const updatedBooks = await removeBookFromToRead(userId, googleBookId);
+      setWantToReadBooks(updatedBooks);
+      alert('Book removed from your To-Read list');
+    } catch (err) {
+      console.error('Error removing book:', err.response?.data || err);
+      alert(err.response?.data?.message || 'Failed to remove book');
+    }
+  };
+
   // Stats (set to 0)
   const stats = [
     { label: "Books Read", value: "0", icon: Book },
@@ -98,29 +143,53 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const imgSrc =
     imagePreview || tempData.profileImageUrl || userInfo.profileImageUrl;
 
-  // Mock books
-  const currentlyReading = [
-    {
-      id: 1,
-      title: "The Midnight Library",
-      author: "Matt Haig",
-      genre: "Fiction",
-    },
-    {
-      id: 2,
-      title: "Atomic Habits",
-      author: "James Clear",
-      genre: "Self-Help",
-    },
-  ];
+  // Inline BookCard (ported from ProfileView for consistency - no external change)
+  const BookCard = ({ book }) => (
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer">
+      <div className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-6">
+        {book.thumbnail ? (
+          <img src={book.thumbnail} alt={book.title} className="max-h-full max-w-full object-contain" />
+        ) : (
+          <span className="font-serif text-xl text-center text-gray-800 font-semibold leading-tight">
+            {book.title}
+          </span>
+        )}
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button className="rounded-full h-8 w-8 bg-white shadow-md flex items-center justify-center hover:bg-gray-50">
+            <Heart className="h-4 w-4 text-gray-600" />
+          </button>
+        </div>
+        <span className="absolute bottom-2 left-2 px-3 py-1 rounded-full text-xs font-medium bg-teal-600 text-white">
+          Want to Read
+        </span>
+      </div>
+      <div className="p-4">
+        <h3 className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900">
+          {book.title}
+        </h3>
+        <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
+        <div className="mt-2 flex justify-between">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemove(book.googleBookId);
+            }}
+            className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Profile Header */}
+      {/* Profile Header - unchanged */}
       <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* Avatar */}
+            {/* Avatar - unchanged */}
             <div className="relative">
               <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg bg-orange-500 flex items-center justify-center">
                 {imgSrc ? (
@@ -157,7 +226,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             <div className="flex-1">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  {/* Name - NOT editable like GitHub */}
                   <h1 className="font-serif text-3xl font-bold mb-2 text-gray-900">
                     {userInfo.name}
                   </h1>
@@ -183,7 +251,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 ) : null}
               </div>
 
-              {/* Bio - Editable */}
               {isEditing ? (
                 <textarea
                   value={tempData.bio}
@@ -198,7 +265,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 </p>
               )}
 
-              {/* Action Buttons */}
               {isEditing && (
                 <div className="flex gap-3 mb-6">
                   <button
@@ -216,7 +282,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 </div>
               )}
 
-              {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat) => (
                   <div
@@ -236,7 +301,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         </div>
       </div>
 
-      {/* Bookshelves - Same as ProfileView */}
+      {/* Bookshelves */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
           <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
@@ -273,9 +338,27 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           </div>
         </div>
 
-        <div className="text-center text-gray-500 py-12">
-          <p>Your book collection will appear here</p>
-        </div>
+        {/* Tab Content - Enhanced with BookCard */}
+        {activeTab === 'want-to-read' ? (
+          <div className="py-8">
+            <button onClick={handleAddDemo} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
+              Add Demo Book
+            </button>
+            {wantToReadBooks.length === 0 ? (
+              <p className="text-center text-gray-500 py-12">No books yet. Go add some!</p>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {wantToReadBooks.map((book) => (
+                  <BookCard key={book.googleBookId} book={book} />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="text-center text-gray-500 py-12">
+            <p>Your book collection will appear here</p>
+          </div>
+        )}
       </div>
     </div>
   );
