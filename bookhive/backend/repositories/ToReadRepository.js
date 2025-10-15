@@ -10,6 +10,7 @@ class ToReadRepository {
     this.ToRead = ToReadModel;
   }
 
+  // Fetches the "to read" list for a user
   async getBooksForUser(userId) {
     const doc = await this.ToRead.findOne({ userId });
     return doc?.books ?? [];
