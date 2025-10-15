@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const PostSchema = new mongoose.Schema({
   groupId:   { type: mongoose.Schema.Types.ObjectId, ref: 'BookGroup', required: true },
   userId:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  type:      { type: String, enum: ['text','image','link'], default: 'text' },
-  content:   { type: String, trim: true, required: true },         // text body OR caption
+  content:   { type: String, trim: true, required: true, maxlength: 3000 },         // text body OR caption
   mediaUrl:  { type: String },                                     // if image
   linkUrl:   { type: String },                                     // if link
   // lightweight counters (optional, but useful)
