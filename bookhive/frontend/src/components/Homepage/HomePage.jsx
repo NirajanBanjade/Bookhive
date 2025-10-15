@@ -1,7 +1,17 @@
 import React from "react";
-import { Heart, MessageCircle, Star, Sparkles } from "lucide-react";
+import {
+  Heart,
+  MessageCircle,
+  Star,
+  Sparkles,
+  BookOpen,
+  Target,
+  TrendingUp,
+  Calendar,
+} from "lucide-react";
 
 const HomePage = () => {
+  // TODO: Replace with API call to /api/activity/:userId
   const activities = [
     {
       id: 1,
@@ -41,6 +51,7 @@ const HomePage = () => {
     },
   ];
 
+  // TODO: Replace with API call to /api/books/recommendations/:userId
   const recommendations = [
     {
       title: "The Seven Husbands of Evelyn Hugo",
@@ -63,6 +74,44 @@ const HomePage = () => {
       rating: 4.1,
       gradient: "linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%)",
     },
+  ];
+
+  // TODO: Replace with API call to /api/collections/:userId/currently-reading
+  const currentlyReading = [
+    {
+      id: 1,
+      title: "The Midnight Library",
+      author: "Matt Haig",
+      currentPage: 201,
+      totalPages: 300,
+      progress: 67,
+    },
+    {
+      id: 2,
+      title: "Atomic Habits",
+      author: "James Clear",
+      currentPage: 102,
+      totalPages: 300,
+      progress: 34,
+    },
+  ];
+
+  // TODO: Replace with API call to /api/reading-goals/:userId
+  const readingGoal = {
+    year: 2025,
+    targetBooks: 52,
+    booksRead: 23,
+    progress: 44,
+    booksAhead: 3,
+    weekStreak: 12,
+  };
+
+  // TODO: Future feature - Replace with API call to /api/communities/joined/:userId
+  // For Reddit-style book communities/subreddits
+  const communities = [
+    { name: "Fantasy Readers", members: "45K", icon: "🐉" },
+    { name: "Mystery & Thriller Club", members: "32K", icon: "🔍" },
+    { name: "Historical Fiction Fans", members: "28K", icon: "📜" },
   ];
 
   return (
@@ -88,11 +137,143 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Main Content - Two Column Layout */}
+      {/* Main Content - Three Column Layout */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Friend Activity - Left Column */}
-          <div className="lg:col-span-2">
+        <div className="grid lg:grid-cols-12 gap-8">
+          {/* LEFT SIDEBAR - Currently Reading & Goals */}
+          <div className="lg:col-span-3">
+            <div className="space-y-6">
+              {/* Currently Reading Widget */}
+              <div
+                className="bg-white rounded-xl p-6 border border-gray-200"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+              >
+                <div className="flex items-center gap-2 mb-5">
+                  <BookOpen className="h-5 w-5 text-amber-600" />
+                  <h3 className="font-bold text-gray-900 text-lg">
+                    Currently Reading
+                  </h3>
+                </div>
+
+                <div className="space-y-5">
+                  {currentlyReading.map((book) => (
+                    <div key={book.id} className="space-y-2">
+                      <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                        {book.title}
+                      </h4>
+                      <p className="text-xs text-gray-600">{book.author}</p>
+
+                      {/* Progress Bar */}
+                      <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="absolute h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all"
+                          style={{ width: `${book.progress}%` }}
+                        />
+                      </div>
+
+                      <div className="flex justify-between text-xs text-gray-500">
+                        <span>
+                          {book.currentPage} of {book.totalPages} pages
+                        </span>
+                        <span className="font-semibold">{book.progress}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button className="mt-5 w-full py-2 text-sm font-medium text-stone-700 hover:text-stone-900 transition-colors">
+                  View All →
+                </button>
+              </div>
+
+              {/* Reading Goal Widget */}
+              <div
+                className="bg-white rounded-xl p-6 border border-gray-200"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+              >
+                <div className="flex items-center gap-2 mb-5">
+                  <Target className="h-5 w-5 text-amber-600" />
+                  <h3 className="font-bold text-gray-900 text-lg">
+                    {readingGoal.year} Reading Goal
+                  </h3>
+                </div>
+
+                {/* Goal Progress */}
+                <div className="mb-5">
+                  <div className="flex justify-between items-baseline mb-2">
+                    <span className="text-4xl font-bold text-gray-900">
+                      {readingGoal.booksRead}
+                    </span>
+                    <span className="text-sm text-gray-600">
+                      of {readingGoal.targetBooks} books
+                    </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden mb-2">
+                    <div
+                      className="absolute h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all"
+                      style={{ width: `${readingGoal.progress}%` }}
+                    />
+                  </div>
+
+                  <p className="text-xs text-gray-600">
+                    {readingGoal.progress}% complete •{" "}
+                    {readingGoal.targetBooks - readingGoal.booksRead} books to
+                    go
+                  </p>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-teal-600">
+                      <TrendingUp className="h-4 w-4" />
+                      <span className="text-xs font-medium">On Track</span>
+                    </div>
+                    <p className="text-lg font-bold text-gray-900">
+                      +{readingGoal.booksAhead} ahead
+                    </p>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-orange-600">
+                      <Calendar className="h-4 w-4" />
+                      <span className="text-xs font-medium">Week Streak</span>
+                    </div>
+                    <p className="text-lg font-bold text-gray-900">
+                      {readingGoal.weekStreak} weeks 🔥
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* TODO: Future Feature - Book Communities Preview */}
+              {/* Uncomment when Reddit-style communities are implemented */}
+              {/* 
+              <div className="bg-white rounded-xl p-6 border border-gray-200" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.08)' }}>
+                <h3 className="font-bold text-gray-900 text-lg mb-4">Your Communities</h3>
+                <div className="space-y-3">
+                  {communities.map((community, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                      <span className="text-2xl">{community.icon}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-900">{community.name}</p>
+                        <p className="text-xs text-gray-600">{community.members} members</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button className="mt-4 w-full py-2 text-sm font-medium text-stone-700 hover:text-stone-900 transition-colors">
+                  Explore Communities →
+                </button>
+              </div>
+              */}
+            </div>
+          </div>
+
+          {/* CENTER - Friend Activity */}
+          <div className="lg:col-span-6">
             <h2 className="text-3xl font-bold text-gray-800 mb-8 font-serif">
               Friend Activity
             </h2>
@@ -101,12 +282,12 @@ const HomePage = () => {
               {activities.map((activity) => (
                 <div
                   key={activity.id}
-                  className="bg-white rounded-xl p-6 border border-gray-200"
+                  className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg hover:border-stone-300 transition-all duration-300"
                   style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
                 >
                   <div className="flex gap-4">
                     <div
-                      className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xl"
+                      className="w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xl hover:scale-110 transition-transform"
                       style={{
                         background:
                           "linear-gradient(135deg, #78716c 0%, #57534e 100%)",
@@ -132,7 +313,7 @@ const HomePage = () => {
                           {[...Array(5)].map((_, i) => (
                             <Star
                               key={i}
-                              className={`h-5 w-5 ${
+                              className={`h-5 w-5 transition-all ${
                                 i < activity.rating
                                   ? "fill-amber-500 text-amber-500"
                                   : "text-gray-300"
@@ -151,11 +332,11 @@ const HomePage = () => {
                           {activity.time}
                         </span>
                         <div className="flex gap-4">
-                          <button className="flex items-center gap-2 text-gray-600 hover:text-stone-700 transition-colors">
+                          <button className="flex items-center gap-2 text-gray-600 hover:text-stone-700 hover:scale-110 transition-all">
                             <Heart className="h-5 w-5" />
                             <span className="text-sm">{activity.likes}</span>
                           </button>
-                          <button className="flex items-center gap-2 text-gray-600 hover:text-stone-700 transition-colors">
+                          <button className="flex items-center gap-2 text-gray-600 hover:text-stone-700 hover:scale-110 transition-all">
                             <MessageCircle className="h-5 w-5" />
                             <span className="text-sm">{activity.comments}</span>
                           </button>
@@ -168,12 +349,12 @@ const HomePage = () => {
             </div>
           </div>
 
-          {/* Recommendations Sidebar - Right Column */}
-          <div className="lg:col-span-1">
+          {/* RIGHT SIDEBAR - Recommendations */}
+          <div className="lg:col-span-3">
             <div className="lg:sticky lg:top-8">
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="h-6 w-6 text-amber-600" />
-                <h2 className="text-2xl font-bold text-gray-800 font-serif">
+                <h2 className="text-xl font-bold text-gray-800 font-serif">
                   Books You Might Love
                 </h2>
               </div>
@@ -182,9 +363,8 @@ const HomePage = () => {
                 {recommendations.map((book, index) => (
                   <div
                     key={index}
-                    className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                    className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                   >
-                    {/* Book Cover */}
                     <div
                       className="aspect-[3/4] flex items-center justify-center p-6"
                       style={{ background: book.gradient }}
@@ -194,7 +374,6 @@ const HomePage = () => {
                       </h3>
                     </div>
 
-                    {/* Book Info */}
                     <div className="p-5">
                       <h4 className="font-bold text-gray-900 mb-1 line-clamp-2">
                         {book.title}
@@ -209,7 +388,7 @@ const HomePage = () => {
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-4 w-4 ${
+                            className={`h-4 w-4 transition-all ${
                               i < Math.floor(book.rating)
                                 ? "fill-amber-500 text-amber-500"
                                 : "text-gray-300"
