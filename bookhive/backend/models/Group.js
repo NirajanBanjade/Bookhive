@@ -9,3 +9,8 @@ const BookGroupSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+
+BookGroupSchema.index({ bookId: 1 }, { unique: true });
+BookGroupSchema.index({ slug: 1 },   { unique: true });
+
+module.exports = mongoose.model('BookGroup', BookGroupSchema);
