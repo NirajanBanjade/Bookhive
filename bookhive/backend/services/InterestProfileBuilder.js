@@ -1,5 +1,4 @@
 // OCP via pluggable sources/weighting; DIP via constructor injection
-//const { getVolume } = require("./googleBooks");
 
 class InterestProfileBuilder {
   /**
@@ -24,7 +23,7 @@ class InterestProfileBuilder {
     const toRead = await this.toReadRepo.getBooksForUser(userId);
 
     // TODO: integrate other sources similarly (currentlyReadingRepo, finishedRepo, etc.)
-    const books = toRead; // merge later if you add more lists
+    const books = toRead; // merge later if we add more lists
 
     // 2) Build term maps
     const authorCounts = {};
@@ -75,8 +74,7 @@ class InterestProfileBuilder {
   }
 
   async _ensureVolume(book) {
-    // If the ToRead doc already has enough info, you could skip.
-    // For now, always fetch to avoid stale data; add caching later.
+    // Always fetch to avoid stale data; add caching later.
     if (!book?.googleBookId) return null;
     return /*getVolume(book.googleBookId);*/this.booksService(book.googleBookId);
   }
