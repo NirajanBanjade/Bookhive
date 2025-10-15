@@ -6,6 +6,7 @@ const BookGroupSchema = new mongoose.Schema(
         slug: { type: String, required: true }, // for URL slugs.
         name: { type: String, required: true },
         membersCount: { type: Number, default: 0, min: 0 },
+        createdBy:   { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     },
     { timestamps: true }
 );
