@@ -35,3 +35,32 @@ exports.addBookToCollections = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+// Update book status (in-progress <-> finished)
+exports.updateBookStatus = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const googleBookId = req.params.googleBookId;
+    const { status } = req.body;
+
+    const validStatuses = ['currently-reading', 'completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: 'Invalid status: must be currently-reading or completed' });
+    }
+
+    const list = await Collection.findOneAndUpdate(
+      { userId, 'books.googleBookId': googleBookId },
+      { $set: { 'books.$.status': status } },
+      { new: true }
+    );
+
+    if (!list) {
+      return res.status(404).json({ error: 'Book not found in collection' });
+    }
+
+    res.status(200).json(list);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
