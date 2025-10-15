@@ -68,3 +68,6 @@ module.exports = app;
 // Profile API routes - handles user profile viewing and editing
 const profileRoutes = require('./routes/profileRoutes');
 app.use('/api/profile', profileRoutes);
+
+const collectionsRoutes = require('./routes/collectionsRoutes');  
+app.use('/api/collections', collectionsRoutes);
