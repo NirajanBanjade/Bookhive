@@ -10,7 +10,9 @@ class Tokenizer {
   constructor({ stopwords = DEFAULT_STOPWORDS } = {}) {
     this.stop = stopwords;
   }
-
+  // Simple whitespace + punctuation tokenizer, lowercases, removes stopwords
+  // and short tokens (<=2 chars)
+  // Returns array of tokens
   tokens(text) {
     if (!text) return [];
     return text
@@ -19,7 +21,9 @@ class Tokenizer {
       .split(/\s+/)
       .filter(t => t && !this.stop.has(t) && t.length > 2);
   }
-
+  // Returns top N terms by weight from a term-frequency map
+  //Sorted descending by weight
+  //returns array of {name, weight}
   topN(tfMap, n = 50) {
     return Object.entries(tfMap)
       .sort((a, b) => b[1] - a[1])
