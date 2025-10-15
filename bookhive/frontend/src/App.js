@@ -5,7 +5,7 @@ import Profile from "./components/Profile";
 import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
 import Loginpage from "./components/Loginpage/Loginpage";
-import HomePage from "./components/HomePage/HomePage";
+import HomePage from "./components/Homepage/HomePage";
 
 function App() {
   return (
