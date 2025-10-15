@@ -8,6 +8,10 @@ class RecommendationController {
     this.getProfile = this.getProfile.bind(this);
   }
 
+  // POST /api/recommendations/profile/rebuild
+  // Rebuilds the interest profile for the specified user
+  // If userId is not provided, uses the authenticated user's ID
+  // Used by recommendationController component when user requests rebuild
   async rebuildProfile(req, res, next) {
     try {
       const userId = req.user?.id || req.params.userId || req.query.userId;
@@ -20,6 +24,8 @@ class RecommendationController {
     }
   }
 
+  // GET /api/recommendations/profile
+  // Fetches the interest profile for the specified user
   async getProfile(req, res, next) {
     try {
       const userId = req.user?.id || req.params.userId || req.query.userId;
