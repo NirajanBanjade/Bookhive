@@ -1,5 +1,6 @@
 const UserInterestProfile = require("../models/UserInterestProfile");
 
+// SRP: Only reads/writes UserInterestProfile data for a user
 class UserInterestProfileRepository {
   constructor({ Model = UserInterestProfile } = {}) {
     this.Model = Model;
