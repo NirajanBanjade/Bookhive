@@ -1,10 +1,11 @@
 const mongoose = require("mongoose");
-
+// Subdocument schema for weighted terms
 const WeightedTermSchema = new mongoose.Schema({
   name: { type: String, required: true, index: true },
   weight: { type: Number, required: true, min: 0 },
 }, { _id: false });
 
+// UserInterestProfile schema
 const UserInterestProfileSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true, index: true },
   authors: [WeightedTermSchema],
@@ -18,4 +19,4 @@ const UserInterestProfileSchema = new mongoose.Schema({
   lastBuiltAt: { type: Date, default: null },
 }, { timestamps: true });
 
-module.exports = mongoose.model("UserInterestProfile", UserInterestProfileSchema);
+module.exports = mongoose.model("UserInterestProfile", UserInterestProfileSchema); 
