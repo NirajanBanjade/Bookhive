@@ -4,5 +4,8 @@ const collectionsController = require('../controllers/collectionsController');
 
 router.get('/:userId', collectionsController.getCollectionsList);
 router.post('/:userId', collectionsController.addBookToCollections);
+router.put('/:userId/books/:googleBookId/status', collectionsController.updateBookStatus);
+// router.put('/:userId/books/:googleBookId/review', collectionsController.addReview); // KAN-60: Future review support
+// router.get('/:userId/stats', collectionsController.getProfileStats); // KAN-60: Future profile stats
 
 module.exports = router;
