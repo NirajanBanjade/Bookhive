@@ -26,6 +26,27 @@ const groupMemberJoin = async (req, res) => {
     }
 };
 
+const groupMemberLeave = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const categoryKey = BookGroup.toKey ? BookGroup.toKey(req.params.category) : req.params.category.toLowerCase().trim();
 
+        const group = await BookGroup.findOne({ categoryKey });
+        if (!group) return res.status(200).json({ left: true, existed: false });
 
-module.exports = { groupMemberJoin};
+        const deleted = await Membership.findOneAndDelete({ groupId: group._id, userId });
+        if (deleted) {
+            // SIMPLE COUNT DECREMENT (guard floor at 0 if you like)
+            await BookGroup.updateOne(
+                { _id: group._id, membersCount: { $gt: 0 } },
+                { $inc: { membersCount: -1 } }
+            );
+        }
+
+        return res.status(200).json({ left: true, existed: !!deleted });
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
+    }
+};
+
+module.exports = { groupMemberJoin, groupMemberLeave };
