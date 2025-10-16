@@ -33,18 +33,33 @@ function mapToToReadBook(volume) {
   };
 }
 
-// Fetch detailed volume info by ID for profile building
-async function getVolume(volumeId, { fields } = {}) {
-  if (!volumeId) throw new Error('volumeId is required');
+async function getVolume(volumeId, { fields, retries = 3, timeoutMs = 8000 } = {}) {
+  if (!volumeId) throw new Error("volumeId is required");
 
   const url = `${BASE}/${encodeURIComponent(volumeId)}`;
-  const params = {key: process.env.GOOGLE_BOOKS_API_KEY};
-
+  const params = { key: process.env.GOOGLE_BOOKS_API_KEY };
   if (fields) params.fields = fields;
 
-  const { data } = await axios.get(url, { params });
+  let lastErr;
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const { data } = await axios.get(url, { params, timeout: timeoutMs });
+      return data;
+    } catch (err) {
+      lastErr = err;
+      const status = err.response?.status;
+      const retriable =
+        [429, 502, 503, 504].includes(status) ||
+        ["ECONNRESET", "ETIMEDOUT"].includes(err.code);
+      if (!retriable) throw err; // Non-retriable → exit early
+      await new Promise(r => setTimeout(r, 300 * 2 ** attempt)); // Exponential backoff
+    }
+  }
 
-  return data;
+  const e = new Error(`getVolume failed after ${retries} retries: ${lastErr?.message}`);
+  e.status = lastErr?.response?.status;
+  throw e;
 }
+
 
 module.exports = { searchVolumes, mapToToReadBook, getVolume };
