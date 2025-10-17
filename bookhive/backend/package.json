@@ -5,8 +5,7 @@
   "scripts": {
     "server": "node server.js",
     "server:watch": "nodemon server.js",
-    "test": "mocha TESTS --timeout 10000"
-    
+    "test": "cross-env NODE_ENV=test mocha TESTS --timeout 10000"
   },
   "keywords": [],
   "author": "",
@@ -28,6 +27,7 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
     "mocha": "^11.7.4",
     "nodemon": "^3.1.10",
     "supertest": "^7.1.4"

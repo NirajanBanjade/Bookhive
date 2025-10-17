@@ -20,14 +20,24 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendMail({ to, subject, text, html, replyTo }) {
+  if (process.env.NODE_ENV === "test") {
+    console.log("[mail] sendMail skipped in test env");
+    return {
+      skipped: true,
+      to,
+      subject,
+    };
+  }
+
   const info = await transporter.sendMail({
-    from: `"Bookhive" <${GMAIL_USER}>`, 
-    to, // leaving it dyanamic.(in prevous version it was hardcoded)
+    from: `"Bookhive" <${GMAIL_USER}>`,
+    to,
     subject,
     text,
     html,
     ...(replyTo ? { replyTo } : {}),
   });
+
   return {
     messageId: info.messageId,
     accepted: info.accepted,
