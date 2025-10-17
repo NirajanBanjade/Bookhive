@@ -63,7 +63,6 @@ app.use('/api/profile', requireAuth, toUserProfile);
 
 const toUpdateUserPassword=require('./routes/toUpdatePassword');
 app.use('/api/update-password', toUpdateUserPassword);
-module.exports = app;
 
 // Profile API routes - handles user profile viewing and editing
 const profileRoutes = require('./routes/profileRoutes');
@@ -94,3 +93,5 @@ app.use('/api/recommendations', recommendationsRoutes);
 //const groupsRouter = require('./routes/userDetailsSameGroup');
 //app.use('/api', groupsRouter);
 
+
+module.exports = app;
