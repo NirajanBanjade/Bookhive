@@ -16,17 +16,20 @@ class NotificationService {
     });
   }
 
-  /**
-   * Mark a single notification as read (user-scoped).
-   */
   async markRead({ id, userId }) {
     if (!id) throw new Error("markRead requires id");
     if (!userId) throw new Error("markRead requires userId");
+    return NotificationRepo.markAsRead(id, userId);
+  }
 
-    const updated = await NotificationRepo.markAsRead(id, userId);
-    return updated; // null if not found or not owned by user
+  /**
+   * Mark all notifications as read for a user.
+   */
+  async markAllRead({ userId }) {
+    if (!userId) throw new Error("markAllRead requires userId");
+    return NotificationRepo.markAllAsRead(userId);
   }
 }
 
 module.exports = new NotificationService();
-module.exports.NotificationService = NotificationService; // for tests/DI
+module.exports.NotificationService = NotificationService;
