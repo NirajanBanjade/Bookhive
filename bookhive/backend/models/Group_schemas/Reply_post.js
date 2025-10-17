@@ -7,6 +7,6 @@ const ReplySchema = new mongoose.Schema({
   isDeleted: { type: Boolean, default: false },
 }, { timestamps: true });
 
-CommentSchema.index({ postId: 1, createdAt: 1 }); 
+ReplySchema.index({ postId: 1, createdAt: 1 }); 
 
 module.exports = mongoose.model('Reply', ReplySchema);
