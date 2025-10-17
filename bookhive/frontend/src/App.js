@@ -6,7 +6,24 @@ import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
 import Loginpage from "./components/Loginpage/Loginpage";
 import HomePage from "./components/Homepage/HomePage";
+import GenrePage from "./pages/GenrePage";
 
+/**
+ * Main App Component
+ *
+ * Routes:
+ * - / : User profile
+ * - /home : Home feed with activity
+ * - /search : Book search
+ * - /to-read : User's to-read list
+ * - /genre : Browse all genres (NEW)
+ * - /login : Authentication
+ *
+ * TODO for team:
+ * - Add /genre/:subject route in next phase for filtered results
+ * - Add protected routes when auth is implemented
+ * - Consider adding 404 page
+ */
 function App() {
   return (
     <Router>
@@ -17,9 +34,10 @@ function App() {
           <Routes>
             <Route path="/login" element={<Loginpage />} />
             <Route path="/" element={<Profile />} />
+            <Route path="/home" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/to-read" element={<ToReadPage />} />
-            <Route path="/home" element={<HomePage />} />
+            <Route path="/genre" element={<GenrePage />} />
           </Routes>
         </main>
       </div>
