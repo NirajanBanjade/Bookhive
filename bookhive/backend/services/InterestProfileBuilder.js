@@ -5,15 +5,15 @@ class InterestProfileBuilder {
    * @param {Object} deps
    * @param {ToReadRepository} deps.toReadRepo
    * @param {UserInterestProfileRepository} deps.profileRepo
-   * @param {googleBooks.getVolume} booksService
+   * @param {googleBooks.getVolume} booksServiceGetVolume
    * @param {Tokenizer} deps.tokenizer
    * @param {Object} [deps.options]
    * @param {number} [deps.options.maxKeywords] - cap keyword features
    */
-  constructor({ toReadRepo, profileRepo, booksService, tokenizer, options = {} }) {
+  constructor({ toReadRepo, profileRepo, booksServiceGetVolume, tokenizer, options = {} }) {
     this.toReadRepo = toReadRepo;
     this.profileRepo = profileRepo;
-    this.booksService = booksService;
+    this.getVolume = booksServiceGetVolume;
     this.tokenizer = tokenizer;
     this.maxKeywords = options.maxKeywords ?? 200;
   }
@@ -30,27 +30,40 @@ class InterestProfileBuilder {
     const categoryCounts = {};
     const keywordTF = {};
 
+    const warnings = [];
+
     for (const b of books) {
-      const vol = await this._ensureVolume(b);
-      const info = vol?.volumeInfo ?? {};
+        let vol;
+        try {
+            vol = await this._ensureVolume(b);
+            if (!vol) {
+                warnings.push(`Book with ID ${b.googleBookId} not found`);
+                continue;
+            }
+        } catch (err) {
+            warnings.push(`Error fetching book ID ${b.googleBookId}: ${err.message}`);
+            continue;
+        }
 
-      // Authors
-      for (const a of (info.authors ?? [])) {
-        const key = a.trim().toLowerCase();
-        authorCounts[key] = (authorCounts[key] || 0) + 1;
-      }
+        const info = vol?.volumeInfo ?? {};
 
-      // Categories (genres)
-      for (const c of (info.categories ?? [])) {
-        const key = c.trim().toLowerCase();
-        categoryCounts[key] = (categoryCounts[key] || 0) + 1;
-      }
+        // Authors
+        for (const a of (info.authors ?? [])) {
+            const key = a.trim().toLowerCase();
+            authorCounts[key] = (authorCounts[key] || 0) + 1;
+        }
 
-      // Keywords from description
-      const tokens = this.tokenizer.tokens(info.description || "");
-      for (const t of tokens) {
-        keywordTF[t] = (keywordTF[t] || 0) + 1;
-      }
+        // Categories (genres)
+        for (const c of (info.categories ?? [])) {
+            const key = c.trim().toLowerCase();
+            categoryCounts[key] = (categoryCounts[key] || 0) + 1;
+        }
+
+        // Keywords from description
+        const tokens = this.tokenizer.tokens(info.description || "");
+        for (const t of tokens) {
+            keywordTF[t] = (keywordTF[t] || 0) + 1;
+        }
     }
 
     // 3) Normalize each channel to 0..1
@@ -70,13 +83,13 @@ class InterestProfileBuilder {
       }
     });
 
-    return profileDoc;
+    return { profile: profileDoc, warnings };
   }
 
   async _ensureVolume(book) {
     // Always fetch to avoid stale data; add caching later.
     if (!book?.googleBookId) return null;
-    return /*getVolume(book.googleBookId);*/this.booksService(book.googleBookId);
+    return this.getVolume(book.googleBookId);//this.booksService(book.googleBookId);
   }
 
   _normalize(counts) {
