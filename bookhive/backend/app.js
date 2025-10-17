@@ -82,3 +82,7 @@ app.use('/api/recommendations', recommendationsRoutes);
 const groupRoutes = require('./routes/groupRoutes');
 // protect only these with auth (or move auth inside the router)
 app.use('/api', requireAuth, groupRoutes);
+
+//display user details in a specific group.
+const groupsRouter = require('./routes/userDetailsSameGroup');
+app.use('/api', groupsRouter);
