@@ -1,6 +1,10 @@
 // backend/controllers/notificationController.js
 const NotificationService = require("../services/NotificationService");
 
+/**
+ * GET /api/notifications
+ * Query: ?unread=true|false&page=1&limit=20
+ */
 async function list(req, res) {
   try {
     const userId = req.user?.id || req.user?._id; // depends on your auth middleware
@@ -26,4 +30,28 @@ async function list(req, res) {
   }
 }
 
-module.exports = { list };
+/**
+ * PATCH /api/notifications/:id/read
+ * Marks a single notification as read for the authenticated user.
+ */
+async function markRead(req, res) {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "Notification id is required" });
+
+    const updated = await NotificationService.markRead({ id, userId });
+    if (!updated) {
+      return res.status(404).json({ message: "Notification not found" });
+    }
+
+    return res.json(updated);
+  } catch (err) {
+    console.error(`PATCH /api/notifications/${req.params?.id}/read failed:`, err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+module.exports = { list, markRead };
