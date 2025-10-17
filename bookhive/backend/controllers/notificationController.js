@@ -54,4 +54,21 @@ async function markRead(req, res) {
   }
 }
 
-module.exports = { list, markRead };
+/**
+ * PATCH /api/notifications/read-all
+ * Marks all notifications as read for the authenticated user.
+ */
+async function markAllRead(req, res) {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+
+    const result = await NotificationService.markAllRead({ userId });
+    return res.json({ ok: true, ...result });
+  } catch (err) {
+    console.error("PATCH /api/notifications/read-all failed:", err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+module.exports = { list, markRead, markAllRead };
