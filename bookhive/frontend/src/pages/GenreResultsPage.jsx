@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { GENRES, getGenreById } from "../constants/genres";
+import { GENRES, getGenreById } from "../constants/genre";
 import axios from "axios";
 
 /**
@@ -355,13 +355,3 @@ const GenreResultsPage = () => {
 };
 
 export default GenreResultsPage;
-```
-
----
-
-## **📋 FUTURE IMPLEMENTATION GUIDE FOR YOUR TEAM**
-
-### **Phase 2 Backend Tasks:**
-
-**1. Create Genre Endpoint: ##**GET /api/books/genre/:genreId?page=1&sort=newest&minRating=4**## **
-```;
