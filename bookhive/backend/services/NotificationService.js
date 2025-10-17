@@ -1,29 +1,31 @@
 // backend/services/NotificationService.js
-const Notification = require("../models/Notification");
+const NotificationRepo = require("../repositories/NotificationRepository");
 
-async function listByUser({ userId, unread, page = 1, limit = 20 }) {
-  const filter = { userId };
-  if (unread === true) filter.read = false;
+class NotificationService {
+  /**
+   * List notifications for a user with pagination and optional unread filter.
+   * Keeps orchestration here; all DB details live in the repository.
+   */
+  async listByUser({ userId, unread = null, page = 1, limit = 20 } = {}) {
+    if (!userId) {
+      throw new Error("listByUser requires userId");
+    }
 
-  const skip = (page - 1) * limit;
+    // Coerce query params safely here (service boundary)
+    const safeUnread =
+      unread === true || unread === false ? unread : null;
 
-  const [items, total] = await Promise.all([
-    Notification.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit),
-    Notification.countDocuments(filter),
-  ]);
-
-  return {
-    items,
-    page,
-    limit,
-    total,
-    hasMore: skip + items.length < total,
-  };
+    return NotificationRepo.findPaginated({
+      userId,
+      unread: safeUnread,
+      page,
+      limit,
+      // Open for extension: sort/projection can be overridden later without changing callers
+      sort: { createdAt: -1 },
+      projection: null,
+    });
+  }
 }
 
-module.exports = {
-  listByUser,
-};
+module.exports = new NotificationService();
+module.exports.NotificationService = NotificationService; // for testing/DI
