@@ -1,35 +1,29 @@
+// backend/controllers/notificationController.js
 const NotificationService = require("../services/NotificationService");
 
-module.exports = {
-  async list(req, res) {
-    try {
-      const { userId, limit } = req.query;
-      const items = await NotificationService.listForUser(userId, Number(limit) || 20);
-      res.json({ items });
-    } catch (e) {
-      res.status(400).json({ error: e.message });
-    }
-  },
+async function list(req, res) {
+  try {
+    const userId = req.user?.id || req.user?._id; // depends on your auth middleware
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
-  // POST /api/notifications/:id/read
-  async markRead(req, res) {
-    try {
-      const { id } = req.params;
-      const updated = await NotificationService.markAsRead(id);
-      res.json({ ok: true, item: updated });
-    } catch (e) {
-      res.status(400).json({ error: e.message });
-    }
-  },
+    const page = Math.max(1, parseInt(req.query.page ?? "1", 10) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit ?? "20", 10) || 20));
+    const unreadParam = (req.query.unread ?? "").toString().toLowerCase();
+    const unread =
+      unreadParam === "true" ? true : unreadParam === "false" ? false : null;
 
-  // POST /api/notifications/read-all  { userId: "..." }
-  async markAllRead(req, res) {
-    try {
-      const { userId } = req.body;
-      await NotificationService.markAllAsRead(userId);
-      res.json({ ok: true });
-    } catch (e) {
-      res.status(400).json({ error: e.message });
-    }
-  },
-};
+    const result = await NotificationService.listByUser({
+      userId,
+      unread,
+      page,
+      limit,
+    });
+
+    return res.json(result);
+  } catch (err) {
+    console.error("GET /api/notifications failed:", err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+module.exports = { list };
