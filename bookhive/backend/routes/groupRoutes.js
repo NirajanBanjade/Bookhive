@@ -1,6 +1,6 @@
 const express = require('express');
 const { groupMemberJoin, groupMemberLeave } = require('../controllers/Group_controller/group_member_join'); 
-const authenticateToken = require('../middleware/auth');
+const authenticateToken = require('../middleware/jwt_auth');
 
 const router = express.Router();
 

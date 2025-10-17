@@ -77,3 +77,8 @@ app.use("/api/notifications", notificationRoutes);
 // Recommendation API routes - handles interest profile and recommendations
 const recommendationsRoutes = require('./routes/recommendationsRoutes');
 app.use('/api/recommendations', recommendationsRoutes);
+
+// Group join/leave (and later posts)
+const groupRoutes = require('./routes/groupRoutes');
+// protect only these with auth (or move auth inside the router)
+app.use('/api', requireAuth, groupRoutes);
