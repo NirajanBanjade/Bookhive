@@ -18,12 +18,23 @@ router.delete('/groups/:category/leave', authenticateToken, groupMemberLeave);
 
 
 
-const { createGroupPost } = require('../controllers/groupPosts');
+const { createGroupPost } = require('../controllers/Group_controller/group_member_post');
 
 router.post('/groups/:category/posts', auth, createGroupPost);
 
 
 
 // -----------------------------------------------------------------
+//this is for displaying all posts of a specific group.
+
+
+
+const {listGroupPost} = require('../controllers/Group_controller/group_posts_all');
+router.get('/groups/:category/posts',  authenticateToken, listGroupPost);
+
+
+
+
+//--------------------------------------------------------------------
 
 module.exports = router;
