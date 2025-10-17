@@ -86,3 +86,4 @@ app.use('/api', requireAuth, groupRoutes);
 //display user details in a specific group.
 const groupsRouter = require('./routes/userDetailsSameGroup');
 app.use('/api', groupsRouter);
+
