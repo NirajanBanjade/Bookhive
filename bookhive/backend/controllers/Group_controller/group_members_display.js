@@ -1,4 +1,3 @@
-// controllers/groupMemberNames.js
 const BookGroup = require('../../models/Group');
 const Membership = require('../../models/Group_schemas/Membership');
 
