@@ -10,7 +10,7 @@ import {
   Heart,
 } from "lucide-react";
 import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
-import { getCollections } from '../../services/collectionsService';
+import { getCollections, moveToCollections } from '../../services/collectionsService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
@@ -136,6 +136,18 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
+  const handleMoveToCollections = async (googleBookId, status) => {
+    try {
+      const response = await moveToCollections(userId, googleBookId, status);
+      setWantToReadBooks(response.toRead);
+      setCollectionBooks(response.collections);
+      alert(`Book moved to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
+    } catch (err) {
+      console.error('Error moving book:', err.response?.data || err);
+      alert(err.response?.data?.message || 'Failed to move book');
+    }
+  };
+
   const stats = [
     { label: "Books Read", value: "0", icon: Book },
     { label: "Reviews", value: "0", icon: Star },
@@ -172,15 +184,37 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
         <div className="mt-2 flex justify-between">
           {activeTab === 'want-to-read' && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRemove(book.googleBookId);
-              }}
-              className="text-xs px-2 py-1 bg-red-500 text-white rounded"
-            >
-              Remove
-            </button>
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(book.googleBookId);
+                }}
+                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+              >
+                Remove
+              </button>
+              <div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMoveToCollections(book.googleBookId, 'currently-reading');
+                  }}
+                  className="text-xs px-2 py-1 bg-green-500 text-white rounded mr-1"
+                >
+                  Start
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMoveToCollections(book.googleBookId, 'completed');
+                  }}
+                  className="text-xs px-2 py-1 bg-blue-500 text-white rounded"
+                >
+                  Finish
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -34,3 +34,13 @@ export const updateBookStatus = async (userId, googleBookId, status) => {
     throw error;
   }
 };
+
+export const moveToCollections = async (userId, googleBookId, status) => {
+  try {
+    const response = await api.post(`/to-read/${userId}/${googleBookId}/move-to-collections`, { status });
+    return response.data; // { toRead, collections }
+  } catch (error) {
+    console.error('Move to collections failed:', error);
+    throw error;
+  }
+};
