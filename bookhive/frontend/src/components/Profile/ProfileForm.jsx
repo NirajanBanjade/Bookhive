@@ -170,8 +170,10 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
+  const booksReadCount = collectionBooks.filter(book => book.status === 'completed').length;
+
   const stats = [
-    { label: "Books Read", value: "0", icon: Book },
+    { label: "Books Read", value: booksReadCount.toString(), icon: Book },
     { label: "Reviews", value: "0", icon: Star },
     { label: "Followers", value: "0", icon: Users },
     { label: "Following", value: "0", icon: UserPlus },
