@@ -10,7 +10,7 @@ import {
   Heart,
 } from "lucide-react";
 import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
-import { getCollections, moveToCollections } from '../../services/collectionsService';
+import { getCollections, moveToCollections, updateBookStatus } from '../../services/collectionsService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
@@ -148,6 +148,17 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
+  const handleUpdateStatus = async (googleBookId, newStatus) => {
+    try {
+      const updatedBooks = await updateBookStatus(userId, googleBookId, newStatus);
+      setCollectionBooks(updatedBooks);
+      alert(`Book status updated to ${newStatus === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
+    } catch (err) {
+      console.error('Error updating book status:', err.response?.data || err);
+      alert(err.response?.data?.message || 'Failed to update book status');
+    }
+  };
+
   const stats = [
     { label: "Books Read", value: "0", icon: Book },
     { label: "Reviews", value: "0", icon: Star },
@@ -183,7 +194,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         </h3>
         <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
         <div className="mt-2 flex justify-between">
-          {activeTab === 'want-to-read' && (
+          {activeTab === 'want-to-read' ? (
             <>
               <button
                 onClick={(e) => {
@@ -215,6 +226,18 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 </button>
               </div>
             </>
+          ) : (
+            <select
+              value={book.status}
+              onChange={(e) => {
+                e.stopPropagation();
+                handleUpdateStatus(book.googleBookId, e.target.value);
+              }}
+              className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="currently-reading">Currently Reading</option>
+              <option value="completed">Completed</option>
+            </select>
           )}
         </div>
       </div>
