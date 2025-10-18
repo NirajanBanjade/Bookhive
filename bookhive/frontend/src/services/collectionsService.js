@@ -44,3 +44,13 @@ export const moveToCollections = async (userId, googleBookId, status) => {
     throw error;
   }
 };
+
+export const removeFromCollections = async (userId, googleBookId) => {
+  try {
+    const response = await api.delete(`/collections/${userId}/books/${googleBookId}`);
+    return response.data.books || [];
+  } catch (error) {
+    console.error('Remove from collections failed:', error);
+    throw error;
+  }
+};

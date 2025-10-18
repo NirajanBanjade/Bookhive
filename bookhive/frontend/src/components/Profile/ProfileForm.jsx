@@ -10,7 +10,7 @@ import {
   Heart,
 } from "lucide-react";
 import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
-import { getCollections, moveToCollections, updateBookStatus } from '../../services/collectionsService';
+import { getCollections, moveToCollections, updateBookStatus, removeFromCollections } from '../../services/collectionsService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
@@ -159,6 +159,17 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
+  const handleRemoveFromCollections = async (googleBookId) => {
+    try {
+      const updatedBooks = await removeFromCollections(userId, googleBookId);
+      setCollectionBooks(updatedBooks);
+      alert('Book removed from your collection');
+    } catch (err) {
+      console.error('Error removing book from collection:', err.response?.data || err);
+      alert(err.response?.data?.message || 'Failed to remove book');
+    }
+  };
+
   const stats = [
     { label: "Books Read", value: "0", icon: Book },
     { label: "Reviews", value: "0", icon: Star },
@@ -227,17 +238,28 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
               </div>
             </>
           ) : (
-            <select
-              value={book.status}
-              onChange={(e) => {
-                e.stopPropagation();
-                handleUpdateStatus(book.googleBookId, e.target.value);
-              }}
-              className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-            >
-              <option value="currently-reading">Currently Reading</option>
-              <option value="completed">Completed</option>
-            </select>
+            <>
+              <select
+                value={book.status}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleUpdateStatus(book.googleBookId, e.target.value);
+                }}
+                className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="currently-reading">Currently Reading</option>
+                <option value="completed">Completed</option>
+              </select>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveFromCollections(book.googleBookId);
+                }}
+                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+              >
+                Remove
+              </button>
+            </>
           )}
         </div>
       </div>
