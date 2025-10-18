@@ -18,9 +18,10 @@ router.delete('/groups/:category/leave', authenticateToken, groupMemberLeave);
 
 
 
-const { createGroupPost } = require('../controllers/Group_controller/group_member_post');
+const { createGroupPost, deleteGroupPost } = require('../controllers/Group_controller/group_member_post');
 
 router.post('/groups/:category/posts', auth, createGroupPost);
+router.delete('/groups/:category/posts/:postId', auth, deleteGroupPost);
 
 
 
