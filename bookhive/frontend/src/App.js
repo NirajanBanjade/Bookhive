@@ -5,6 +5,7 @@ import Profile from "./components/Profile";
 import SearchPage from "./pages/searchPage";
 import ToReadPage from "./pages/ToReadPage";
 import Loginpage from "./components/Loginpage/Loginpage";
+import HomePage from "./components/Homepage/HomePage";
 
 function App() {
   return (
@@ -14,15 +15,15 @@ function App() {
 
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Routes>
-          <Route path="/login" element={<Loginpage />} />
+            <Route path="/login" element={<Loginpage />} />
             <Route path="/" element={<Profile />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/to-read" element={<ToReadPage />} />
+            <Route path="/home" element={<HomePage />} />
           </Routes>
         </main>
       </div>
     </Router>
-          
   );
 }
 
