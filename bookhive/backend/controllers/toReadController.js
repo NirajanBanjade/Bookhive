@@ -93,7 +93,6 @@ exports.searchToReadBooks = async (req, res) => {
   }
 };
 
-// Add a book to the user's to-read list
 exports.addBookToToRead = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -103,9 +102,15 @@ exports.addBookToToRead = async (req, res) => {
       return res.status(400).json({ error: 'googleBookId and title are required' });
     }
 
+    // Check if book is already in Collections
+    const collection = await Collection.findOne({ userId, 'books.googleBookId': googleBookId });
+    if (collection) {
+      return res.status(400).json({ error: 'Book is already in your collection' });
+    }
+
     const book = { googleBookId, title, authors, thumbnail };
 
-    // Find or create list; prevent duplicates
+    // Find or create To-Read list; prevent duplicates
     let list = await ToRead.findOne({ userId });
     if (!list) {
       list = new ToRead({ userId, books: [book] });
@@ -153,10 +158,14 @@ exports.removeBookFromToRead = async (req, res) => {
   }
 };
 
-// Move a book from the user's to-read list into collections
 exports.moveBookToCollections = async (req, res) => {
   try {
     const { userId, googleBookId } = req.params;
+    const { status = 'currently-reading' } = req.body; // Default to currently-reading
+
+    if (!['currently-reading', 'completed'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
 
     // Find the user's To-Read document
     const toReadList = await ToRead.findOne({ userId });
@@ -164,30 +173,30 @@ exports.moveBookToCollections = async (req, res) => {
       return res.status(404).json({ error: 'User to-read list not found' });
     }
 
-    // Find the book object inside the toRead list (we need the full book fields)
+    // Find the book object
     const book = toReadList.books.find(b => b.googleBookId === googleBookId);
     if (!book) {
       return res.status(404).json({ error: 'Book not found in to-read list' });
     }
 
-    // add to collections if not already present
+    // Add to Collections with status
     const collection = await Collection.findOneAndUpdate(
-      { userId, 'books.googleBookId': { $ne: googleBookId } }, // only match if book not present
-      { $push: { books: book }, $setOnInsert: { userId } },
+      { userId, 'books.googleBookId': { $ne: googleBookId } },
+      { $push: { books: { ...book.toObject(), status } }, $setOnInsert: { userId } },
       { upsert: true, new: true }
     );
 
-    //    Using updateOne with $pull avoids fetching the whole doc again for the write.
+    // Remove from To-Read
     await ToRead.updateOne({ userId }, { $pull: { books: { googleBookId } } });
 
-    // Create a notification for the user that book is moved
+    // Create notification
     await Notification.create({
       userId,
-      message: `Book "${book.title}" moved from To-Read to Collections.`,
+      message: `Book "${book.title}" moved from To-Read to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}.`,
       type: 'success',
     });
 
-    // return the updated lists
+    // Return updated lists
     const updatedToRead = (await ToRead.findOne({ userId })) || { userId, books: [] };
     const updatedCollection = (await Collection.findOne({ userId })) || { userId, books: [] };
 
@@ -201,7 +210,6 @@ exports.moveBookToCollections = async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 };
-
 
 // Fetch notifications for a user
 exports.getNotifications = async (req, res) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react"; // Added useEffect
+import React, { useState, useEffect } from "react";
 import {
   MapPin,
   Calendar,
@@ -7,19 +7,17 @@ import {
   Users,
   UserPlus,
   Settings,
-  Heart, // Added for BookCard hover
+  Heart,
 } from "lucide-react";
-
-import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService'; 
+import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
+import { getCollections, moveToCollections, updateBookStatus, removeFromCollections } from '../../services/collectionsService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
-
-  // New: To-Read specific state
   const [wantToReadBooks, setWantToReadBooks] = useState([]);
-  const userId = 'user123'; // Demo; replace with real auth later
+  const [collectionBooks, setCollectionBooks] = useState([]);
+  const userId = 'user123';
 
-  // Default user data
   const defaultUser = {
     name: "John Doe",
     email: "john.doe@example.com",
@@ -36,7 +34,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const [tempData, setTempData] = useState(initialUser);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // New: Fetch To-Read books when tab is active
   useEffect(() => {
     if (activeTab === 'want-to-read') {
       const fetchBooks = async () => {
@@ -51,7 +48,20 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   }, [activeTab, userId]);
 
-  // Get initials for avatar
+  useEffect(() => {
+    if (activeTab === 'currently-reading' || activeTab === 'completed') {
+      const fetchCollections = async () => {
+        try {
+          const books = await getCollections(userId);
+          setCollectionBooks(books);
+        } catch (err) {
+          console.error('Error fetching collections:', err);
+        }
+      };
+      fetchCollections();
+    }
+  }, [activeTab, userId]);
+
   const getInitials = (name) => {
     return name
       .split(" ")
@@ -61,12 +71,10 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       .slice(0, 2);
   };
 
-  // Handle input changes
   const handleInputChange = (field, value) => {
     setTempData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // Handle image upload
   const handleImageUpload = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -79,7 +87,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     reader.readAsDataURL(file);
   };
 
-  // Save functionality
   const handleSave = () => {
     setUserInfo((prev) => ({
       ...tempData,
@@ -102,25 +109,23 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     });
   };
 
-  // Cancel functionality
   const handleCancel = () => {
     setTempData(userInfo);
     setIsEditing(false);
     setImagePreview(null);
   };
 
-  // New: Ported from ToReadPage - Add demo book
   const handleAddDemo = async () => {
-    try {
-      const updatedBooks = await addDemoBookToRead(userId);
-      setWantToReadBooks(updatedBooks);
-    } catch (err) {
-      console.error('Error adding book:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to add book');
-    }
-  };
+  try {
+    const updatedBooks = await addDemoBookToRead(userId);
+    setWantToReadBooks(updatedBooks);
+    alert('Demo book added to To-Read list');
+  } catch (err) {
+    console.error('Error adding book:', err);
+    alert(typeof err === 'string' ? err : 'Failed to add book');
+  }
+};
 
-  // New: Ported from ToReadPage - Remove book
   const handleRemove = async (googleBookId) => {
     try {
       const updatedBooks = await removeBookFromToRead(userId, googleBookId);
@@ -128,13 +133,48 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       alert('Book removed from your To-Read list');
     } catch (err) {
       console.error('Error removing book:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to remove book');
+      alert(err.response?.data?.error || 'Failed to remove book');
     }
   };
 
-  // Stats (set to 0)
+  const handleMoveToCollections = async (googleBookId, status) => {
+    try {
+      const response = await moveToCollections(userId, googleBookId, status);
+      setWantToReadBooks(response.toRead);
+      setCollectionBooks(response.collections);
+      alert(`Book moved to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
+    } catch (err) {
+      console.error('Error moving book:', err.response?.data || err);
+      alert(err.response?.data?.error || 'Failed to move book');
+    }
+  };
+
+  const handleUpdateStatus = async (googleBookId, newStatus) => {
+    try {
+      const updatedBooks = await updateBookStatus(userId, googleBookId, newStatus);
+      setCollectionBooks(updatedBooks);
+      alert(`Book status updated to ${newStatus === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
+    } catch (err) {
+      console.error('Error updating book status:', err.response?.data || err);
+      alert(err.response?.data?.error || 'Failed to update book status');
+    }
+  };
+
+  const handleRemoveFromCollections = async (googleBookId) => {
+    try {
+      const updatedBooks = await removeFromCollections(userId, googleBookId);
+      setCollectionBooks(updatedBooks);
+      alert('Book removed from your collection');
+    } catch (err) {
+      console.error('Error removing book from collection:', err.response?.data || err);
+      alert(err.response?.data?.error || 'Failed to remove book');
+    }
+  };
+
+  const booksReadCount = collectionBooks.filter(book => book.status === 'completed').length;
+
   const stats = [
-    { label: "Books Read", value: "0", icon: Book },
+    { label: "Books Read", value: booksReadCount.toString(), icon: Book },
     { label: "Reviews", value: "0", icon: Star },
     { label: "Followers", value: "0", icon: Users },
     { label: "Following", value: "0", icon: UserPlus },
@@ -143,7 +183,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const imgSrc =
     imagePreview || tempData.profileImageUrl || userInfo.profileImageUrl;
 
-  // Inline BookCard (ported from ProfileView for consistency - no external change)
   const BookCard = ({ book }) => (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer">
       <div className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-6">
@@ -160,7 +199,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           </button>
         </div>
         <span className="absolute bottom-2 left-2 px-3 py-1 rounded-full text-xs font-medium bg-teal-600 text-white">
-          Want to Read
+          {activeTab === 'want-to-read' ? 'Want to Read' : book.status === 'currently-reading' ? 'Currently Reading' : 'Completed'}
         </span>
       </div>
       <div className="p-4">
@@ -169,15 +208,62 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         </h3>
         <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
         <div className="mt-2 flex justify-between">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              handleRemove(book.googleBookId);
-            }}
-            className="text-xs px-2 py-1 bg-red-500 text-white rounded"
-          >
-            Remove
-          </button>
+          {activeTab === 'want-to-read' ? (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(book.googleBookId);
+                }}
+                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+              >
+                Remove
+              </button>
+              <div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMoveToCollections(book.googleBookId, 'currently-reading');
+                  }}
+                  className="text-xs px-2 py-1 bg-green-500 text-white rounded mr-1"
+                >
+                  Start
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMoveToCollections(book.googleBookId, 'completed');
+                  }}
+                  className="text-xs px-2 py-1 bg-blue-500 text-white rounded"
+                >
+                  Finish
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <select
+                value={book.status}
+                onChange={(e) => {
+                  e.stopPropagation();
+                  handleUpdateStatus(book.googleBookId, e.target.value);
+                }}
+                className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              >
+                <option value="currently-reading">Currently Reading</option>
+                <option value="completed">Completed</option>
+              </select>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveFromCollections(book.googleBookId);
+                }}
+                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+              >
+                Remove
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
@@ -185,11 +271,9 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Profile Header - unchanged */}
       <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row gap-6 items-start">
-            {/* Avatar - unchanged */}
             <div className="relative">
               <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg bg-orange-500 flex items-center justify-center">
                 {imgSrc ? (
@@ -301,7 +385,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         </div>
       </div>
 
-      {/* Bookshelves */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
           <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
@@ -338,27 +421,36 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           </div>
         </div>
 
-        {/* Tab Content - Enhanced with BookCard */}
-        {activeTab === 'want-to-read' ? (
-          <div className="py-8">
-            <button onClick={handleAddDemo} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
-              Add Demo Book
-            </button>
-            {wantToReadBooks.length === 0 ? (
-              <p className="text-center text-gray-500 py-12">No books yet. Go add some!</p>
-            ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {wantToReadBooks.map((book) => (
-                  <BookCard key={book.googleBookId} book={book} />
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="text-center text-gray-500 py-12">
-            <p>Your book collection will appear here</p>
-          </div>
-        )}
+        <div className="py-8">
+          {activeTab === 'want-to-read' ? (
+            <>
+              <button onClick={handleAddDemo} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
+                Add Demo Book
+              </button>
+              {wantToReadBooks.length === 0 ? (
+                <p className="text-center text-gray-500 py-12">No books yet. Go add some!</p>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {wantToReadBooks.map((book) => (
+                    <BookCard key={book.googleBookId} book={book} />
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {collectionBooks.length === 0 ? (
+                <p className="text-center text-gray-500 py-12">No books yet in this collection.</p>
+              ) : (
+                collectionBooks
+                  .filter(book => book.status === activeTab)
+                  .map((book) => (
+                    <BookCard key={book.googleBookId} book={book} />
+                  ))
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

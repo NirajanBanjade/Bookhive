@@ -8,13 +8,11 @@ const {
   removeBookFromToRead,
   searchToReadBooks,
   moveBookToCollections,
-  getNotifications
 } = require('../controllers/toReadController');
 
 
 // get routes
 router.get('/:userId/search', searchToReadBooks);
-router.get('/:userId/notifications', getNotifications);
 
 // ✅ THEN PUT GENERIC ROUTES
 router.get('/:userId', getToReadList);
