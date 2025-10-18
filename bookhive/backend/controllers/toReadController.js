@@ -93,7 +93,6 @@ exports.searchToReadBooks = async (req, res) => {
   }
 };
 
-// Add a book to the user's to-read list
 exports.addBookToToRead = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -103,9 +102,15 @@ exports.addBookToToRead = async (req, res) => {
       return res.status(400).json({ error: 'googleBookId and title are required' });
     }
 
+    // Check if book is already in Collections
+    const collection = await Collection.findOne({ userId, 'books.googleBookId': googleBookId });
+    if (collection) {
+      return res.status(400).json({ error: 'Book is already in your collection' });
+    }
+
     const book = { googleBookId, title, authors, thumbnail };
 
-    // Find or create list; prevent duplicates
+    // Find or create To-Read list; prevent duplicates
     let list = await ToRead.findOne({ userId });
     if (!list) {
       list = new ToRead({ userId, books: [book] });

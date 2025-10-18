@@ -1,8 +1,6 @@
-// src/services/toReadService.js
 import axios from 'axios';
 
-// Use env var for base URL (your .env sets it)
-const API_BASE = '/api'; // Relative now
+const API_BASE = '/api';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -27,18 +25,18 @@ export const getToReadBooks = async (userId) => {
 };
 
 export const addDemoBookToRead = async (userId) => {
-  const demoBook = {
-    googleBookId: `demo-${Date.now()}`,
-    title: 'Demo Book',
-    authors: ['Jane Doe'],
-    thumbnail: 'https://example.com/image.jpg',
-  };
   try {
+    const demoBook = {
+      googleBookId: `demo-${Date.now()}`,
+      title: `Test Book ${Date.now()}`,
+      authors: ['Jane Doe'],
+      thumbnail: 'https://example.com/image.jpg',
+    };
     const response = await api.post(`/to-read/${userId}`, demoBook);
     return response.data.books || [];
   } catch (error) {
-    console.error('Add book failed:', error);
-    throw error;
+    console.error('Add demo book failed:', error);
+    throw error.response?.data?.error || 'Failed to add demo book';
   }
 };
 
@@ -48,6 +46,6 @@ export const removeBookFromToRead = async (userId, googleBookId) => {
     return response.data.list?.books || [];
   } catch (error) {
     console.error('Remove book failed:', error);
-    throw error;
+    throw error.response?.data?.error || 'Failed to remove book';
   }
 };

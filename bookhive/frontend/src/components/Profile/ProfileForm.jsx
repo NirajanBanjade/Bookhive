@@ -116,14 +116,15 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   };
 
   const handleAddDemo = async () => {
-    try {
-      const updatedBooks = await addDemoBookToRead(userId);
-      setWantToReadBooks(updatedBooks);
-    } catch (err) {
-      console.error('Error adding book:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to add book');
-    }
-  };
+  try {
+    const updatedBooks = await addDemoBookToRead(userId);
+    setWantToReadBooks(updatedBooks);
+    alert('Demo book added to To-Read list');
+  } catch (err) {
+    console.error('Error adding book:', err);
+    alert(typeof err === 'string' ? err : 'Failed to add book');
+  }
+};
 
   const handleRemove = async (googleBookId) => {
     try {
@@ -132,7 +133,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       alert('Book removed from your To-Read list');
     } catch (err) {
       console.error('Error removing book:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to remove book');
+      alert(err.response?.data?.error || 'Failed to remove book');
     }
   };
 
@@ -144,7 +145,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       alert(`Book moved to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
     } catch (err) {
       console.error('Error moving book:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to move book');
+      alert(err.response?.data?.error || 'Failed to move book');
     }
   };
 
@@ -155,7 +156,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       alert(`Book status updated to ${newStatus === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
     } catch (err) {
       console.error('Error updating book status:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to update book status');
+      alert(err.response?.data?.error || 'Failed to update book status');
     }
   };
 
@@ -166,7 +167,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       alert('Book removed from your collection');
     } catch (err) {
       console.error('Error removing book from collection:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to remove book');
+      alert(err.response?.data?.error || 'Failed to remove book');
     }
   };
 
