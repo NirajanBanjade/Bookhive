@@ -238,6 +238,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 >
                   Finish
                 </button>
+
               </div>
             </>
           ) : (
@@ -265,9 +266,38 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             </>
           )}
         </div>
-      </div>
+     {/* Categories Section - Added at the bottom */}
+     {Array.isArray(book.categories) && book.categories.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-gray-100">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Book className="h-3.5 w-3.5 text-gray-500" />
+            <span className="text-xs font-medium text-gray-600">Categories</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {book.categories.map((c, idx) => {
+              const label = typeof c === "string" ? c : c?.name ?? "";
+              if (!label) return null;
+              return (
+                <button
+                  key={`${label}-${idx}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // TODO: handle click (e.g., navigate/filter by category)
+                  }}
+                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-gray-800 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
+                  title={label}
+                >
+                  <Book className="h-3 w-3 text-amber-600" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 
   return (
     <div className="min-h-screen bg-gray-50">
