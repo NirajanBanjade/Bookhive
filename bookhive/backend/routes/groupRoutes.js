@@ -20,8 +20,8 @@ router.delete('/groups/:category/leave', authenticateToken, groupMemberLeave);
 
 const { createGroupPost, deleteGroupPost } = require('../controllers/Group_controller/group_member_post');
 
-router.post('/groups/:category/posts', auth, createGroupPost);
-router.delete('/groups/:category/posts/:postId', auth, deleteGroupPost);
+router.post('/groups/:category/posts', authenticateToken, createGroupPost);
+router.delete('/groups/:category/posts/:postId', authenticateToken, deleteGroupPost);
 
 
 
@@ -30,8 +30,8 @@ router.delete('/groups/:category/posts/:postId', auth, deleteGroupPost);
 
 
 
-const {listGroupPost} = require('../controllers/Group_controller/group_posts_all');
-router.get('/groups/:category/posts',  authenticateToken, listGroupPost);
+// const { listGroupPost } = require('../controllers/Group_controller/group_posts_all');
+// router.get('/groups/:category/posts',  authenticateToken, listGroupPost);
 
 
 
