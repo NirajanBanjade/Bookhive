@@ -1,6 +1,20 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+/**
+ * Navbar Component
+ *
+ * Main navigation bar with:
+ * - Logo and branding
+ * - Search functionality
+ * - User actions (notifications, profile)
+ * - Secondary navigation links
+ *
+ * TODO for team:
+ * - Add active link highlighting
+ * - Add user authentication state
+ * - Add dropdown for genre preview (future enhancement)
+ */
 const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -144,6 +158,12 @@ const Navbar = () => {
               className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
             >
               Search
+            </Link>
+            <Link
+              to="/genre"
+              className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
+            >
+              Genre
             </Link>
             <Link
               to="/to-read"
