@@ -1,6 +1,7 @@
 const BookGroup = require('../../models/Group');
 const Membership = require('../../models/Group_schemas/Membership');
-const Post = require('../../models/Post');
+const Post = require('../../models/Group_schemas/Member_post');
+const mongoose = require('mongoose');
 
 const toKey = raw => (BookGroup.toKey ? BookGroup.toKey(raw) : raw.toLowerCase().trim());
 const createGroupPost = async (req, res) => {

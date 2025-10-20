@@ -31,4 +31,4 @@ const listGroupPosts = async (req, res) => {
 
   // need to see about pagination later. But for now simple load all posts.
 
-module.exports = { createGroupPost, listGroupPosts };
+module.exports = { listGroupPosts };
