@@ -11,7 +11,8 @@ events.on("TO_READ_ADDED", async ({ ownerId, actorId, book }) => {
       entityType: "BOOK",
       entityId: book.id,          // GoogleBookId 
       message: `Someone added your book "${book.title}" to their To-Read list.`,
-      metadata: { googleBookId: book.id, title: book.title },
+      metadata: { googleBookId: book.id, title: book.title, categories: book.categories 
+       },/// added categories here (testing)
       type: "info",
     });
   } catch (err) {
