@@ -1,8 +1,8 @@
 // Fetch all groups the user has joined
 export const getJoinedGroups = async () => {
     try {
-      const response = await fetch('/api/groups/joined', {
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      const response = await fetch('/api/me/groups', {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
       });
       
       if (!response.ok) {
@@ -23,7 +23,7 @@ export const getJoinedGroups = async () => {
       const response = await fetch(`/api/groups/${category}/join`, {
         method: 'POST',
         headers: { 
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ name: category })
@@ -46,7 +46,7 @@ export const getJoinedGroups = async () => {
     try {
       const response = await fetch(`/api/groups/${category}/leave`, {
         method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
       });
       
       if (!response.ok) {

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
 import { getCollections, moveToCollections, updateBookStatus, removeFromCollections } from '../../services/collectionsService';
+import { joinGroup } from '../../services/groupService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
@@ -74,11 +75,12 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   useEffect(() => {
     const fetchJoinedGroups = async () => {
       try {
-        const response = await fetch('/api/groups/:category/join', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        const res = await fetch('/api/me/groups', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
         });
-        const data = await response.json();
-        setJoinedGroups(data.groups || []);
+        const data = await res.json();
+        // data.items is from your controller; keep a normalized set for quick lookups
+        setJoinedGroups(data.items || []);
       } catch (err) {
         console.error('Error fetching joined groups:', err);
       }
@@ -195,6 +197,35 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       alert(err.response?.data?.error || 'Failed to remove book');
     }
   };
+  const toKey = (raw) => (raw || '').toLowerCase().trim();
+  const handleJoinCategory = async (rawLabel) => {
+    try {
+      setJoiningCategory(rawLabel);
+      // IMPORTANT: encode the category for the URL (spaces, slashes, etc.)
+      const categoryForUrl = encodeURIComponent(rawLabel);
+      const res = await joinGroup(categoryForUrl); // POST /api/groups/<encoded>/join
+  
+      // Optimistically add to joinedGroups if not present
+      const key = toKey(rawLabel);
+      setJoinedGroups((prev) => {
+        if (prev.some(g => g.categoryKey === key)) return prev;
+        // shape matches listMyGroups mapping
+        return [{ categoryKey: key, name: rawLabel, role: 'member', membersCount: (res.membersCount ?? 1) }, ...prev];
+      });
+  
+      // optional toast/snackbar
+      alert(res.alreadyMember ? `Already in ${rawLabel}` : `Joined ${rawLabel}!`);
+    } catch (err) {
+      // show actual server message if available
+      if (err.response) {
+        const t = await err.response.text?.();
+        console.error('Join failed response:', err.response.status, t);
+      }
+      alert('Failed to join group');
+    } finally {
+      setJoiningCategory(null);
+    }
+  };
 
   const booksReadCount = collectionBooks.filter(book => book.status === 'completed').length;
 
@@ -233,17 +264,17 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         </h3>
         <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
         <div className="mt-2 flex justify-between">
-          {activeTab === 'want-to-read' ? (
-            <>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(book.googleBookId);
-                }}
-                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
-              >
-                Remove
-              </button>
+        {activeTab === 'want-to-read' ? (
+  <>
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        handleRemove(book.googleBookId);
+      }}
+      className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+    >
+      Remove
+    </button>
               <div>
                 <button
                   onClick={(e) => {
@@ -282,7 +313,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleRemoveFromCollections(book.googleBookId);
+                  handleRemove(book.googleBookId);
                 }}
                 className="text-xs px-2 py-1 bg-red-500 text-white rounded"
               >
@@ -299,24 +330,39 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             <span className="text-xs font-medium text-gray-600">Categories</span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {book.categories.map((c, idx) => {
-              const label = typeof c === "string" ? c : c?.name ?? "";
-              if (!label) return null;
-              return (
-                <button
-                  key={`${label}-${idx}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // TODO: handle click (e.g., navigate/filter by category)
-                  }}
-                  className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 hover:from-amber-100 hover:to-orange-100 text-gray-800 transition-all duration-200 shadow-sm hover:shadow-md font-medium"
-                  title={label}
-                >
-                  <Book className="h-3 w-3 text-amber-600" />
-                  {label}
-                </button>
-              );
-            })}
+          {book.categories.map((c, idx) => {
+  const label = typeof c === "string" ? c : c?.name ?? "";
+  if (!label) return null;
+
+  const key = toKey(label);
+  const alreadyJoined = joinedGroups.some(g => g.categoryKey === key);
+  const isJoining = joiningCategory === label;
+
+  return (
+    <button
+      key={`${label}-${idx}`}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (!alreadyJoined && !isJoining) handleJoinCategory(label);
+      }}
+      className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 shadow-sm hover:shadow-md font-medium
+        ${alreadyJoined
+          ? 'border-green-200 bg-green-50 text-green-800'
+          : 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-gray-800 hover:from-amber-100 hover:to-orange-100'}
+      `}
+      title={alreadyJoined ? `Joined ${label}` : `Join ${label}`}
+      disabled={isJoining}
+    >
+      <Book className="h-3 w-3" />
+      {alreadyJoined
+        ? `Joined ✓ ${label}`
+        : isJoining
+          ? `Joining… ${label}`
+          : label}
+    </button>
+  );
+})}
+
           </div>
         </div>
       )}
