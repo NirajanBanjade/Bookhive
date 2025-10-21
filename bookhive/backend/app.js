@@ -79,11 +79,15 @@ const recommendationsRoutes = require('./routes/recommendationsRoutes');
 app.use('/api/recommendations', recommendationsRoutes);
 
 // Group join/leave (and later posts)
-const groupRoutes = require('./routes/groupRoutes');
+//Temporarily disabled Group Routes in app.js (lines 82-89) due to existing bugs:
+//- Missing models/Post.js
+//- Incorrect auth middleware reference in groupRoutes.js
+
+//const groupRoutes = require('./routes/groupRoutes');
 // protect only these with auth (or move auth inside the router)
-app.use('/api', requireAuth, groupRoutes);
+//app.use('/api', requireAuth, groupRoutes);
 
 //display user details in a specific group.
-const groupsRouter = require('./routes/userDetailsSameGroup');
-app.use('/api', groupsRouter);
+//const groupsRouter = require('./routes/userDetailsSameGroup');
+//app.use('/api', groupsRouter);
 
