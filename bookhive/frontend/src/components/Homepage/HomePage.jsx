@@ -232,10 +232,6 @@ const HomePage = () => {
                     ))}
                   </div>
                 )}
-
-                <div className="mt-5 pt-4 border-t border-gray-100 text-xs text-gray-500 text-center">
-                  Powered by NYT Bestsellers
-                </div>
               </div>
 
               {/* Currently Reading Widget */}
@@ -250,28 +246,16 @@ const HomePage = () => {
                   </h3>
                 </div>
 
-                <div className="space-y-5">
+                <div className="space-y-4">
                   {currentlyReading.map((book) => (
-                    <div key={book.id} className="space-y-2">
-                      <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                    <div
+                      key={book.id}
+                      className="p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1">
                         {book.title}
                       </h4>
                       <p className="text-xs text-gray-600">{book.author}</p>
-
-                      {/* Progress Bar */}
-                      <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="absolute h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all"
-                          style={{ width: `${book.progress}%` }}
-                        />
-                      </div>
-
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>
-                          {book.currentPage} of {book.totalPages} pages
-                        </span>
-                        <span className="font-semibold">{book.progress}%</span>
-                      </div>
                     </div>
                   ))}
                 </div>
