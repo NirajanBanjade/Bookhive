@@ -1,8 +1,5 @@
 // services/nytBestsellers.js
-const fetch = require("node-fetch");
 
-// NYT API is free but requires a key - get yours at https://developer.nytimes.com/
-// For now, we'll use their demo endpoint that doesn't require a key
 const NYT_API_KEY = process.env.NYT_API_KEY || "YOUR_API_KEY_HERE";
 const NYT_BASE_URL = "https://api.nytimes.com/svc/books/v3";
 
@@ -39,7 +36,6 @@ async function getBestsellerList(
       rank: book.rank,
       weeksOnList: book.weeks_on_list,
       publisher: book.publisher,
-      amazonUrl: book.amazon_product_url,
     }));
   } catch (error) {
     console.error("Error fetching NYT bestsellers:", error);
@@ -47,28 +43,6 @@ async function getBestsellerList(
   }
 }
 
-/**
- * Get overview of multiple bestseller lists
- */
-async function getBestsellerOverview() {
-  try {
-    const url = `${NYT_BASE_URL}/lists/overview.json?api-key=${NYT_API_KEY}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`NYT API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.results;
-  } catch (error) {
-    console.error("Error fetching NYT overview:", error);
-    throw error;
-  }
-}
-
 module.exports = {
   getBestsellerList,
-  getBestsellerOverview,
 };
