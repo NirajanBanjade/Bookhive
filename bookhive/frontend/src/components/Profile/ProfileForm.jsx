@@ -16,6 +16,12 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
   const [wantToReadBooks, setWantToReadBooks] = useState([]);
   const [collectionBooks, setCollectionBooks] = useState([]);
+
+
+  const [joinedGroups, setJoinedGroups] = useState([]);   // 
+  const [joiningCategory, setJoiningCategory] = useState(null); // user statement management for joined groups..
+
+
   const userId = 'user123';
 
   const defaultUser = {
@@ -61,6 +67,25 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       fetchCollections();
     }
   }, [activeTab, userId]);
+
+
+
+  //-----------------------// Fetch joined groups on mount
+  useEffect(() => {
+    const fetchJoinedGroups = async () => {
+      try {
+        const response = await fetch('/api/groups/:category/join', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await response.json();
+        setJoinedGroups(data.groups || []);
+      } catch (err) {
+        console.error('Error fetching joined groups:', err);
+      }
+    };
+    fetchJoinedGroups();
+  }, []);
+    //----------------------
 
   const getInitials = (name) => {
     return name
