@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react"; // 🆕 Added useState, useEffect
 import {
   Heart,
   MessageCircle,
@@ -8,9 +8,44 @@ import {
   Target,
   TrendingUp,
   Calendar,
+  Flame, // 🆕 Added Flame icon for trending
 } from "lucide-react";
+import { getTrendingBooks } from "../../api/books"; 
 
 const HomePage = () => {
+  // 🆕 NEW STATE - Trending books
+  const [trendingBooks, setTrendingBooks] = useState([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
+  const [trendingError, setTrendingError] = useState(null);
+
+  // 🆕 NEW EFFECT - Fetch trending books on mount
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchTrending() {
+      try {
+        setTrendingLoading(true);
+        const data = await getTrendingBooks({
+          limit: 5,
+          signal: controller.signal,
+        });
+        setTrendingBooks(data.trending || []);
+        setTrendingError(null);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Failed to fetch trending books:", err);
+          setTrendingError("Failed to load trending books");
+        }
+      } finally {
+        setTrendingLoading(false);
+      }
+    }
+
+    fetchTrending();
+
+    return () => controller.abort();
+  }, []);
+
   // TODO: Replace with API call to /api/activity/:userId
   const activities = [
     {
@@ -140,9 +175,65 @@ const HomePage = () => {
       {/* Main Content - Three Column Layout */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid lg:grid-cols-12 gap-8">
-          {/* LEFT SIDEBAR - Currently Reading & Goals */}
+          {/* LEFT SIDEBAR - Trending, Currently Reading & Goals */}
           <div className="lg:col-span-3">
             <div className="space-y-6">
+              {/* 🆕 NEW - Trending Books Widget */}
+              <div
+                className="bg-white rounded-xl p-6 border border-gray-200"
+                style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+              >
+                <div className="flex items-center gap-2 mb-5">
+                  <Flame className="h-5 w-5 text-orange-600" />
+                  <h3 className="font-bold text-gray-900 text-lg">
+                    Trending Now
+                  </h3>
+                </div>
+
+                {trendingLoading ? (
+                  <div className="text-center py-8 text-gray-500 text-sm">
+                    Loading trending books...
+                  </div>
+                ) : trendingError ? (
+                  <div className="text-center py-8 text-red-500 text-sm">
+                    {trendingError}
+                  </div>
+                ) : trendingBooks.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500 text-sm">
+                    No trending books available
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {trendingBooks.map((book, index) => (
+                      <div
+                        key={book.isbn || index}
+                        className="flex gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold text-lg shadow-sm">
+                            {book.rank || index + 1}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-gray-900 text-sm line-clamp-2 mb-1">
+                            {book.title}
+                          </h4>
+                          <p className="text-xs text-gray-600 line-clamp-1">
+                            {book.authors?.[0] || "Unknown Author"}
+                          </p>
+                          {book.weeksOnList > 0 && (
+                            <p className="text-xs text-orange-600 font-medium mt-1">
+                              {book.weeksOnList} week
+                              {book.weeksOnList !== 1 ? "s" : ""} on list
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Currently Reading Widget */}
               <div
                 className="bg-white rounded-xl p-6 border border-gray-200"
@@ -155,28 +246,16 @@ const HomePage = () => {
                   </h3>
                 </div>
 
-                <div className="space-y-5">
+                <div className="space-y-4">
                   {currentlyReading.map((book) => (
-                    <div key={book.id} className="space-y-2">
-                      <h4 className="font-semibold text-gray-900 text-sm line-clamp-1">
+                    <div
+                      key={book.id}
+                      className="p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                    >
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1">
                         {book.title}
                       </h4>
                       <p className="text-xs text-gray-600">{book.author}</p>
-
-                      {/* Progress Bar */}
-                      <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                          className="absolute h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all"
-                          style={{ width: `${book.progress}%` }}
-                        />
-                      </div>
-
-                      <div className="flex justify-between text-xs text-gray-500">
-                        <span>
-                          {book.currentPage} of {book.totalPages} pages
-                        </span>
-                        <span className="font-semibold">{book.progress}%</span>
-                      </div>
                     </div>
                   ))}
                 </div>
