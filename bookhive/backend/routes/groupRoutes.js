@@ -37,5 +37,10 @@ router.delete('/groups/:category/posts/:postId', authenticateToken, deleteGroupP
 
 
 //--------------------------------------------------------------------
+const { listMyGroups } = require('../controllers/Group_controller/group_member_list');
+router.get('/me/groups', authenticateToken, listMyGroups);
+
+
+
 
 module.exports = router;
