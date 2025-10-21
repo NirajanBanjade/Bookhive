@@ -1,5 +1,7 @@
 // controllers/bookController.js
 const { searchVolumes, mapToToReadBook } = require('../services/googleBooks');
+const { getBestsellerList } = require("../services/nytBestsellers");
+const Collection = require("../models/Collection");
 
 function clamp(n, min, max) {
   return Math.max(min, Math.min(max, n));
@@ -109,4 +111,46 @@ async function searchBooks(req, res) {
   }
 }
 
-module.exports = { searchBooks };
+// Trending Books with NYT section
+async function getTrendingBooks(req, res) {
+  try {
+    const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
+    const cacheKey = `trending_nyt_${limit}`;
+
+    if (cache.has(cacheKey)) {
+      const cached = cache.get(cacheKey);
+      const TRENDING_CACHE_TTL = 1000 * 60 * 60 * 6; // 6 hours
+      if (Date.now() - cached.timestamp < TRENDING_CACHE_TTL) {
+        console.log('Cache hit for trending books');
+        return res.json(cached.data);
+      } else {
+        cache.delete(cacheKey);
+      }
+    }
+
+    console.log('Fetching trending books from NYT Bestsellers...');
+
+    const bestsellers = await getBestsellerList('combined-print-and-e-book-fiction');
+    const limitedBooks = bestsellers.slice(0, limit);
+
+    const responseData = {
+      trending: limitedBooks,
+      count: limitedBooks.length,
+      source: 'NYT Bestsellers',
+      calculatedAt: new Date().toISOString()
+    };
+
+    cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+
+    return res.json(responseData);
+  } catch (err) {
+    console.error('Trending books error:', err);
+    return res.status(500).json({
+      error: 'Failed to fetch trending books',
+      trending: [],
+      count: 0
+    });
+  }
+}
+
+module.exports = { searchBooks, getTrendingBooks }; 
