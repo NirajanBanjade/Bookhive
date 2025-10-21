@@ -74,6 +74,9 @@ app.use('/api/collections', collectionsRoutes);
 const notificationRoutes = require("./routes/notifications");
 app.use("/api/notifications", notificationRoutes);
 
+const reviewsRoutes = require('./routes/reviewsRoutes'); 
+app.use('/api/reviews', reviewsRoutes);
+
 // Recommendation API routes - handles interest profile and recommendations
 const recommendationsRoutes = require('./routes/recommendationsRoutes');
 app.use('/api/recommendations', recommendationsRoutes);
