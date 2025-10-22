@@ -1,5 +1,5 @@
 // backend/services/NotificationService.js
-const NotificationRepo = require("../repositories/NotificationRepository");
+const NotificationRepo = require('../repositories/NotificationRepository');
 
 /**
  * Orchestrates notification operations.
@@ -16,7 +16,7 @@ class NotificationService {
    * @param {number} [params.limit=20]
    */
   async listByUser({ userId, unread = null, page = 1, limit = 20 } = {}) {
-    if (!userId) throw new Error("listByUser requires userId");
+    if (!userId) throw new Error('listByUser requires userId');
     const safeUnread = unread === true || unread === false ? unread : null;
 
     return NotificationRepo.findPaginated({
@@ -36,8 +36,8 @@ class NotificationService {
    * @param {string|ObjectId} params.userId
    */
   async markRead({ id, userId }) {
-    if (!id) throw new Error("markRead requires id");
-    if (!userId) throw new Error("markRead requires userId");
+    if (!id) throw new Error('markRead requires id');
+    if (!userId) throw new Error('markRead requires userId');
     return NotificationRepo.markAsRead(id, userId); // null if not found/not owned
   }
 
@@ -47,7 +47,7 @@ class NotificationService {
    * @param {string|ObjectId} params.userId
    */
   async markAllRead({ userId }) {
-    if (!userId) throw new Error("markAllRead requires userId");
+    if (!userId) throw new Error('markAllRead requires userId');
     return NotificationRepo.markAllAsRead(userId); // { matched, modified }
   }
 
@@ -68,7 +68,7 @@ class NotificationService {
     const {
       toUserId,
       message,
-      type = "info",
+      type = 'info',
       actorId = null,
       eventType = null,
       entityType = null,
@@ -76,8 +76,8 @@ class NotificationService {
       metadata = {},
     } = data || {};
 
-    if (!toUserId) throw new Error("createNotification requires toUserId");
-    if (!message) throw new Error("createNotification requires message");
+    if (!toUserId) throw new Error('createNotification requires toUserId');
+    if (!message) throw new Error('createNotification requires message');
 
     return NotificationRepo.create({
       userId: toUserId,
@@ -88,6 +88,32 @@ class NotificationService {
       entityType,
       entityId,
       metadata,
+    });
+  }
+
+  /**
+   * Shortcut for KAN-69: create "To-Read added" notification.
+   * Uses existing normalization/validation from createNotification.
+   * @param {Object} p
+   * @param {string|ObjectId} p.recipientId
+   * @param {string|ObjectId} [p.actorId]
+   * @param {string} p.bookId
+   * @param {string} [p.bookTitle]
+   */
+  async createToReadAdded({ recipientId, actorId = null, bookId, bookTitle }) {
+    const message = bookTitle
+      ? `Added "${bookTitle}" to To-Read list`
+      : 'Added a book to To-Read list';
+
+    return this.createNotification({
+      toUserId: recipientId,
+      message,
+      type: 'info',
+      actorId,
+      eventType: 'TO_READ_ADDED',
+      entityType: 'BOOK',
+      entityId: bookId,
+      metadata: { bookId, bookTitle },
     });
   }
 }
