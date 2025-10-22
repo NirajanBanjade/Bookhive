@@ -1,14 +1,16 @@
+// backend/routes/notifications.js
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/notificationController");
+const { list, markRead, markAllRead } = require("../controllers/notificationController");
+const auth = require("../middleware/jwt_auth");
 
-// List notifications for a user: GET /api/notifications?userId=...&limit=20
-router.get("/", controller.list);
+// GET /api/notifications → list user notifications
+router.get("/", auth, list);
 
-// Mark a single notification as read: POST /api/notifications/:id/read
-router.post("/:id/read", controller.markRead);
+// PATCH /api/notifications/:id/read → mark single notification as read
+router.patch("/:id/read", auth, markRead);
 
-// Mark all notifications as read for a user: POST /api/notifications/read-all
-router.post("/read-all", controller.markAllRead);
+// PATCH /api/notifications/read-all → mark all notifications as read
+router.patch("/read-all", auth, markAllRead);
 
 module.exports = router;

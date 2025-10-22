@@ -1,71 +1,96 @@
-const repo = require("../repositories/NotificationRepository");
+// backend/services/NotificationService.js
+const NotificationRepo = require("../repositories/NotificationRepository");
 
+/**
+ * Orchestrates notification operations.
+ * SRP: no DB code here (delegates to repository).
+ * OCP: methods accept extensible options (sort/projection later if needed).
+ */
 class NotificationService {
   /**
-   * Create a notification
+   * List notifications for a user with pagination and optional unread filter.
    * @param {Object} params
-   * @param {string} params.userId       - who receives the notification (required)
-   * @param {string} [params.actorId]    - who triggered it
-   * @param {string} [params.eventType]  - domain event type (e.g., TO_READ_ADDED, MENTION)
-   * @param {string} [params.entityType] - e.g., BOOK, COMMENT
-   * @param {string} [params.entityId]   - e.g., GoogleBookId or CommentId
-   * @param {string} params.message      - text to display (required)
-   * @param {Object} [params.metadata]   - extra info for routing/UI
-   * @param {('info'|'success'|'warning')} [params.type='info'] - UI category (kept from your schema)
+   * @param {string|ObjectId} params.userId
+   * @param {boolean|null} [params.unread] - true | false | null(no filter)
+   * @param {number} [params.page=1]
+   * @param {number} [params.limit=20]
    */
-  async create({
-    userId,
-    actorId,
-    eventType,
-    entityType,
-    entityId,
-    message,
-    metadata = {},
-    type = "info",
-  }) {
-    if (!userId || !message) {
-      throw new Error("userId and message are required to create a notification");
-    }
+  async listByUser({ userId, unread = null, page = 1, limit = 20 } = {}) {
+    if (!userId) throw new Error("listByUser requires userId");
+    const safeUnread = unread === true || unread === false ? unread : null;
 
-    return await repo.create({
+    return NotificationRepo.findPaginated({
       userId,
-      actorId,
-      eventType,
-      entityType,
-      entityId,
-      message,
-      metadata,
-      type,
+      unread: safeUnread,
+      page,
+      limit,
+      sort: { createdAt: -1 },
+      projection: null,
     });
   }
 
   /**
-   * List notifications for a user (newest first)
-   * @param {string} userId
-   * @param {number} [limit=20]
+   * Mark a single notification as read (user-scoped).
+   * @param {Object} params
+   * @param {string} params.id
+   * @param {string|ObjectId} params.userId
    */
-  async listForUser(userId, limit = 20) {
-    if (!userId) throw new Error("userId is required");
-    return await repo.findByUser(userId, limit);
+  async markRead({ id, userId }) {
+    if (!id) throw new Error("markRead requires id");
+    if (!userId) throw new Error("markRead requires userId");
+    return NotificationRepo.markAsRead(id, userId); // null if not found/not owned
   }
 
   /**
-   * Mark a single notification as read
-   * @param {string} id - notification id
+   * Mark all notifications as read for a user (bulk).
+   * @param {Object} params
+   * @param {string|ObjectId} params.userId
    */
-  async markAsRead(id) {
-    if (!id) throw new Error("notification id is required");
-    return await repo.markAsRead(id);
+  async markAllRead({ userId }) {
+    if (!userId) throw new Error("markAllRead requires userId");
+    return NotificationRepo.markAllAsRead(userId); // { matched, modified }
   }
 
   /**
-   * Mark all notifications as read for a user
-   * @param {string} userId
+   * Create a notification record.
+   * Keeps validation/normalization here; repo handles persistence.
+   * @param {Object} data
+   * @param {string|ObjectId} data.toUserId
+   * @param {string} data.message
+   * @param {"info"|"success"|"warning"} [data.type="info"]
+   * @param {string|ObjectId} [data.actorId]
+   * @param {string} [data.eventType] - e.g., "TO_READ_ADDED"
+   * @param {string} [data.entityType] - e.g., "BOOK", "COMMENT"
+   * @param {string} [data.entityId]
+   * @param {Object} [data.metadata={}]
    */
-  async markAllAsRead(userId) {
-    if (!userId) throw new Error("userId is required");
-    return await repo.markAllAsRead(userId);
+  async createNotification(data) {
+    const {
+      toUserId,
+      message,
+      type = "info",
+      actorId = null,
+      eventType = null,
+      entityType = null,
+      entityId = null,
+      metadata = {},
+    } = data || {};
+
+    if (!toUserId) throw new Error("createNotification requires toUserId");
+    if (!message) throw new Error("createNotification requires message");
+
+    return NotificationRepo.create({
+      userId: toUserId,
+      message,
+      type,
+      actorId,
+      eventType,
+      entityType,
+      entityId,
+      metadata,
+    });
   }
 }
 
 module.exports = new NotificationService();
+module.exports.NotificationService = NotificationService; // for tests/DI
