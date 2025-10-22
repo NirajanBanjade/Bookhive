@@ -1,36 +1,55 @@
-const mongoose = require("mongoose");
+// models/notification.js
+const mongoose = require('mongoose');
 const { Schema, Types } = mongoose;
 
 const notificationSchema = new Schema({
+  // Recipient of the notification
   userId: {
-    type: Types.ObjectId, // allows referencing actual user documents later
+    type: Types.ObjectId,
+    ref: 'User',
     required: true,
-    ref: "User",
   },
-  message: { type: String, required: true },
-  type: { type: String, enum: ["info", "success", "warning"], default: "info" },
-  createdAt: { type: Date, default: Date.now },
-  read: { type: Boolean, default: false },
 
-  actorId: { type: Types.ObjectId, ref: "User" }, // who triggered it
+  message: { type: String, required: true },
+
+  // UI severity/type (non-functional)
+  type: {
+    type: String,
+    enum: ['info', 'success', 'warning'],
+    default: 'info',
+  },
+
+  // When it was created (kept explicit to match existing behavior)
+  createdAt: { type: Date, default: Date.now },
+
+  // Read state & timestamp
+  read: { type: Boolean, default: false },
+  readAt: { type: Date },
+
+  // Actor who triggered the event (optional)
+  actorId: { type: Types.ObjectId, ref: 'User' },
+
+  // What happened
   eventType: {
     type: String,
-    enum: ["TO_READ_ADDED", "COMMENT", "REPLY", "MENTION"],
+    enum: ['TO_READ_ADDED', 'COMMENT', 'REPLY', 'MENTION'],
   },
-  entityType: { type: String }, // e.g., "BOOK", "COMMENT"
-  entityId: { type: String }, // e.g., GoogleBookId or CommentId
+
+  entityType: { type: String }, 
+  entityId: { type: String },   
+
+  // Extra context for rendering or linking
   metadata: { type: Schema.Types.Mixed, default: {} },
-  readAt: { type: Date }, // when it was read
 });
 
-// Performance index for filtering/sorting
+// Query performance for list views
 notificationSchema.index({ userId: 1, read: 1, createdAt: -1 });
 
-// Instance method to mark as read
+// Instance method: mark as read
 notificationSchema.methods.markRead = function () {
   this.read = true;
   this.readAt = new Date();
   return this.save();
 };
 
-module.exports = mongoose.model("Notification", notificationSchema);
+module.exports = mongoose.model('Notification', notificationSchema);
