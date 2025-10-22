@@ -178,7 +178,7 @@ const Navbar = () => {
               Login
             </Link>
             <Link
-              to="/groups"
+              to="/my-groups"
               className="text-sm font-medium text-gray-700 hover:text-primary transition-colors"
             >
               Joined Groups
