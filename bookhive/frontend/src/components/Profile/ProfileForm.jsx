@@ -11,11 +11,13 @@ import {
 } from "lucide-react";
 import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
 import { getCollections, moveToCollections, updateBookStatus, removeFromCollections } from '../../services/collectionsService';
+import { createReview } from '../../services/reviewsService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
   const [wantToReadBooks, setWantToReadBooks] = useState([]);
   const [collectionBooks, setCollectionBooks] = useState([]);
+  const [reviewState, setReviewState] = useState({}); // { googleBookId: { rating, comment, loading, error, data } }
   const userId = 'user123';
 
   const defaultUser = {
@@ -171,6 +173,97 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
+  // REVIEW FORM – only shown on the Completed tab
+  const ReviewForm = ({ book }) => {
+    const bookId = book.googleBookId;
+    const state = reviewState[bookId] || { rating: 0, comment: '', loading: false, error: '' };
+
+    const setState = (updates) =>
+      setReviewState((prev) => ({
+        ...prev,
+        [bookId]: { ...prev[bookId], ...updates },
+      }));
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!state.comment.trim()) {
+        setState({ error: 'Comment cannot be empty' });
+        return;
+      }
+      if (state.rating < 1 || state.rating > 5) {
+        setState({ error: 'Rating must be 1-5' });
+        return;
+      }
+      setState({ loading: true, error: '' });
+
+      const optimistic = {
+        _id: `temp-${Date.now()}`,
+        userId,
+        googleBookId: bookId,
+        rating: state.rating,
+        comment: state.comment,
+        reviewedAt: new Date().toISOString(),
+      };
+      setState({ data: optimistic, loading: false });
+
+      try {
+        const saved = await createReview(userId, bookId, state.rating, state.comment);
+        setState({ data: saved });
+      } catch (err) {
+        setState({ data: null, error: err });
+      }
+    };
+
+    return (
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium">Rating:</label>
+            <select
+              value={state.rating}
+              onChange={(e) => setState({ rating: Number(e.target.value) })}
+              className="px-2 py-1 border rounded text-sm"
+            >
+              <option value={0}>Select</option>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <option key={n} value={n}>{n} stars</option>
+              ))}
+            </select>
+          </div>
+
+          <textarea
+            placeholder="Write your review..."
+            value={state.comment}
+            onChange={(e) => setState({ comment: e.target.value })}
+            className="w-full p-2 border rounded resize-none text-sm"
+            rows={3}
+          />
+
+          {state.error && <p className="text-red-600 text-xs">{state.error}</p>}
+
+          <button
+            type="submit"
+            disabled={state.loading}
+            className="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 disabled:opacity-50"
+          >
+            {state.loading ? 'Saving...' : 'Submit Review'}
+          </button>
+        </form>
+
+        {state.data && (
+          <div className="mt-3 p-3 bg-white rounded border text-sm">
+            <p>
+              <strong>{state.data.rating} stars</strong> – {state.data.comment}
+            </p>
+            <p className="text-xs text-gray-500">
+              {new Date(state.data.reviewedAt).toLocaleString()}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const booksReadCount = collectionBooks.filter(book => book.status === 'completed').length;
 
   const stats = [
@@ -265,6 +358,8 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             </>
           )}
         </div>
+
+        {activeTab === 'completed' && <ReviewForm book={book} />}
       </div>
     </div>
   );
