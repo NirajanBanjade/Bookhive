@@ -1,16 +1,18 @@
-// models/notification.js
+// models/Notification.js
 const mongoose = require('mongoose');
-const { Schema, Types } = mongoose;
+const { Schema } = mongoose;
 
 const notificationSchema = new Schema({
-  // Recipient of the notification
+  // Recipient of the notification (now stored as a string)
   userId: {
-    type: Types.ObjectId,
-    ref: 'User',
+    type: String,
     required: true,
   },
 
-  message: { type: String, required: true },
+  message: {
+    type: String,
+    required: true,
+  },
 
   // UI severity/type (non-functional)
   type: {
@@ -20,14 +22,24 @@ const notificationSchema = new Schema({
   },
 
   // When it was created (kept explicit to match existing behavior)
-  createdAt: { type: Date, default: Date.now },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 
   // Read state & timestamp
-  read: { type: Boolean, default: false },
-  readAt: { type: Date },
+  read: {
+    type: Boolean,
+    default: false,
+  },
+  readAt: {
+    type: Date,
+  },
 
-  // Actor who triggered the event (optional)
-  actorId: { type: Types.ObjectId, ref: 'User' },
+  //  Actor who triggered the event (also string for consistency)
+  actorId: {
+    type: String,
+  },
 
   // What happened
   eventType: {
@@ -35,11 +47,18 @@ const notificationSchema = new Schema({
     enum: ['TO_READ_ADDED', 'COMMENT', 'REPLY', 'MENTION'],
   },
 
-  entityType: { type: String }, 
-  entityId: { type: String },   
+  entityType: {
+    type: String,
+  },
+  entityId: {
+    type: String,
+  },
 
   // Extra context for rendering or linking
-  metadata: { type: Schema.Types.Mixed, default: {} },
+  metadata: {
+    type: Schema.Types.Mixed,
+    default: {},
+  },
 });
 
 // Query performance for list views
