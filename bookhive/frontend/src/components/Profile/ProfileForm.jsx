@@ -87,7 +87,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     };
     fetchJoinedGroups();
   }, []);
-    //----------------------
+  //----------------------
 
   const getInitials = (name) => {
     return name
@@ -143,15 +143,15 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   };
 
   const handleAddDemo = async () => {
-  try {
-    const updatedBooks = await addDemoBookToRead(userId);
-    setWantToReadBooks(updatedBooks);
-    alert('Demo book added to To-Read list');
-  } catch (err) {
-    console.error('Error adding book:', err);
-    alert(typeof err === 'string' ? err : 'Failed to add book');
-  }
-};
+    try {
+      const updatedBooks = await addDemoBookToRead(userId);
+      setWantToReadBooks(updatedBooks);
+      alert('Demo book added to To-Read list');
+    } catch (err) {
+      console.error('Error adding book:', err);
+      alert(typeof err === 'string' ? err : 'Failed to add book');
+    }
+  };
 
   const handleRemove = async (googleBookId) => {
     try {
@@ -197,14 +197,19 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       alert(err.response?.data?.error || 'Failed to remove book');
     }
   };
-  const toKey = (raw) => (raw || '').toLowerCase().trim();
+  const toKey = (raw) => (raw || '')
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-')           // Replace spaces with hyphens
+  .replace(/&/g, 'and')           // Replace & with 'and'
+  .replace(/-+/g, '-');  
   const handleJoinCategory = async (rawLabel) => {
     try {
       setJoiningCategory(rawLabel);
       // IMPORTANT: encode the category for the URL (spaces, slashes, etc.)
       const categoryForUrl = encodeURIComponent(rawLabel);
       const res = await joinGroup(categoryForUrl); // POST /api/groups/<encoded>/join
-  
+
       // Optimistically add to joinedGroups if not present
       const key = toKey(rawLabel);
       setJoinedGroups((prev) => {
@@ -212,7 +217,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         // shape matches listMyGroups mapping
         return [{ categoryKey: key, name: rawLabel, role: 'member', membersCount: (res.membersCount ?? 1) }, ...prev];
       });
-  
+
       // optional toast/snackbar
       alert(res.alreadyMember ? `Already in ${rawLabel}` : `Joined ${rawLabel}!`);
     } catch (err) {
@@ -264,17 +269,17 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         </h3>
         <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
         <div className="mt-2 flex justify-between">
-        {activeTab === 'want-to-read' ? (
-  <>
-    <button
-      onClick={(e) => {
-        e.stopPropagation();
-        handleRemove(book.googleBookId);
-      }}
-      className="text-xs px-2 py-1 bg-red-500 text-white rounded"
-    >
-      Remove
-    </button>
+          {activeTab === 'want-to-read' ? (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(book.googleBookId);
+                }}
+                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+              >
+                Remove
+              </button>
               <div>
                 <button
                   onClick={(e) => {
@@ -322,53 +327,61 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             </>
           )}
         </div>
-     {/* Categories Section - Added at the bottom */}
-     {Array.isArray(book.categories) && book.categories.length > 0 && (
-        <div className="mt-4 pt-3 border-t border-gray-100">
-          <div className="flex items-center gap-1.5 mb-2">
-            <Book className="h-3.5 w-3.5 text-gray-500" />
-            <span className="text-xs font-medium text-gray-600">Categories</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-          {book.categories.map((c, idx) => {
-  const label = typeof c === "string" ? c : c?.name ?? "";
-  if (!label) return null;
+        {/* Categories Section - Added at the bottom */}
+        {Array.isArray(book.categories) && book.categories.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Book className="h-3.5 w-3.5 text-gray-500" />
+              <span className="text-xs font-medium text-gray-600">Categories</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {book.categories.map((c, idx) => {
+                const label = typeof c === "string" ? c : c?.name ?? "";
+                if (!label) return null;
 
-  const key = toKey(label);
-  const alreadyJoined = joinedGroups.some(g => g.categoryKey === key);
-  const isJoining = joiningCategory === label;
+                const key = toKey(label);
+                const alreadyJoined = joinedGroups.some(g => g.categoryKey === key);
+                const isJoining = joiningCategory === label;
+                console.log('=== Checking Category ===');
+                  console.log(`Book category label: "${label}"`);
+                  console.log(`Normalized label: "${toKey(label)}"`);
+                  console.log('Joined groups:', joinedGroups.map(g => ({
+                    original: g.categoryKey,
+                    normalized: toKey(g.categoryKey)
+                  })));
+                
 
-  return (
-    <button
-      key={`${label}-${idx}`}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (!alreadyJoined && !isJoining) handleJoinCategory(label);
-      }}
-      className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 shadow-sm hover:shadow-md font-medium
+                return (
+                  <button
+                    key={`${label}-${idx}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!alreadyJoined && !isJoining) handleJoinCategory(label);
+                    }}
+                    className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 shadow-sm hover:shadow-md font-medium
         ${alreadyJoined
-          ? 'border-green-200 bg-green-50 text-green-800'
-          : 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-gray-800 hover:from-amber-100 hover:to-orange-100'}
+                        ? 'border-green-200 bg-green-50 text-green-800'
+                        : 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-gray-800 hover:from-amber-100 hover:to-orange-100'}
       `}
-      title={alreadyJoined ? `Joined ${label}` : `Join ${label}`}
-      disabled={isJoining}
-    >
-      <Book className="h-3 w-3" />
-      {alreadyJoined
-        ? `Joined ✓ ${label}`
-        : isJoining
-          ? `Joining… ${label}`
-          : label}
-    </button>
-  );
-})}
+                    title={alreadyJoined ? `Joined ${label}` : `Join ${label}`}
+                    disabled={isJoining}
+                  >
+                    <Book className="h-3 w-3" />
+                    {alreadyJoined
+                      ? `Joined ✓ ${label}`
+                      : isJoining
+                        ? `Joining… ${label}`
+                        : label}
+                  </button>
+                );
+              })}
 
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -491,31 +504,28 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
             <button
               onClick={() => setActiveTab("currently-reading")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "currently-reading"
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "currently-reading"
                   ? "bg-gray-100 text-gray-900"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               Currently Reading
             </button>
             <button
               onClick={() => setActiveTab("want-to-read")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "want-to-read"
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "want-to-read"
                   ? "bg-gray-100 text-gray-900"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               Want to Read
             </button>
             <button
               onClick={() => setActiveTab("completed")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "completed"
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "completed"
                   ? "bg-gray-100 text-gray-900"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               Completed
             </button>

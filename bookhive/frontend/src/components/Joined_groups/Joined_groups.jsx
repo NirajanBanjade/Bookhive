@@ -57,6 +57,13 @@ const JoinedGroups = () => {
       useEffect(() => {
         fetchJoinedGroups();
       }, []);
+      const decodeGroupName = (name) => {
+        try {
+          return decodeURIComponent(name);
+        } catch (e) {
+          return name;
+        }
+      };
 
 
 
@@ -91,7 +98,7 @@ const JoinedGroups = () => {
 
   // Filter groups based on search term
   const filteredGroups = joinedGroups.filter(group =>
-    group.name.toLowerCase().includes(searchTerm.toLowerCase())
+    decodeGroupName(group.name).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // Sort groups based on selected option
@@ -116,6 +123,7 @@ const JoinedGroups = () => {
       year: 'numeric' 
     });
   };
+
 
   return (
     <div className="joined-groups-container">
@@ -198,7 +206,7 @@ const JoinedGroups = () => {
                 >
                   <div className="group-card-header">
                     <div className="group-info">
-                      <h3 className="group-name">{group.name}</h3>
+                      <h3 className="group-name">{decodeGroupName(group.name)}</h3>
                       <p className="group-members">
                         {group.membersCount || 0} {group.membersCount === 1 ? 'member' : 'members'}
                       </p>
