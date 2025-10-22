@@ -1,5 +1,27 @@
 // backend/controllers/notificationController.js
-const NotificationService = require("../services/NotificationService");
+const NotificationService = require('../services/NotificationService');
+
+function getAuthUserId(req) {
+  return req.user?.id || req.user?._id || null;
+}
+
+function parsePage(str) {
+  const n = parseInt(str ?? '1', 10);
+  return Number.isFinite(n) && n > 0 ? n : 1;
+}
+
+function parseLimit(str) {
+  const n = parseInt(str ?? '20', 10);
+  const safe = Number.isFinite(n) && n > 0 ? n : 20;
+  return Math.min(50, safe);
+}
+
+function parseUnread(str) {
+  const v = (str ?? '').toString().toLowerCase();
+  if (v === 'true') return true;
+  if (v === 'false') return false;
+  return null; // no filter
+}
 
 /**
  * GET /api/notifications
@@ -7,14 +29,12 @@ const NotificationService = require("../services/NotificationService");
  */
 async function list(req, res) {
   try {
-    const userId = req.user?.id || req.user?._id; // depends on your auth middleware
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const userId = getAuthUserId(req);
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const page = Math.max(1, parseInt(req.query.page ?? "1", 10) || 1);
-    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit ?? "20", 10) || 20));
-    const unreadParam = (req.query.unread ?? "").toString().toLowerCase();
-    const unread =
-      unreadParam === "true" ? true : unreadParam === "false" ? false : null;
+    const page = parsePage(req.query.page);
+    const limit = parseLimit(req.query.limit);
+    const unread = parseUnread(req.query.unread);
 
     const result = await NotificationService.listByUser({
       userId,
@@ -25,8 +45,8 @@ async function list(req, res) {
 
     return res.json(result);
   } catch (err) {
-    console.error("GET /api/notifications failed:", err);
-    return res.status(500).json({ message: "Internal Server Error" });
+    console.error('GET /api/notifications failed:', err);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
 
@@ -36,21 +56,19 @@ async function list(req, res) {
  */
 async function markRead(req, res) {
   try {
-    const userId = req.user?.id || req.user?._id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const userId = getAuthUserId(req);
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
-    const { id } = req.params;
-    if (!id) return res.status(400).json({ message: "Notification id is required" });
+    const { id } = req.params || {};
+    if (!id) return res.status(400).json({ message: 'Notification id is required' });
 
     const updated = await NotificationService.markRead({ id, userId });
-    if (!updated) {
-      return res.status(404).json({ message: "Notification not found" });
-    }
+    if (!updated) return res.status(404).json({ message: 'Notification not found' });
 
     return res.json(updated);
   } catch (err) {
     console.error(`PATCH /api/notifications/${req.params?.id}/read failed:`, err);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
 
@@ -60,14 +78,14 @@ async function markRead(req, res) {
  */
 async function markAllRead(req, res) {
   try {
-    const userId = req.user?.id || req.user?._id;
-    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const userId = getAuthUserId(req);
+    if (!userId) return res.status(401).json({ message: 'Unauthorized' });
 
     const result = await NotificationService.markAllRead({ userId });
     return res.json({ ok: true, ...result });
   } catch (err) {
-    console.error("PATCH /api/notifications/read-all failed:", err);
-    return res.status(500).json({ message: "Internal Server Error" });
+    console.error('PATCH /api/notifications/read-all failed:', err);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
 
