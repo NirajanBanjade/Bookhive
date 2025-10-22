@@ -1,5 +1,6 @@
 // controllers/bookController.js
 const { searchVolumes, mapToToReadBook } = require('../services/googleBooks');
+const { getGenreQuery } = require("../constants/genreMapping");
 const { getBestsellerList } = require("../services/nytBestsellers");
 const Collection = require("../models/Collection");
 
@@ -153,4 +154,51 @@ async function getTrendingBooks(req, res) {
   }
 }
 
-module.exports = { searchBooks, getTrendingBooks }; 
+async function getBooksByGenre(req, res) {
+  try {
+    const genreId = req.params.subject;
+    const page = clamp(parseInt(req.query.page || "1", 10) || 1, 1, 1_000_000);
+    const limit = clamp(parseInt(req.query.limit || "20", 10) || 20, 1, 40);
+    const startIndex = (page - 1) * limit;
+
+    const genreQuery = getGenreQuery(genreId);
+    if (!genreQuery) {
+      return res.status(404).json({ error: "Genre not found" });
+    }
+
+    const cacheKey = `genre|${genreId}|${page}|${limit}`;
+    if (cache.has(cacheKey)) {
+      const cached = cache.get(cacheKey);
+      if (Date.now() - cached.timestamp < CACHE_TTL) {
+        return res.json(cached.data);
+      }
+      cache.delete(cacheKey);
+    }
+
+    const data = await searchVolumes(genreQuery, {
+      startIndex,
+      maxResults: limit,
+    });
+    const items = (data.items || []).map(mapToToReadBook);
+    const total =
+      typeof data.totalItems === "number" ? data.totalItems : items.length;
+    const totalPages = Math.min(Math.ceil(total / limit), 50);
+
+    const responseData = {
+      genre: genreId,
+      page,
+      limit,
+      total,
+      totalPages,
+      items,
+    };
+
+    cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+    return res.json(responseData);
+  } catch (err) {
+    console.error("Genre error:", err.message);
+    return res.status(500).json({ error: "Failed to fetch genre books" });
+  }
+}
+
+module.exports = { searchBooks, getTrendingBooks, getBooksByGenre };
