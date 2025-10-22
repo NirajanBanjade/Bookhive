@@ -19,6 +19,45 @@ const JoinedGroups = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent'); // recent, alphabetical, members
 
+    // Fetch joined groups from API
+    const fetchJoinedGroups = async (cursor = null) => {
+        try {
+          setLoading(true);
+          const url = cursor 
+            ? `/api/me/groups?cursor=${cursor}&limit=20`
+            : '/api/me/groups?limit=20';
+          
+          const res = await fetch(url, {
+            headers: { 
+              'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` 
+            }
+          });
+          
+          if (!res.ok) throw new Error('Failed to fetch groups');
+          
+          const data = await res.json();
+          
+          if (cursor) {
+            // Pagination: append to existing groups
+            setJoinedGroups((prev) => [...prev, ...(data.items || [])]);
+          } else {
+            // Initial load: replace groups
+            setJoinedGroups(data.items || []);
+          }
+          
+          setNextCursor(data.nextCursor);
+        } catch (err) {
+          console.error('Error fetching joined groups:', err);
+        } finally {
+          setLoading(false);
+        }
+      };
+    
+      // Fetch groups on component mount
+      useEffect(() => {
+        fetchJoinedGroups();
+      }, []);
+
 
 
   // Get role icon based on user's role in the group
