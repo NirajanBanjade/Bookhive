@@ -219,18 +219,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       setJoiningCategory(null);
     }
   };
-  const toKey = (raw) => (raw || '')
-  .toLowerCase()
-  .trim()
-  .replace(/\s+/g, '-')           // Replace spaces with hyphens
-  .replace(/&/g, 'and')           // Replace & with 'and'
-  .replace(/-+/g, '-');  
-  const handleJoinCategory = async (rawLabel) => {
-    try {
-      setJoiningCategory(rawLabel);
-      // IMPORTANT: encode the category for the URL (spaces, slashes, etc.)
-      const categoryForUrl = encodeURIComponent(rawLabel);
-      const res = await joinGroup(categoryForUrl); // POST /api/groups/<encoded>/join
 
   // --- REVIEW FORM ---
   const ReviewForm = ({ book }) => {
@@ -397,7 +385,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 >
                   Finish
                 </button>
-
               </div>
             </>
           ) : (
