@@ -1,13 +1,15 @@
 // SRP: orchestrates requests -> service calls
 class RecommendationController {
-  constructor({ builder, profileRepo, candidateGenerator }) {
+  constructor({ builder, profileRepo, candidateGenerator, recommendationService }) {
     this.builder = builder;
     this.profileRepo = profileRepo;
     this.candidateGenerator = candidateGenerator;
+    this.recommendationService = recommendationService;
 
     this.rebuildProfile = this.rebuildProfile.bind(this);
     this.getProfile = this.getProfile.bind(this);
     this.getCandidates = this.getCandidates.bind(this);
+    this.getRecommendations = this.getRecommendations.bind(this);
   }
 
   // POST /api/recommendations/profile/rebuild
@@ -52,6 +54,19 @@ class RecommendationController {
 
       const { candidates, reason } = await this.candidateGenerator.generate({ userId, limit });
       res.json({ ok: true, reason, count: candidates.length, candidates });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getRecommendations(req, res, next) {
+    try {
+      const userId = req.user?.id || req.params.userId || req.query.userId;
+      const limit = Number(req.query.limit || 20);
+      if (!userId) return res.status(400).json({ error: "userId required" });
+
+      const { reason, items } = await this.recommendationService.recommend({ userId, limit });
+      res.json({ ok: true, reason, count: items.length, items });
     } catch (err) {
       next(err);
     }
