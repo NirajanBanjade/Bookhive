@@ -173,55 +173,65 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
-  // REVIEW FORM – only shown on the Completed tab
   const ReviewForm = ({ book }) => {
-    const bookId = book.googleBookId;
-    const state = reviewState[bookId] || { rating: 0, comment: '', loading: false, error: '' };
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [data, setData] = useState(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-    const setState = (updates) =>
-      setReviewState((prev) => ({
-        ...prev,
-        [bookId]: { ...prev[bookId], ...updates },
-      }));
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!comment.trim()) {
+      setError('Comment cannot be empty');
+      return;
+    }
+    if (rating < 1 || rating > 5) {
+      setError('Rating must be 1-5');
+      return;
+    }
+    setError('');
+    setLoading(true);
 
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      if (!state.comment.trim()) {
-        setState({ error: 'Comment cannot be empty' });
-        return;
-      }
-      if (state.rating < 1 || state.rating > 5) {
-        setState({ error: 'Rating must be 1-5' });
-        return;
-      }
-      setState({ loading: true, error: '' });
-
-      const optimistic = {
-        _id: `temp-${Date.now()}`,
-        userId,
-        googleBookId: bookId,
-        rating: state.rating,
-        comment: state.comment,
-        reviewedAt: new Date().toISOString(),
-      };
-      setState({ data: optimistic, loading: false });
-
-      try {
-        const saved = await createReview(userId, bookId, state.rating, state.comment);
-        setState({ data: saved });
-      } catch (err) {
-        setState({ data: null, error: err });
-      }
+    const optimistic = {
+      _id: `temp-${Date.now()}`,
+      userId,
+      googleBookId: book.googleBookId,
+      rating,
+      comment,
+      reviewedAt: new Date().toISOString(),
     };
+    setData(optimistic);
 
-    return (
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+    try {
+      const saved = await createReview(userId, book.googleBookId, rating, comment);
+      setData(saved);
+      setIsSubmitted(true);
+    } catch (err) {
+      setData(null);
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+      {isSubmitted ? (
+        <div className="p-3 bg-green-50 border border-green-200 rounded text-sm">
+          <p className="text-green-800 font-medium">Review submitted!</p>
+          <p className="text-green-700">
+            <strong>{rating} stars</strong> – {comment}
+          </p>
+        </div>
+      ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium">Rating:</label>
             <select
-              value={state.rating}
-              onChange={(e) => setState({ rating: Number(e.target.value) })}
+              value={rating}
+              onChange={(e) => setRating(Number(e.target.value))}
               className="px-2 py-1 border rounded text-sm"
             >
               <option value={0}>Select</option>
@@ -233,36 +243,37 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
 
           <textarea
             placeholder="Write your review..."
-            value={state.comment}
-            onChange={(e) => setState({ comment: e.target.value })}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
             className="w-full p-2 border rounded resize-none text-sm"
             rows={3}
           />
 
-          {state.error && <p className="text-red-600 text-xs">{state.error}</p>}
+          {error && <p className="text-red-600 text-xs">{error}</p>}
 
           <button
             type="submit"
-            disabled={state.loading}
+            disabled={loading}
             className="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 disabled:opacity-50"
           >
-            {state.loading ? 'Saving...' : 'Submit Review'}
+            {loading ? 'Saving...' : 'Submit Review'}
           </button>
         </form>
+      )}
 
-        {state.data && (
-          <div className="mt-3 p-3 bg-white rounded border text-sm">
-            <p>
-              <strong>{state.data.rating} stars</strong> – {state.data.comment}
-            </p>
-            <p className="text-xs text-gray-500">
-              {new Date(state.data.reviewedAt).toLocaleString()}
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
+      {data && !isSubmitted && (
+        <div className="mt-3 p-3 bg-white rounded border text-sm">
+          <p>
+            <strong>{data.rating} stars</strong> – {data.comment}
+          </p>
+          <p className="text-xs text-gray-500">
+            {new Date(data.reviewedAt).toLocaleString()}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
 
   const booksReadCount = collectionBooks.filter(book => book.status === 'completed').length;
 
