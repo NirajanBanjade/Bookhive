@@ -12,17 +12,14 @@ import {
 import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
 import { getCollections, moveToCollections, updateBookStatus, removeFromCollections } from '../../services/collectionsService';
 import { joinGroup } from '../../services/groupService';
+import { createReview } from '../../services/reviewsService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
   const [wantToReadBooks, setWantToReadBooks] = useState([]);
   const [collectionBooks, setCollectionBooks] = useState([]);
-
-
-  const [joinedGroups, setJoinedGroups] = useState([]);   // 
-  const [joiningCategory, setJoiningCategory] = useState(null); // user statement management for joined groups..
-
-
+  const [joinedGroups, setJoinedGroups] = useState([]);
+  const [joiningCategory, setJoiningCategory] = useState(null);
   const userId = 'user123';
 
   const defaultUser = {
@@ -41,37 +38,39 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const [tempData, setTempData] = useState(initialUser);
   const [imagePreview, setImagePreview] = useState(null);
 
+  // --- Fetch To-Read ---
   useEffect(() => {
     if (activeTab === 'want-to-read') {
       const fetchBooks = async () => {
         try {
           const books = await getToReadBooks(userId);
-          setWantToReadBooks(books);
+          setWantToReadBooks(Array.isArray(books) ? books : []);
         } catch (err) {
           console.error('Error fetching to-read list:', err);
+          setWantToReadBooks([]);
         }
       };
       fetchBooks();
     }
   }, [activeTab, userId]);
 
+  // --- Fetch Collections ---
   useEffect(() => {
     if (activeTab === 'currently-reading' || activeTab === 'completed') {
       const fetchCollections = async () => {
         try {
           const books = await getCollections(userId);
-          setCollectionBooks(books);
+          setCollectionBooks(Array.isArray(books) ? books : []);
         } catch (err) {
           console.error('Error fetching collections:', err);
+          setCollectionBooks([]);
         }
       };
       fetchCollections();
     }
   }, [activeTab, userId]);
 
-
-
-  //-----------------------// Fetch joined groups on mount
+  // --- Fetch Joined Groups ---
   useEffect(() => {
     const fetchJoinedGroups = async () => {
       try {
@@ -79,15 +78,14 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
         });
         const data = await res.json();
-        // data.items is from your controller; keep a normalized set for quick lookups
-        setJoinedGroups(data.items || []);
+        setJoinedGroups(Array.isArray(data.items) ? data.items : []);
       } catch (err) {
         console.error('Error fetching joined groups:', err);
+        setJoinedGroups([]);
       }
     };
     fetchJoinedGroups();
   }, []);
-  //----------------------
 
   const getInitials = (name) => {
     return name
@@ -129,11 +127,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         profileImageUrl: imagePreview ?? tempData.profileImageUrl,
       });
     }
-
-    console.log("Saving user data:", {
-      ...tempData,
-      profileImageUrl: imagePreview ?? tempData.profileImageUrl,
-    });
   };
 
   const handleCancel = () => {
@@ -145,26 +138,33 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const handleAddDemo = async () => {
     try {
       const updatedBooks = await addDemoBookToRead(userId);
-      setWantToReadBooks(updatedBooks);
+      setWantToReadBooks(Array.isArray(updatedBooks) ? updatedBooks : []);
       alert('Demo book added to To-Read list');
     } catch (err) {
       console.error('Error adding book:', err);
-      alert(typeof err === 'string' ? err : 'Failed to add book');
+      alert('Failed to add book');
     }
   };
 
+  // --- Unified Remove (handles both tabs) ---
   const handleRemove = async (googleBookId) => {
     try {
+      let updatedWantToRead = wantToReadBooks;
+      let updatedCollection = collectionBooks;
+
       if (activeTab === 'want-to-read') {
-      const updatedBooks = await removeBookFromToRead(userId, googleBookId);
-      setWantToReadBooks(updatedBooks);
-      alert('Book removed from your To-Read list');
-      }else {
-        // For 'currently-reading' or 'completed' tabs, books are in collections
-        const updatedBooks = await handleRemoveFromCollections(googleBookId);
+        const res = await removeBookFromToRead(userId, googleBookId);
+        updatedWantToRead = Array.isArray(res) ? res : (res?.toRead || []);
+      } else {
+        const res = await removeFromCollections(userId, googleBookId);
+        updatedCollection = Array.isArray(res) ? res : (res?.collections || []);
       }
+
+      setWantToReadBooks(updatedWantToRead);
+      setCollectionBooks(updatedCollection);
+      alert('Book removed');
     } catch (err) {
-      console.error('Error removing book:', err.response?.data || err);
+      console.error('Remove error:', err);
       alert(err.response?.data?.error || 'Failed to remove book');
     }
   };
@@ -172,11 +172,11 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const handleMoveToCollections = async (googleBookId, status) => {
     try {
       const response = await moveToCollections(userId, googleBookId, status);
-      setWantToReadBooks(response.toRead);
-      setCollectionBooks(response.collections);
+      setWantToReadBooks(Array.isArray(response.toRead) ? response.toRead : []);
+      setCollectionBooks(Array.isArray(response.collections) ? response.collections : []);
       alert(`Book moved to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
     } catch (err) {
-      console.error('Error moving book:', err.response?.data || err);
+      console.error('Error moving book:', err);
       alert(err.response?.data?.error || 'Failed to move book');
     }
   };
@@ -184,60 +184,149 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const handleUpdateStatus = async (googleBookId, newStatus) => {
     try {
       const updatedBooks = await updateBookStatus(userId, googleBookId, newStatus);
-      setCollectionBooks(updatedBooks);
+      setCollectionBooks(Array.isArray(updatedBooks) ? updatedBooks : []);
       alert(`Book status updated to ${newStatus === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
     } catch (err) {
-      console.error('Error updating book status:', err.response?.data || err);
+      console.error('Error updating book status:', err);
       alert(err.response?.data?.error || 'Failed to update book status');
     }
   };
 
-  const handleRemoveFromCollections = async (googleBookId) => {
-    try {
-      const updatedBooks = await removeFromCollections(userId, googleBookId);
-      setCollectionBooks(updatedBooks);
-      alert('Book removed from your collection');
-    } catch (err) {
-      console.error('Error removing book from collection:', err.response?.data || err);
-      alert(err.response?.data?.error || 'Failed to remove book');
-    }
-  };
   const toKey = (raw) => (raw || '')
-  .toLowerCase()
-  .trim()
-  .replace(/\s+/g, '-')           // Replace spaces with hyphens
-  .replace(/&/g, 'and')           // Replace & with 'and'
-  .replace(/-+/g, '-');  
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/&/g, 'and')
+    .replace(/-+/g, '-');
+
   const handleJoinCategory = async (rawLabel) => {
     try {
       setJoiningCategory(rawLabel);
-      // IMPORTANT: encode the category for the URL (spaces, slashes, etc.)
       const categoryForUrl = encodeURIComponent(rawLabel);
-      const res = await joinGroup(categoryForUrl); // POST /api/groups/<encoded>/join
+      const res = await joinGroup(categoryForUrl);
 
-      // Optimistically add to joinedGroups if not present
       const key = toKey(rawLabel);
       setJoinedGroups((prev) => {
         if (prev.some(g => g.categoryKey === key)) return prev;
-        // shape matches listMyGroups mapping
         return [{ categoryKey: key, name: rawLabel, role: 'member', membersCount: (res.membersCount ?? 1) }, ...prev];
       });
 
-      // optional toast/snackbar
       alert(res.alreadyMember ? `Already in ${rawLabel}` : `Joined ${rawLabel}!`);
     } catch (err) {
-      // show actual server message if available
-      if (err.response) {
-        const t = await err.response.text?.();
-        console.error('Join failed response:', err.response.status, t);
-      }
+      console.error('Join failed:', err);
       alert('Failed to join group');
     } finally {
       setJoiningCategory(null);
     }
   };
 
-  const booksReadCount = collectionBooks.filter(book => book.status === 'completed').length;
+  // --- REVIEW FORM ---
+  const ReviewForm = ({ book }) => {
+    const [rating, setRating] = useState(0);
+    const [comment, setComment] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [data, setData] = useState(null);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      if (!comment.trim()) {
+        setError('Comment cannot be empty');
+        return;
+      }
+      if (rating < 1 || rating > 5) {
+        setError('Rating must be 1-5');
+        return;
+      }
+      setError('');
+      setLoading(true);
+
+      const optimistic = {
+        _id: `temp-${Date.now()}`,
+        userId,
+        googleBookId: book.googleBookId,
+        rating,
+        comment,
+        reviewedAt: new Date().toISOString(),
+      };
+      setData(optimistic);
+
+      try {
+        const saved = await createReview(userId, book.googleBookId, rating, comment);
+        setData(saved);
+        setIsSubmitted(true);
+      } catch (err) {
+        setData(null);
+        setError('Failed to save review');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    return (
+      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+        {isSubmitted ? (
+          <div className="p-3 bg-green-50 border border-green-200 rounded text-sm">
+            <p className="text-green-800 font-medium">Review submitted!</p>
+            <p className="text-green-700">
+              <strong>{rating} stars</strong> – {comment}
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Rating:</label>
+              <select
+                value={rating}
+                onChange={(e) => setRating(Number(e.target.value))}
+                className="px-2 py-1 border rounded text-sm"
+              >
+                <option value={0}>Select</option>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <option key={n} value={n}>{n} stars</option>
+                ))}
+              </select>
+            </div>
+
+            <textarea
+              placeholder="Write your review..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full p-2 border rounded resize-none text-sm"
+              rows={3}
+            />
+
+            {error && <p className="text-red-600 text-xs">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Submit Review'}
+            </button>
+          </form>
+        )}
+
+        {data && !isSubmitted && (
+          <div className="mt-3 p-3 bg-white rounded border text-sm">
+            <p>
+              <strong>{data.rating} stars</strong> – {data.comment}
+            </p>
+            <p className="text-xs text-gray-500">
+              {new Date(data.reviewedAt).toLocaleString()}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // --- Safe Stats ---
+  const booksReadCount = Array.isArray(collectionBooks)
+    ? collectionBooks.filter(book => book.status === 'completed').length
+    : 0;
 
   const stats = [
     { label: "Books Read", value: booksReadCount.toString(), icon: Book },
@@ -246,8 +335,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     { label: "Following", value: "0", icon: UserPlus },
   ];
 
-  const imgSrc =
-    imagePreview || tempData.profileImageUrl || userInfo.profileImageUrl;
+  const imgSrc = imagePreview || tempData.profileImageUrl || userInfo.profileImageUrl;
 
   const BookCard = ({ book }) => (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer">
@@ -273,58 +361,44 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           {book.title}
         </h3>
         <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
+
+        {/* Buttons */}
         <div className="mt-2 flex justify-between">
           {activeTab === 'want-to-read' ? (
             <>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(book.googleBookId);
-                }}
+                onClick={(e) => { e.stopPropagation(); handleRemove(book.googleBookId); }}
                 className="text-xs px-2 py-1 bg-red-500 text-white rounded"
               >
                 Remove
               </button>
               <div>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveToCollections(book.googleBookId, 'currently-reading');
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleMoveToCollections(book.googleBookId, 'currently-reading'); }}
                   className="text-xs px-2 py-1 bg-green-500 text-white rounded mr-1"
                 >
                   Start
                 </button>
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleMoveToCollections(book.googleBookId, 'completed');
-                  }}
+                  onClick={(e) => { e.stopPropagation(); handleMoveToCollections(book.googleBookId, 'completed'); }}
                   className="text-xs px-2 py-1 bg-blue-500 text-white rounded"
                 >
                   Finish
                 </button>
-
               </div>
             </>
           ) : (
             <>
               <select
                 value={book.status}
-                onChange={(e) => {
-                  e.stopPropagation();
-                  handleUpdateStatus(book.googleBookId, e.target.value);
-                }}
+                onChange={(e) => { e.stopPropagation(); handleUpdateStatus(book.googleBookId, e.target.value); }}
                 className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="currently-reading">Currently Reading</option>
                 <option value="completed">Completed</option>
               </select>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove(book.googleBookId);
-                }}
+                onClick={(e) => { e.stopPropagation(); handleRemove(book.googleBookId); }}
                 className="text-xs px-2 py-1 bg-red-500 text-white rounded"
               >
                 Remove
@@ -332,7 +406,8 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             </>
           )}
         </div>
-        {/* Categories Section - Added at the bottom */}
+
+        {/* Categories */}
         {Array.isArray(book.categories) && book.categories.length > 0 && (
           <div className="mt-4 pt-3 border-t border-gray-100">
             <div className="flex items-center gap-1.5 mb-2">
@@ -347,14 +422,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 const key = toKey(label);
                 const alreadyJoined = joinedGroups.some(g => g.categoryKey === key);
                 const isJoining = joiningCategory === label;
-                console.log('=== Checking Category ===');
-                  console.log(`Book category label: "${label}"`);
-                  console.log(`Normalized label: "${toKey(label)}"`);
-                  console.log('Joined groups:', joinedGroups.map(g => ({
-                    original: g.categoryKey,
-                    normalized: toKey(g.categoryKey)
-                  })));
-                
 
                 return (
                   <button
@@ -364,26 +431,28 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                       if (!alreadyJoined && !isJoining) handleJoinCategory(label);
                     }}
                     className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 shadow-sm hover:shadow-md font-medium
-        ${alreadyJoined
+                      ${alreadyJoined
                         ? 'border-green-200 bg-green-50 text-green-800'
                         : 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-gray-800 hover:from-amber-100 hover:to-orange-100'}
-      `}
+                    `}
                     title={alreadyJoined ? `Joined ${label}` : `Join ${label}`}
                     disabled={isJoining}
                   >
                     <Book className="h-3 w-3" />
                     {alreadyJoined
-                      ? `Joined ✓ ${label}`
+                      ? `Joined ${label}`
                       : isJoining
                         ? `Joining… ${label}`
                         : label}
                   </button>
                 );
               })}
-
             </div>
           </div>
         )}
+
+        {/* Review Form */}
+        {activeTab === 'completed' && <ReviewForm book={book} />}
       </div>
     </div>
   );
@@ -396,30 +465,15 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             <div className="relative">
               <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg bg-orange-500 flex items-center justify-center">
                 {imgSrc ? (
-                  <img
-                    src={imgSrc}
-                    alt={userInfo.name}
-                    className="h-full w-full rounded-full object-cover"
-                  />
+                  <img src={imgSrc} alt={userInfo.name} className="h-full w-full rounded-full object-cover" />
                 ) : (
-                  <span className="text-4xl font-serif font-bold text-white">
-                    {getInitials(userInfo.name)}
-                  </span>
+                  <span className="text-4xl font-serif font-bold text-white">{getInitials(userInfo.name)}</span>
                 )}
               </div>
               {isEditing && (
                 <div className="mt-3">
-                  <input
-                    type="file"
-                    id="profileImage"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-                  <label
-                    htmlFor="profileImage"
-                    className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
-                  >
+                  <input type="file" id="profileImage" accept="image/*" onChange={handleImageUpload} className="hidden" />
+                  <label htmlFor="profileImage" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
                     Change Photo
                   </label>
                 </div>
@@ -429,29 +483,17 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             <div className="flex-1">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h1 className="font-serif text-3xl font-bold mb-2 text-gray-900">
-                    {userInfo.name}
-                  </h1>
+                  <h1 className="font-serif text-3xl font-bold mb-2 text-gray-900">{userInfo.name}</h1>
                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      {userInfo.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
-                      Joined {userInfo.joinDate}
-                    </span>
+                    <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{userInfo.location}</span>
+                    <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />Joined {userInfo.joinDate}</span>
                   </div>
                 </div>
-                {!isEditing ? (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
-                  >
-                    <Settings className="h-4 w-4" />
-                    Edit Profile
+                {!isEditing && (
+                  <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+                    <Settings className="h-4 w-4" />Edit Profile
                   </button>
-                ) : null}
+                )}
               </div>
 
               {isEditing ? (
@@ -463,23 +505,15 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                   placeholder="Tell us about your reading preferences..."
                 />
               ) : (
-                <p className="text-gray-700 mb-6 max-w-2xl leading-relaxed">
-                  {userInfo.bio}
-                </p>
+                <p className="text-gray-700 mb-6 max-w-2xl leading-relaxed">{userInfo.bio}</p>
               )}
 
               {isEditing && (
                 <div className="flex gap-3 mb-6">
-                  <button
-                    onClick={handleSave}
-                    className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium"
-                  >
+                  <button onClick={handleSave} className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
                     Save Changes
                   </button>
-                  <button
-                    onClick={handleCancel}
-                    className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700"
-                  >
+                  <button onClick={handleCancel} className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700">
                     Cancel
                   </button>
                 </div>
@@ -487,14 +521,9 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow"
-                  >
+                  <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
                     <stat.icon className="h-5 w-5 mx-auto mb-2 text-orange-500" />
-                    <div className="text-2xl font-bold font-serif text-gray-900">
-                      {stat.value}
-                    </div>
+                    <div className="text-2xl font-bold font-serif text-gray-900">{stat.value}</div>
                     <div className="text-xs text-gray-600">{stat.label}</div>
                   </div>
                 ))}
@@ -507,43 +536,17 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
           <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
-            <button
-              onClick={() => setActiveTab("currently-reading")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "currently-reading"
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:text-gray-900"
-                }`}
-            >
-              Currently Reading
-            </button>
-            <button
-              onClick={() => setActiveTab("want-to-read")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "want-to-read"
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:text-gray-900"
-                }`}
-            >
-              Want to Read
-            </button>
-            <button
-              onClick={() => setActiveTab("completed")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "completed"
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:text-gray-900"
-                }`}
-            >
-              Completed
-            </button>
+            <button onClick={() => setActiveTab("currently-reading")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "currently-reading" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Currently Reading</button>
+            <button onClick={() => setActiveTab("want-to-read")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "want-to-read" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Want to Read</button>
+            <button onClick={() => setActiveTab("completed")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "completed" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Completed</button>
           </div>
         </div>
 
         <div className="py-8">
           {activeTab === 'want-to-read' ? (
             <>
-              <button onClick={handleAddDemo} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
-                Add Demo Book
-              </button>
-              {wantToReadBooks.length === 0 ? (
+              <button onClick={handleAddDemo} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">Add Demo Book</button>
+              {(!Array.isArray(wantToReadBooks) || wantToReadBooks.length === 0) ? (
                 <p className="text-center text-gray-500 py-12">No books yet. Go add some!</p>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -555,7 +558,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             </>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {collectionBooks.length === 0 ? (
+              {(!Array.isArray(collectionBooks) || collectionBooks.length === 0) ? (
                 <p className="text-center text-gray-500 py-12">No books yet in this collection.</p>
               ) : (
                 collectionBooks
