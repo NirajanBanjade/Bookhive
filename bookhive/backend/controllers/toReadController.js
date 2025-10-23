@@ -223,3 +223,30 @@ exports.getNotifications = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+// Remove a book from the user's collections
+exports.removeBookFromCollections = async (req, res) => {
+  try {
+    const { userId, googleBookId } = req.params;
+
+    const collection = await Collection.findOne({ userId });
+    if (!collection) return res.status(404).json({ error: 'User collection not found' });
+
+    const bookToRemove = collection.books.find(b => b.googleBookId === googleBookId);
+    if (!bookToRemove) return res.status(404).json({ error: 'Book not found' });
+
+    collection.books = collection.books.filter(b => b.googleBookId !== googleBookId);
+    await collection.save();
+
+    // Create notification
+    await Notification.create({
+      userId,
+      message: `Book "${bookToRemove.title}" was removed from your collection.`,
+      type: 'info',
+    });
+
+    res.status(200).json({ message: 'Book removed', collection });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -155,9 +155,14 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
 
   const handleRemove = async (googleBookId) => {
     try {
+      if (activeTab === 'want-to-read') {
       const updatedBooks = await removeBookFromToRead(userId, googleBookId);
       setWantToReadBooks(updatedBooks);
       alert('Book removed from your To-Read list');
+      }else {
+        // For 'currently-reading' or 'completed' tabs, books are in collections
+        const updatedBooks = await handleRemoveFromCollections(googleBookId);
+      }
     } catch (err) {
       console.error('Error removing book:', err.response?.data || err);
       alert(err.response?.data?.error || 'Failed to remove book');
