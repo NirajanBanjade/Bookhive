@@ -11,6 +11,7 @@ const bookSchema = new mongoose.Schema({
   title: { type: String, required: true },
   authors: [{ type: String }],
   thumbnail: { type: String },
+  categories: [{ type: String }],
   status: { 
     type: String, 
     enum: ['currently-reading', 'completed'], 

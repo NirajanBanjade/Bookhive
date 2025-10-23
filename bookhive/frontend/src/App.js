@@ -8,6 +8,7 @@ import Loginpage from "./components/Loginpage/Loginpage";
 import HomePage from "./components/Homepage/HomePage";
 import GenrePage from "./pages/GenrePage";
 import GenreResultsPage from "./pages/GenreResultsPage";
+import JoinedGroups from "./components/Joined_groups/Joined_groups";
 
 /**
  * Main App Component - Application Routing
@@ -52,6 +53,7 @@ function App() {
             <Route path="/home" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/to-read" element={<ToReadPage />} />
+            <Route path="/my-groups" element={<JoinedGroups />} />
 
             {/* Genre Routes */}
             <Route path="/genre" element={<GenrePage />} />

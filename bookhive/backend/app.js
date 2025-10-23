@@ -85,9 +85,8 @@ app.use('/api/recommendations', recommendationsRoutes);
 //- Missing models/Post.js
 //- Incorrect auth middleware reference in groupRoutes.js
 
-//const groupRoutes = require('./routes/groupRoutes');
-// protect only these with auth (or move auth inside the router)
-//app.use('/api', requireAuth, groupRoutes);
+const groupRoutes = require('./routes/groupRoutes');
+app.use('/api', requireAuth, groupRoutes);
 
 //display user details in a specific group.
 //const groupsRouter = require('./routes/userDetailsSameGroup');
