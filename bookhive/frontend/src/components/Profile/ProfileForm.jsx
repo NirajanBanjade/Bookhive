@@ -11,11 +11,18 @@ import {
 } from "lucide-react";
 import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
 import { getCollections, moveToCollections, updateBookStatus, removeFromCollections } from '../../services/collectionsService';
+import { joinGroup } from '../../services/groupService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
   const [wantToReadBooks, setWantToReadBooks] = useState([]);
   const [collectionBooks, setCollectionBooks] = useState([]);
+
+
+  const [joinedGroups, setJoinedGroups] = useState([]);   // 
+  const [joiningCategory, setJoiningCategory] = useState(null); // user statement management for joined groups..
+
+
   const userId = 'user123';
 
   const defaultUser = {
@@ -61,6 +68,26 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       fetchCollections();
     }
   }, [activeTab, userId]);
+
+
+
+  //-----------------------// Fetch joined groups on mount
+  useEffect(() => {
+    const fetchJoinedGroups = async () => {
+      try {
+        const res = await fetch('/api/me/groups', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
+        });
+        const data = await res.json();
+        // data.items is from your controller; keep a normalized set for quick lookups
+        setJoinedGroups(data.items || []);
+      } catch (err) {
+        console.error('Error fetching joined groups:', err);
+      }
+    };
+    fetchJoinedGroups();
+  }, []);
+  //----------------------
 
   const getInitials = (name) => {
     return name
@@ -116,21 +143,26 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   };
 
   const handleAddDemo = async () => {
-  try {
-    const updatedBooks = await addDemoBookToRead(userId);
-    setWantToReadBooks(updatedBooks);
-    alert('Demo book added to To-Read list');
-  } catch (err) {
-    console.error('Error adding book:', err);
-    alert(typeof err === 'string' ? err : 'Failed to add book');
-  }
-};
+    try {
+      const updatedBooks = await addDemoBookToRead(userId);
+      setWantToReadBooks(updatedBooks);
+      alert('Demo book added to To-Read list');
+    } catch (err) {
+      console.error('Error adding book:', err);
+      alert(typeof err === 'string' ? err : 'Failed to add book');
+    }
+  };
 
   const handleRemove = async (googleBookId) => {
     try {
+      if (activeTab === 'want-to-read') {
       const updatedBooks = await removeBookFromToRead(userId, googleBookId);
       setWantToReadBooks(updatedBooks);
       alert('Book removed from your To-Read list');
+      }else {
+        // For 'currently-reading' or 'completed' tabs, books are in collections
+        const updatedBooks = await handleRemoveFromCollections(googleBookId);
+      }
     } catch (err) {
       console.error('Error removing book:', err.response?.data || err);
       alert(err.response?.data?.error || 'Failed to remove book');
@@ -168,6 +200,40 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     } catch (err) {
       console.error('Error removing book from collection:', err.response?.data || err);
       alert(err.response?.data?.error || 'Failed to remove book');
+    }
+  };
+  const toKey = (raw) => (raw || '')
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-')           // Replace spaces with hyphens
+  .replace(/&/g, 'and')           // Replace & with 'and'
+  .replace(/-+/g, '-');  
+  const handleJoinCategory = async (rawLabel) => {
+    try {
+      setJoiningCategory(rawLabel);
+      // IMPORTANT: encode the category for the URL (spaces, slashes, etc.)
+      const categoryForUrl = encodeURIComponent(rawLabel);
+      const res = await joinGroup(categoryForUrl); // POST /api/groups/<encoded>/join
+
+      // Optimistically add to joinedGroups if not present
+      const key = toKey(rawLabel);
+      setJoinedGroups((prev) => {
+        if (prev.some(g => g.categoryKey === key)) return prev;
+        // shape matches listMyGroups mapping
+        return [{ categoryKey: key, name: rawLabel, role: 'member', membersCount: (res.membersCount ?? 1) }, ...prev];
+      });
+
+      // optional toast/snackbar
+      alert(res.alreadyMember ? `Already in ${rawLabel}` : `Joined ${rawLabel}!`);
+    } catch (err) {
+      // show actual server message if available
+      if (err.response) {
+        const t = await err.response.text?.();
+        console.error('Join failed response:', err.response.status, t);
+      }
+      alert('Failed to join group');
+    } finally {
+      setJoiningCategory(null);
     }
   };
 
@@ -238,6 +304,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 >
                   Finish
                 </button>
+
               </div>
             </>
           ) : (
@@ -256,7 +323,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleRemoveFromCollections(book.googleBookId);
+                  handleRemove(book.googleBookId);
                 }}
                 className="text-xs px-2 py-1 bg-red-500 text-white rounded"
               >
@@ -265,6 +332,58 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             </>
           )}
         </div>
+        {/* Categories Section - Added at the bottom */}
+        {Array.isArray(book.categories) && book.categories.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Book className="h-3.5 w-3.5 text-gray-500" />
+              <span className="text-xs font-medium text-gray-600">Categories</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {book.categories.map((c, idx) => {
+                const label = typeof c === "string" ? c : c?.name ?? "";
+                if (!label) return null;
+
+                const key = toKey(label);
+                const alreadyJoined = joinedGroups.some(g => g.categoryKey === key);
+                const isJoining = joiningCategory === label;
+                console.log('=== Checking Category ===');
+                  console.log(`Book category label: "${label}"`);
+                  console.log(`Normalized label: "${toKey(label)}"`);
+                  console.log('Joined groups:', joinedGroups.map(g => ({
+                    original: g.categoryKey,
+                    normalized: toKey(g.categoryKey)
+                  })));
+                
+
+                return (
+                  <button
+                    key={`${label}-${idx}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (!alreadyJoined && !isJoining) handleJoinCategory(label);
+                    }}
+                    className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 shadow-sm hover:shadow-md font-medium
+        ${alreadyJoined
+                        ? 'border-green-200 bg-green-50 text-green-800'
+                        : 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-gray-800 hover:from-amber-100 hover:to-orange-100'}
+      `}
+                    title={alreadyJoined ? `Joined ${label}` : `Join ${label}`}
+                    disabled={isJoining}
+                  >
+                    <Book className="h-3 w-3" />
+                    {alreadyJoined
+                      ? `Joined ✓ ${label}`
+                      : isJoining
+                        ? `Joining… ${label}`
+                        : label}
+                  </button>
+                );
+              })}
+
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -390,31 +509,28 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
             <button
               onClick={() => setActiveTab("currently-reading")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "currently-reading"
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "currently-reading"
                   ? "bg-gray-100 text-gray-900"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               Currently Reading
             </button>
             <button
               onClick={() => setActiveTab("want-to-read")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "want-to-read"
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "want-to-read"
                   ? "bg-gray-100 text-gray-900"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               Want to Read
             </button>
             <button
               onClick={() => setActiveTab("completed")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "completed"
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "completed"
                   ? "bg-gray-100 text-gray-900"
                   : "text-gray-600 hover:text-gray-900"
-              }`}
+                }`}
             >
               Completed
             </button>

@@ -16,7 +16,7 @@ exports.getCollectionsList = async (req, res) => {
 exports.addBookToCollections = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { googleBookId, title, authors = [], thumbnail } = req.body;
+    const { googleBookId, title, authors = [], thumbnail, categories=[] } = req.body;
 
     if (!googleBookId || !title) {
       return res.status(400).json({ error: 'googleBookId and title are required' });
@@ -24,10 +24,10 @@ exports.addBookToCollections = async (req, res) => {
 
     let list = await Collection.findOne({ userId });
     if (!list) {
-      list = new Collection({ userId, books: [{ googleBookId, title, authors, thumbnail }] });
+      list = new Collection({ userId, books: [{ googleBookId, title, authors, thumbnail,categories }] });
     } else {
       const exists = list.books.some(b => b.googleBookId === googleBookId);
-      if (!exists) list.books.push({ googleBookId, title, authors, thumbnail });
+      if (!exists) list.books.push({ googleBookId, title, authors, thumbnail, categories });
     }
 
     await list.save();

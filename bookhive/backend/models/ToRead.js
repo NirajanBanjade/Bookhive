@@ -8,6 +8,7 @@ const ToReadSchema = new mongoose.Schema({
       title: String,
       authors: [String],
       thumbnail: String,
+      categories: [String],
     },
   ],
 }, { timestamps: true });
@@ -16,7 +17,8 @@ const ToReadSchema = new mongoose.Schema({
 // 🔹 Add a text index to speed up keyword search on embedded fields
 ToReadSchema.index({
   'books.title': 'text',
-  'books.authors': 'text'
+  'books.authors': 'text',
+  'books.categories': 'text',
 });
 
 module.exports = mongoose.model('ToRead', ToReadSchema);

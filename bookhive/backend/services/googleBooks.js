@@ -29,7 +29,9 @@ function mapToToReadBook(volume) {
     googleBookId: volume?.id || '',
     title: info.title || 'Untitled',
     authors: Array.isArray(info.authors) ? info.authors : [],
-    thumbnail
+    thumbnail,
+    categories: Array.isArray(info.categories) ? info.categories : [],
+
   };
 }
 
