@@ -1,26 +1,15 @@
-import axios from 'axios';
+// frontend/src/services/toReadService.js
+import http from "../api/http"; // uses baseURL + JWT interceptor
 
-const API_BASE = '/api';
-
-const api = axios.create({
-  baseURL: API_BASE,
-  headers: { 'Content-Type': 'application/json' },
-});
-
-// Optional: Add auth interceptor later (e.g., for JWT)
-// api.interceptors.request.use(config => {
-//   const token = localStorage.getItem('token');
-//   if (token) config.headers.Authorization = `Bearer ${token}`;
-//   return config;
-// });
+const BASE = "/to-read";
 
 export const getToReadBooks = async (userId) => {
   try {
-    const response = await api.get(`/to-read/${userId}`);
-    return response.data.books || [];
-  } catch (error) {
-    console.error('Fetch To-Read failed:', error);
-    throw error;
+    const { data } = await http.get(`${BASE}/${userId}`);
+    return data.books || [];
+  } catch (err) {
+    console.error("Fetch To-Read failed:", err);
+    throw err;
   }
 };
 
@@ -29,23 +18,31 @@ export const addDemoBookToRead = async (userId) => {
     const demoBook = {
       googleBookId: `demo-${Date.now()}`,
       title: `Test Book ${Date.now()}`,
-      authors: ['Jane Doe'],
-      thumbnail: 'https://example.com/image.jpg',
+      authors: ["Jane Doe"],
+      thumbnail: "https://example.com/image.jpg",
     };
-    const response = await api.post(`/to-read/${userId}`, demoBook);
-    return response.data.books || [];
-  } catch (error) {
-    console.error('Add demo book failed:', error);
-    throw error.response?.data?.error || 'Failed to add demo book';
+    const { data } = await http.post(`${BASE}/${userId}`, demoBook);
+
+    // trigger instant bell refresh
+    window.dispatchEvent(new Event("notifications:refresh"));
+
+    return data.books || [];
+  } catch (err) {
+    console.error("Add demo book failed:", err);
+    throw err.response?.data?.error || "Failed to add demo book";
   }
 };
 
 export const removeBookFromToRead = async (userId, googleBookId) => {
   try {
-    const response = await api.delete(`/to-read/${userId}/${googleBookId}`);
-    return response.data.list?.books || [];
-  } catch (error) {
-    console.error('Remove book failed:', error);
-    throw error.response?.data?.error || 'Failed to remove book';
+    const { data } = await http.delete(`${BASE}/${userId}/${googleBookId}`);
+
+    // 🔔 trigger instant bell refresh
+    window.dispatchEvent(new Event("notifications:refresh"));
+
+    return data.list?.books || [];
+  } catch (err) {
+    console.error("Remove book failed:", err);
+    throw err.response?.data?.error || "Failed to remove book";
   }
 };

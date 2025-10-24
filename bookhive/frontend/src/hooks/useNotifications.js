@@ -10,7 +10,7 @@ import {
  * useNotifications
  * - Fetches notifications on mount
  * - Optional polling (default 20s)
- * - Exposes handlers that match NotificationsDropdown props
+ * - Listens for custom "notifications:refresh" and window focus to refetch
  */
 export default function useNotifications({ pollMs = 20000 } = {}) {
   const [items, setItems] = useState([]);
@@ -83,14 +83,27 @@ export default function useNotifications({ pollMs = 20000 } = {}) {
     };
   }, [fetchPage, pollMs]);
 
+  // NEW: refetch when app fires a custom event or tab regains focus
+  useEffect(() => {
+    const onRefresh = () => fetchPage({});
+    const onFocus = () => fetchPage({});
+    window.addEventListener("notifications:refresh", onRefresh);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      window.removeEventListener("notifications:refresh", onRefresh);
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [fetchPage]);
+
   return {
     items,
     loading,
     error,
     unreadCount,
     fetchPage,
-    onMarkOne,     // matches NotificationsDropdown prop
-    onMarkAll,     // matches NotificationsDropdown prop
-    setItems,      // exposed if you need manual tweaks
+    onMarkOne,
+    onMarkAll,
+    setItems,
+    refresh: () => fetchPage({}), // handy helper if you need it
   };
 }

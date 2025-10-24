@@ -1,6 +1,8 @@
-const ToRead = require('../models/ToRead'); // make sure this path is correct
+// backend/controllers/toReadController.js
+const ToRead = require('../models/ToRead');
 const Collection = require('../models/Collection');
 const Notification = require('../models/Notification');
+const NotificationService = require('../services/NotificationService'); // add service
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 
 // Utility to clamp a number within min/max or return default
@@ -96,8 +98,9 @@ exports.searchToReadBooks = async (req, res) => {
 
 exports.addBookToToRead = async (req, res) => {
   try {
+    // TIP: if this route is behind auth, prefer req.user.id (and validate it matches the param)
     const userId = req.params.userId;
-    const { googleBookId, title, authors = [], thumbnail, categories=[] } = req.body;
+    const { googleBookId, title, authors = [], thumbnail, categories = [] } = req.body;
 
     if (!googleBookId || !title) {
       return res.status(400).json({ error: 'googleBookId and title are required' });
@@ -116,6 +119,15 @@ exports.addBookToToRead = async (req, res) => {
     if (!list) {
       list = new ToRead({ userId, books: [book] });
       await list.save();
+
+      // create notification (new list case)
+      await NotificationService.createToReadAdded({
+        recipientId: userId,
+        actorId: userId,
+        bookId: googleBookId,
+        bookTitle: title,
+      });
+
       return res.status(201).json(list);
     }
 
@@ -126,8 +138,18 @@ exports.addBookToToRead = async (req, res) => {
 
     list.books.push(book);
     await list.save();
-    res.status(201).json(list);
+
+    // create notification (added-to-existing-list case)
+    await NotificationService.createToReadAdded({
+      recipientId: userId,
+      actorId: userId,
+      bookId: googleBookId,
+      bookTitle: title,
+    });
+
+    return res.status(201).json(list);
   } catch (err) {
+    console.error('addBookToToRead error:', err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -146,7 +168,7 @@ exports.removeBookFromToRead = async (req, res) => {
     list.books = list.books.filter(b => b.googleBookId !== googleBookId);
     await list.save();
 
-    // Create notification
+    // Create notification (kept as-is)
     await Notification.create({
       userId,
       message: `Book "${bookToRemove.title}" was removed from your to-read list.`,
@@ -190,7 +212,7 @@ exports.moveBookToCollections = async (req, res) => {
     // Remove from To-Read
     await ToRead.updateOne({ userId }, { $pull: { books: { googleBookId } } });
 
-    // Create notification
+    // Create notification (kept as-is)
     await Notification.create({
       userId,
       message: `Book "${book.title}" moved from To-Read to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}.`,
@@ -238,7 +260,7 @@ exports.removeBookFromCollections = async (req, res) => {
     collection.books = collection.books.filter(b => b.googleBookId !== googleBookId);
     await collection.save();
 
-    // Create notification
+    // Create notification (kept as-is)
     await Notification.create({
       userId,
       message: `Book "${bookToRemove.title}" was removed from your collection.`,
