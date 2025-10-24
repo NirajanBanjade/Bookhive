@@ -1,6 +1,9 @@
 // controllers/bookController.js
 const { searchVolumes, mapToToReadBook } = require('../services/googleBooks');
-const { getGenreQuery } = require("../constants/genreMapping");
+const {
+  getGenreQuery,
+  resolveGenreAlias,
+} = require("../constants/genreMapping");
 const { getBestsellerList } = require("../services/nytBestsellers");
 const Collection = require("../models/Collection");
 
@@ -156,7 +159,7 @@ async function getTrendingBooks(req, res) {
 
 async function getBooksByGenre(req, res) {
   try {
-    const genreId = req.params.subject;
+    const genreId = resolveGenreAlias(req.params.subject);
     const page = clamp(parseInt(req.query.page || "1", 10) || 1, 1, 1_000_000);
     const limit = clamp(parseInt(req.query.limit || "20", 10) || 20, 1, 40);
     const startIndex = (page - 1) * limit;
