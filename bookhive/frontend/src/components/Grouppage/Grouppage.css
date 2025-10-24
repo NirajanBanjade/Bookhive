@@ -432,3 +432,191 @@
     transform: rotate(90deg);
   }
   
+  /* ========================================
+     FORM STYLES
+     ======================================== */
+  
+     .post-form {
+        padding: 1.5rem;
+      }
+      
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+      
+      .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+      }
+      
+      .form-textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        resize: vertical;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+      }
+      
+      .form-textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      
+      .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+      }
+      
+      .form-input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      
+      .char-count {
+        text-align: right;
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+      }
+      
+      /* ========================================
+         MODAL ACTIONS*/
+      
+      .modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        padding-top: 1rem;
+        border-top: 1px solid #e5e7eb;
+      }
+      
+      .cancel-button {
+        background: #f3f4f6;
+        color: #374151;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      
+      .cancel-button:hover:not(:disabled) {
+        background: #e5e7eb;
+      }
+      
+      .cancel-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      .submit-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+      }
+      
+      .submit-button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+      }
+      
+      .submit-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+      
+      .button-spinner {
+        width: 18px;
+        height: 18px;
+        animation: spin 1s linear infinite;
+      }
+      
+      .send-icon {
+        width: 18px;
+        height: 18px;
+      }
+      
+      /* ========================================
+         RESPONSIVE DESIGN*/
+      
+      @media (max-width: 768px) {
+        .group-page-container {
+          padding: 1rem 0.5rem;
+        }
+      
+        .group-page-header {
+          flex-wrap: wrap;
+          padding: 1rem;
+        }
+      
+        .group-title {
+          font-size: 1.25rem;
+        }
+      
+        .create-post-button {
+          width: 100%;
+          justify-content: center;
+        }
+      
+        .post-card {
+          padding: 1rem;
+        }
+      
+        .modal-content {
+          margin: 1rem;
+        }
+      
+        .modal-actions {
+          flex-direction: column;
+        }
+      
+        .cancel-button,
+        .submit-button {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .group-header-icon {
+          width: 40px;
+          height: 40px;
+        }
+      
+        .author-avatar {
+          width: 36px;
+          height: 36px;
+          font-size: 0.95rem;
+        }
+      
+        .post-text {
+          font-size: 0.95rem;
+        }
+      }
