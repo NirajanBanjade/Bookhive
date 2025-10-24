@@ -34,7 +34,7 @@ const GroupPage = () => {
     } catch (err) {
       if (err.status === 403) {
         alert('You must be a member to view posts');
-        navigate('/groups');
+        navigate('/my-groups');
         return;
       }
       console.error('Error fetching posts:', err);
@@ -103,7 +103,7 @@ const GroupPage = () => {
       <div className="group-page-header">
         <button
           className="back-button"
-          onClick={() => navigate('/groups')}
+          onClick={() => navigate('/my-groups')}
         >
           <ArrowLeft className="back-icon" />
         </button>
