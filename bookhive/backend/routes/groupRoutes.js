@@ -30,8 +30,8 @@ router.delete('/groups/:category/posts/:postId', authenticateToken, deleteGroupP
 
 
 
-// const { listGroupPost } = require('../controllers/Group_controller/group_posts_all');
-// router.get('/groups/:category/posts',  authenticateToken, listGroupPost);
+const { listGroupPosts } = require('../controllers/Group_controller/group_posts_all');
+router.get('/groups/:category/posts',  authenticateToken, listGroupPosts);
 
 //--------------------------------------------------------------------
 const { listMyGroups } = require('../controllers/Group_controller/group_list_member');
