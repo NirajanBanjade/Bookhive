@@ -34,6 +34,15 @@ const GENRE_ALIASES = {
 
 function getGenreQuery(genreId) {
   return GENRE_MAPPING[genreId] || null;
+  /**
+   * Resolve genre ID from potential alias
+   * @param {string} genreId - Genre ID or alias
+   * @returns {string} - Canonical genre ID
+   */
+  function resolveGenreAlias(genreId) {
+    const normalized = genreId.toLowerCase();
+    return GENRE_ALIASES[normalized] || normalized;
+  }
 }
 
-module.exports = { GENRE_MAPPING, getGenreQuery };
+module.exports = { GENRE_MAPPING, getGenreQuery, resolveGenreAlias };
