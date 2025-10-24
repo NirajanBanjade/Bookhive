@@ -110,7 +110,7 @@ const GroupPage = () => {
 
         <div className="group-header-info">
           <Users className="group-header-icon" />
-          <div>
+          <div >
             <h1 className="group-title">{decodeCategory(category)}</h1>
             <p className="group-subtitle">
               {posts.length} {posts.length === 1 ? 'post' : 'posts'}
