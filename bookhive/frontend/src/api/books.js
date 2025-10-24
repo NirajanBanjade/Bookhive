@@ -59,3 +59,22 @@ export async function getTrendingBooks({ limit = 10, signal } = {}) {
 
   return await res.json();
 }
+
+// 🆕 NEW FUNCTION - Get personalized book recommendations for a user
+export async function getRecommendedForUser({ userId, limit = 12, signal } = {}) {
+  if (!userId) throw new Error("userId is required");
+  const params = new URLSearchParams();
+  params.set("userId", userId);
+  params.set("limit", String(limit));
+
+  const res = await fetch(`/api/recommendations/ranked?${params.toString()}`, { signal, credentials: "include" });
+  if (!res.ok) {
+    let errMsg = `Failed to fetch recommendations: ${res.status}`;
+    try {
+      const errData = await res.json();
+      if (errData?.error) errMsg = errData.error;
+    } catch {}
+    throw new Error(errMsg);
+  }
+  return await res.json(); // { ok, reason, count, items: [...] }
+}

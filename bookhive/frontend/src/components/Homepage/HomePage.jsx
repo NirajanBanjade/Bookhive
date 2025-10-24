@@ -10,13 +10,20 @@ import {
   Calendar,
   Flame, // 🆕 Added Flame icon for trending
 } from "lucide-react";
-import { getTrendingBooks } from "../../api/books"; 
+import { getTrendingBooks, getRecommendedForUser } from "../../api/books"; 
 
 const HomePage = () => {
   // 🆕 NEW STATE - Trending books
   const [trendingBooks, setTrendingBooks] = useState([]);
   const [trendingLoading, setTrendingLoading] = useState(true);
   const [trendingError, setTrendingError] = useState(null);
+  
+  const [recs, setRecs] = useState([]);
+  const [recsLoading, setRecsLoading] = useState(true);
+  const [recsError, setRecsError] = useState(null);
+
+  // Likely get userId from auth/context; hardcode for now
+const userId = "user123"; // TODO: replace with real auth user id
 
   // 🆕 NEW EFFECT - Fetch trending books on mount
   useEffect(() => {
@@ -45,6 +52,34 @@ const HomePage = () => {
 
     return () => controller.abort();
   }, []);
+
+  // 🆕 NEW EFFECT - Fetch recommendations on mount (and when userId changes)
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchRecs() {
+      try {
+        setRecsLoading(true);
+        const data = await getRecommendedForUser({
+          userId,
+          limit: 9,
+          signal: controller.signal,
+        });
+        setRecs(data.items || []);
+        setRecsError(null);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.error("Failed to fetch recommendations:", err);
+          setRecsError("Failed to load recommendations");
+        }
+      } finally {
+        setRecsLoading(false);
+      }
+    }
+
+    if (userId) fetchRecs();
+    return () => controller.abort();
+  }, [userId]);
 
   // TODO: Replace with API call to /api/activity/:userId
   const activities = [
@@ -439,48 +474,100 @@ const HomePage = () => {
               </div>
 
               <div className="space-y-5">
-                {recommendations.map((book, index) => (
-                  <div
-                    key={index}
-                    className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer"
-                  >
-                    <div
-                      className="aspect-[3/4] flex items-center justify-center p-6"
-                      style={{ background: book.gradient }}
-                    >
-                      <h3 className="text-xl font-serif font-bold text-gray-800 text-center leading-tight">
-                        {book.title}
-                      </h3>
+                <div className="space-y-5">
+                  {recsLoading && (
+                    <div className="space-y-4">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="bg-white rounded-xl overflow-hidden border border-gray-200">
+                          <div className="aspect-[3/4] bg-gray-100 animate-pulse" />
+                          <div className="p-5 space-y-2">
+                            <div className="h-4 w-3/4 bg-gray-100 rounded animate-pulse" />
+                            <div className="h-3 w-1/2 bg-gray-100 rounded animate-pulse" />
+                          </div>
+                        </div>
+                      ))}
                     </div>
+                  )}
 
-                    <div className="p-5">
-                      <h4 className="font-bold text-gray-900 mb-1 line-clamp-2">
-                        {book.title}
-                      </h4>
-                      <p className="text-sm text-gray-600 mb-3">
-                        {book.author}
-                      </p>
-                      <span className="inline-block px-3 py-1 bg-stone-100 text-stone-700 text-xs font-medium rounded-full mb-3">
-                        {book.genre}
-                      </span>
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-4 w-4 transition-all ${
-                              i < Math.floor(book.rating)
-                                ? "fill-amber-500 text-amber-500"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                        <span className="text-sm text-gray-700 ml-2 font-semibold">
-                          {book.rating.toFixed(1)}
-                        </span>
-                      </div>
+                  {!recsLoading && recsError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                      {recsError}
                     </div>
-                  </div>
-                ))}
+                  )}
+
+                  {!recsLoading && !recsError && recs.length === 0 && (
+                    <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+                      No recommendations yet. Add a few books to your To-Read list.
+                    </div>
+                  )}
+
+                  {!recsLoading && !recsError && recs.length > 0 && recs.map((item) => {
+                    const v = item.volumeInfo || {};
+                    const cover =
+                      v.imageLinks?.thumbnail ||
+                      v.imageLinks?.smallThumbnail ||
+                      `https://books.google.com/books/content?id=${encodeURIComponent(item.id)}&printsec=frontcover&img=1&zoom=1`;
+
+                    const authors = v.authors?.join(", ") || "Unknown Author";
+                    const rating = typeof v.averageRating === "number" ? v.averageRating : null;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                      >
+                        <div className="aspect-[3/4]">
+                          <img
+                            src={cover}
+                            alt={v.title || "Book cover"}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        <div className="p-5">
+                          <h4 className="font-bold text-gray-900 mb-1 line-clamp-2">{v.title}</h4>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-1">{authors}</p>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${rating && i < Math.round(rating) ? "fill-amber-500 text-amber-500" : "text-gray-300"}`}
+                                />
+                              ))}
+                              <span className="text-xs text-gray-700 ml-1">
+                                {rating ? rating.toFixed(1) : "No ratings"}
+                              </span>
+                            </div>
+                            {typeof item.score === "number" && (
+                              <span className="text-[10px] text-gray-500">Score {item.score.toFixed(2)}</span>
+                            )}
+                          </div>
+
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              type="button"
+                              className="flex-1 text-xs py-1.5 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800"
+                              onClick={() => console.log("TODO: Add to To-Read", item.id)}
+                            >
+                              Add to To-Read
+                            </button>
+                            <a
+                              href={`https://books.google.com/books?id=${encodeURIComponent(item.id)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs py-1.5 px-2 rounded-lg border border-gray-200 hover:bg-gray-50"
+                            >
+                              Details
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
