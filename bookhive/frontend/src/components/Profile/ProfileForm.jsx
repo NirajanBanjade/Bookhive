@@ -340,11 +340,12 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const imgSrc = imagePreview || tempData.profileImageUrl || userInfo.profileImageUrl;
 
   const BookCard = ({ book }) => (
-    <div 
-      onClick={() => navigate(`/book/${book.googleBookId}`)}
-      className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer"
-    >
-      <div className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-6">
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group">
+      {/* Clickable Cover */}
+      <div 
+        onClick={() => navigate(`/book/${book.googleBookId}`)}
+        className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-6 cursor-pointer"
+      >
         {book.thumbnail ? (
           <img src={book.thumbnail} alt={book.title} className="max-h-full max-w-full object-contain" />
         ) : (
@@ -353,10 +354,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           </span>
         )}
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button 
-            onClick={(e) => e.stopPropagation()}
-            className="rounded-full h-8 w-8 bg-white shadow-md flex items-center justify-center hover:bg-gray-50"
-          >
+          <button className="rounded-full h-8 w-8 bg-white shadow-md flex items-center justify-center hover:bg-gray-50">
             <Heart className="h-4 w-4 text-gray-600" />
           </button>
         </div>
@@ -364,8 +362,13 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           {activeTab === 'want-to-read' ? 'Want to Read' : book.status === 'currently-reading' ? 'Currently Reading' : 'Completed'}
         </span>
       </div>
+
       <div className="p-4">
-        <h3 className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900">
+        {/* Clickable Title */}
+        <h3 
+          onClick={() => navigate(`/book/${book.googleBookId}`)}
+          className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900 cursor-pointer hover:text-orange-600 transition-colors"
+        >
           {book.title}
         </h3>
         <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
@@ -375,20 +378,20 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           {activeTab === 'want-to-read' ? (
             <>
               <button
-                onClick={(e) => { e.stopPropagation(); handleRemove(book.googleBookId); }}
+                onClick={() => handleRemove(book.googleBookId)}
                 className="text-xs px-2 py-1 bg-red-500 text-white rounded"
               >
                 Remove
               </button>
               <div>
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleMoveToCollections(book.googleBookId, 'currently-reading'); }}
+                  onClick={() => handleMoveToCollections(book.googleBookId, 'currently-reading')}
                   className="text-xs px-2 py-1 bg-green-500 text-white rounded mr-1"
                 >
                   Start
                 </button>
                 <button
-                  onClick={(e) => { e.stopPropagation(); handleMoveToCollections(book.googleBookId, 'completed'); }}
+                  onClick={() => handleMoveToCollections(book.googleBookId, 'completed')}
                   className="text-xs px-2 py-1 bg-blue-500 text-white rounded"
                 >
                   Finish
@@ -399,15 +402,14 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             <>
               <select
                 value={book.status}
-                onClick={(e) => e.stopPropagation()}
-                onChange={(e) => { e.stopPropagation(); handleUpdateStatus(book.googleBookId, e.target.value); }}
+                onChange={(e) => handleUpdateStatus(book.googleBookId, e.target.value)}
                 className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
                 <option value="currently-reading">Currently Reading</option>
                 <option value="completed">Completed</option>
               </select>
               <button
-                onClick={(e) => { e.stopPropagation(); handleRemove(book.googleBookId); }}
+                onClick={() => handleRemove(book.googleBookId)}
                 className="text-xs px-2 py-1 bg-red-500 text-white rounded"
               >
                 Remove
@@ -435,8 +437,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 return (
                   <button
                     key={`${label}-${idx}`}
-                    onClick={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       if (!alreadyJoined && !isJoining) handleJoinCategory(label);
                     }}
                     className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 shadow-sm hover:shadow-md font-medium
