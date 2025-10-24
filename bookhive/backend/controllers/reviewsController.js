@@ -85,3 +85,22 @@ exports.deleteReview = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+exports.getReviewsByBook = async (req, res) => {
+  try {
+    const { googleBookId } = req.params;
+
+    if (!googleBookId) {
+      return res.status(400).json({ error: 'googleBookId is required' });
+    }
+
+    const reviews = await Review.find({ googleBookId })
+      .sort({ reviewedAt: -1 })
+      .limit(100);
+
+    res.status(200).json({ reviews, count: reviews.length });
+  } catch (err) {
+    console.error('Error fetching reviews by book:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
