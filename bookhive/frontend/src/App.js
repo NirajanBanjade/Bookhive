@@ -9,7 +9,7 @@ import HomePage from "./components/Homepage/HomePage";
 import GenrePage from "./pages/GenrePage";
 import GenreResultsPage from "./pages/GenreResultsPage";
 import JoinedGroups from "./components/Joined_groups/Joined_groups";
-
+import GroupPage from "./components/Grouppage/Grouppage";
 /**
  * Main App Component - Application Routing
  *
@@ -58,6 +58,7 @@ function App() {
             {/* Genre Routes */}
             <Route path="/genre" element={<GenrePage />} />
             <Route path="/genre/:genreId" element={<GenreResultsPage />} />
+            <Route path="/groups/:category" element={<GroupPage />} />
 
             {/* TODO Phase 2: Add these routes when pages are ready */}
             {/* <Route path="/book/:googleBookId" element={<BookDetailPage />} /> */}

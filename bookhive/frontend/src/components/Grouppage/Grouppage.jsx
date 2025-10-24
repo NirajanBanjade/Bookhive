@@ -1,4 +1,4 @@
-import './GroupPage.css';
+import './Grouppage.css';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -7,7 +7,6 @@ import {
   MessageSquarePlus,
   Loader2,
   MessageSquare,
-  Trash2
 } from 'lucide-react';
 import CreatePostModal from './CreatePostModal/CreatePostModal';
 import PostCard from './PostCard/PostCard';

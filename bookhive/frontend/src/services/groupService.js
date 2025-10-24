@@ -1,7 +1,10 @@
 // Fetch all groups the user has joined
-export const getJoinedGroups = async () => {
+export const getJoinedGroups = async (cursor = null, limit = 20) => {
     try {
-      const response = await fetch('/api/me/groups', {
+      const url = cursor 
+      ? `/api/me/groups?cursor=${cursor}&limit=${limit}`
+      : `/api/me/groups?limit=${limit}`;
+      const response = await fetch(url, { // ✅ Use the url variable
         headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
       });
       
@@ -10,7 +13,7 @@ export const getJoinedGroups = async () => {
       }
       
       const data = await response.json();
-      return data.groups || [];
+      return data;
     } catch (err) {
       console.error('Error fetching joined groups:', err);
       throw err;
