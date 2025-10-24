@@ -71,9 +71,9 @@ const GenreResultsPage = () => {
       try {
         // PHASE 1: Using existing search endpoint
         // Google Books API uses "subject" parameter for genre filtering
-        const response = await fetch(
-          `/api/books/search?keywords=${encodeURIComponent(genre.subject)}&searchType=both&page=${page}&limit=20`
-        );
+       const response = await fetch(
+         `/api/books/genre/${genreId}?page=${page}&limit=20`
+       );
         
         if (!response.ok) {
           throw new Error("Failed to fetch books");
