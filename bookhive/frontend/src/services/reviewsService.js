@@ -27,3 +27,10 @@ export const getReviewsByBook = async (googleBookId) => {
     throw error.response?.data?.error || 'Failed to fetch reviews';
   }
 };
+
+// Calculate average rating from reviews array
+export const calculateAverageRating = (reviews) => {
+  if (!reviews || reviews.length === 0) return 0;
+  const sum = reviews.reduce((acc, review) => acc + (review.rating || 0), 0);
+  return (sum / reviews.length).toFixed(1);
+};
