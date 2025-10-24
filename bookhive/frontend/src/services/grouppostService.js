@@ -17,7 +17,7 @@ const getAuthHeaders = () => ({
       }
       
       const data = await response.json();
-      return data.posts || [];
+      return data;
     } catch (err) {
       console.error('Error fetching posts:', err);
       throw err;
