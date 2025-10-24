@@ -1,5 +1,5 @@
 // controllers/bookController.js
-const { searchVolumes, mapToToReadBook } = require('../services/googleBooks');
+const { searchVolumes, mapToToReadBook, getVolume } = require('../services/googleBooks');
 const {
   getGenreQuery,
   resolveGenreAlias,
@@ -15,26 +15,24 @@ function clamp(n, min, max) {
 const cache = new Map();
 const CACHE_TTL = 1000 * 60 * 5; // 5 minutes
 
-function makeCacheKey({ qRaw, searchType, keywords, page, limit }) { // include keywords in cache key
+function makeCacheKey({ qRaw, searchType, keywords, page, limit }) {
   return `${searchType}|${qRaw}|${keywords}|${page}|${limit}`;
 }
 
 async function searchBooks(req, res) {
   try {
-    // Normalize inputs: accept q OR title OR keywords for the main query
     const { searchType = 'title' } = req.query;                           
     const qRaw = (req.query.q || req.query.title || req.query.keywords || '').trim(); 
-    const keywords = (req.query.keywords || '').trim();                   // keep keywords for filtering
+    const keywords = (req.query.keywords || '').trim();
 
     if (!qRaw) {
       return res.status(400).json({ error: 'Please input a search' });
     }
 
     const page = clamp(parseInt(req.query.page || '1', 10) || 1, 1, 1_000_000);
-    const limit = clamp(parseInt(req.query.limit || '20', 10) || 20, 1, 40); // Google max 40
+    const limit = clamp(parseInt(req.query.limit || '20', 10) || 20, 1, 40);
     const startIndex = (page - 1) * limit;
 
-    // Construct final query based on searchType
     let finalQ = '';
     if (searchType === 'title') {
       finalQ = `intitle:${qRaw}`;
@@ -46,29 +44,23 @@ async function searchBooks(req, res) {
       finalQ = qRaw;
     }
 
-
     const cacheKey = makeCacheKey({ qRaw, searchType, keywords, page, limit });
 
-    // Check cache before making API call
     if (cache.has(cacheKey)) {
       const cached = cache.get(cacheKey);
-      if (Date.now() - cached.timestamp < CACHE_TTL) {  //check if cache is still valid (less than 5 minutes old)
+      if (Date.now() - cached.timestamp < CACHE_TTL) {
         console.log(`Cache hit for: ${cacheKey}`);
         return res.json(cached.data);
       } else {
-        cache.delete(cacheKey); // expired
+        cache.delete(cacheKey);
       }
     }
 
     console.log(`Cache miss. Searching Google Books for: "${finalQ}", keywords: "${keywords}", page: ${page}, limit: ${limit}`);
 
-    // Call Google Books API after cache miss
     const data = await searchVolumes(finalQ, { startIndex, maxResults: limit });
-
-    // Raw items from Google API to get description for keyword filtering
     let rawItems = data.items || [];
 
-    // If keywords provided, filter results by checking if all keywords are in the description
     if (keywords) {
       const kws = keywords.split(',').map(kw => kw.trim().toLowerCase()).filter(Boolean);
       rawItems = rawItems.filter(volume => {
@@ -77,15 +69,11 @@ async function searchBooks(req, res) {
       });
     }
 
-    // Map to the ToReadBook schema
     const items = rawItems.map(mapToToReadBook);
-
     const total = typeof data.totalItems === 'number' ? data.totalItems : items.length;
     const rawTotalPages = Math.max(Math.ceil(total / limit), 1);
-
     const MAX_PAGES = 50;
     const totalPages = Math.min(rawTotalPages, MAX_PAGES);
-
     const hasMore = page < rawTotalPages;
     const nextPage = hasMore ? page + 1 : null;
     const prevPage = page > 1 ? page - 1 : null;
@@ -94,7 +82,7 @@ async function searchBooks(req, res) {
       q: qRaw,                 
       searchType,
       keywords,
-      finalQ,                   // for debugging
+      finalQ,
       page,
       limit,
       total,
@@ -105,9 +93,7 @@ async function searchBooks(req, res) {
       items
     };
 
-    // Save to cache
     cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
-
     return res.json(responseData);
   } catch (err) {
     console.error('Books search error:', err?.response?.data || err.message);
@@ -115,7 +101,6 @@ async function searchBooks(req, res) {
   }
 }
 
-// Trending Books with NYT section
 async function getTrendingBooks(req, res) {
   try {
     const limit = Math.max(1, Math.min(50, parseInt(req.query.limit || '10', 10)));
@@ -123,7 +108,7 @@ async function getTrendingBooks(req, res) {
 
     if (cache.has(cacheKey)) {
       const cached = cache.get(cacheKey);
-      const TRENDING_CACHE_TTL = 1000 * 60 * 60 * 6; // 6 hours
+      const TRENDING_CACHE_TTL = 1000 * 60 * 60 * 6;
       if (Date.now() - cached.timestamp < TRENDING_CACHE_TTL) {
         console.log('Cache hit for trending books');
         return res.json(cached.data);
@@ -133,7 +118,6 @@ async function getTrendingBooks(req, res) {
     }
 
     console.log('Fetching trending books from NYT Bestsellers...');
-
     const bestsellers = await getBestsellerList('combined-print-and-e-book-fiction');
     const limitedBooks = bestsellers.slice(0, limit);
 
@@ -145,7 +129,6 @@ async function getTrendingBooks(req, res) {
     };
 
     cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
-
     return res.json(responseData);
   } catch (err) {
     console.error('Trending books error:', err);
@@ -204,4 +187,51 @@ async function getBooksByGenre(req, res) {
   }
 }
 
-module.exports = { searchBooks, getTrendingBooks, getBooksByGenre };
+// Get single book by ID
+async function getBookById(req, res) {
+  try {
+    const { googleBookId } = req.params;
+    
+    if (!googleBookId) {
+      return res.status(400).json({ error: 'Book ID is required' });
+    }
+
+    const cacheKey = `book|${googleBookId}`;
+    
+    // Check cache first
+    if (cache.has(cacheKey)) {
+      const cached = cache.get(cacheKey);
+      if (Date.now() - cached.timestamp < CACHE_TTL) {
+        console.log(`Cache hit for book: ${googleBookId}`);
+        return res.json(cached.data);
+      } else {
+        cache.delete(cacheKey);
+      }
+    }
+
+    console.log(`Fetching book details for: ${googleBookId}`);
+    
+    // Use existing getVolume function
+    const volumeData = await getVolume(googleBookId);
+    const book = mapToToReadBook(volumeData);
+    
+    const responseData = {
+      book,
+      volumeInfo: volumeData.volumeInfo,
+      googleBookId
+    };
+
+    // Cache the result
+    cache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+    
+    return res.json(responseData);
+  } catch (err) {
+    console.error('Get book by ID error:', err?.message);
+    if (err.response?.status === 404 || err.status === 404) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    return res.status(500).json({ error: 'Failed to fetch book details' });
+  }
+}
+
+module.exports = { searchBooks, getTrendingBooks, getBooksByGenre, getBookById };

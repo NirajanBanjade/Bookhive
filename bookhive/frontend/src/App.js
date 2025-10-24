@@ -9,6 +9,7 @@ import HomePage from "./components/Homepage/HomePage";
 import GenrePage from "./pages/GenrePage";
 import GenreResultsPage from "./pages/GenreResultsPage";
 import JoinedGroups from "./components/Joined_groups/Joined_groups";
+import BookDetails from "./pages/BookDetails"; // ADD THIS LINE
 
 /**
  * Main App Component - Application Routing
@@ -19,11 +20,11 @@ import JoinedGroups from "./components/Joined_groups/Joined_groups";
  * - /search : Book search (title, author, keywords)
  * - /to-read : User's to-read list
  * - /genre : Browse all genres (grid view)
- * - /genre/:genreId : Filtered books by genre (NEW)
+ * - /genre/:genreId : Filtered books by genre
+ * - /book/:googleBookId : Individual book detail page (NEW)
  * - /login : Authentication page
  *
  * TODO Phase 2 - Future Routes to Add:
- * - /book/:googleBookId : Individual book detail page
  * - /author/:authorName : Author's books page
  * - /communities : Reddit-style book communities
  * - /community/:communityId : Single community view
@@ -59,8 +60,10 @@ function App() {
             <Route path="/genre" element={<GenrePage />} />
             <Route path="/genre/:genreId" element={<GenreResultsPage />} />
 
+            {/* Book Detail Page */}
+            <Route path="/book/:googleBookId" element={<BookDetails />} />
+
             {/* TODO Phase 2: Add these routes when pages are ready */}
-            {/* <Route path="/book/:googleBookId" element={<BookDetailPage />} /> */}
             {/* <Route path="/author/:authorName" element={<AuthorPage />} /> */}
             {/* <Route path="/communities" element={<CommunitiesPage />} /> */}
             {/* <Route path="/community/:communityId" element={<CommunityPage />} /> */}
