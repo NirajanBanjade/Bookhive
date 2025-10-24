@@ -16,3 +16,14 @@ export const createReview = async (userId, googleBookId, rating, comment) => {
     throw error.response?.data?.error || 'Failed to create review';
   }
 };
+
+// Get all reviews for a specific book
+export const getReviewsByBook = async (googleBookId) => {
+  try {
+    const response = await api.get(`/reviews/${googleBookId}`);
+    return response.data.reviews || response.data || [];
+  } catch (error) {
+    console.error('Get reviews failed:', error);
+    throw error.response?.data?.error || 'Failed to fetch reviews';
+  }
+};
