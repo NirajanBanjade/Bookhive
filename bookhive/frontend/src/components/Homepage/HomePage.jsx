@@ -488,6 +488,12 @@ const userId = "user123"; // TODO: replace with real auth user id
                       ))}
                     </div>
                   )}
+
+                  {!recsLoading && recsError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                      {recsError}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
