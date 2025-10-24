@@ -78,3 +78,23 @@ export async function getRecommendedForUser({ userId, limit = 12, signal } = {})
   }
   return await res.json(); // { ok, reason, count, items: [...] }
 }
+
+// Get single book by googleBookId
+export async function getBookById(googleBookId, { signal } = {}) {
+  if (!googleBookId) throw new Error("googleBookId is required");
+
+  const res = await fetch(`/api/books/${googleBookId}`, { signal });
+
+  if (!res.ok) {
+    let errMsg = `Failed to fetch book: ${res.status}`;
+    try {
+      const errData = await res.json();
+      if (errData?.error) errMsg = errData.error;
+    } catch {
+      // ignore JSON parse error
+    }
+    throw new Error(errMsg);
+  }
+
+  return await res.json();
+}
