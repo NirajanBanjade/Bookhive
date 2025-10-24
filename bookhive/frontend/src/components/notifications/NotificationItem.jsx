@@ -2,7 +2,7 @@
 import React, { useMemo, useState } from "react";
 
 /** UI-only row for a single notification */
-export default function NotificationItem({ item, onMarkRead }) {
+export default function NotificationItem({ item, onMarkRead, onCloseDropdown }) {
   const [pending, setPending] = useState(false);
 
   const timeAgo = useMemo(() => {
@@ -23,6 +23,7 @@ export default function NotificationItem({ item, onMarkRead }) {
     try {
       setPending(true);
       await onMarkRead(item._id);
+      if (onCloseDropdown) onCloseDropdown(); // close dropdown
     } finally {
       setPending(false);
     }

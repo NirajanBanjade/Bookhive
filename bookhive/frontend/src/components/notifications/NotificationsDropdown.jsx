@@ -1,5 +1,6 @@
-import React from 'react';
-import NotificationItem from './NotificationItem';
+// frontend/src/components/notifications/NotificationsDropdown.jsx
+import React from "react";
+import NotificationItem from "./NotificationItem";
 
 /** UI-only dropdown; no fetching here */
 export default function NotificationsDropdown({
@@ -10,15 +11,24 @@ export default function NotificationsDropdown({
   unreadCount = 0,
   onMarkAll,
   onMarkOne,
+  onClose, // NEW: optional closer from parent (Navbar)
 }) {
   if (!open) return null;
+
+  const handleMarkAll = async () => {
+    try {
+      await onMarkAll?.();
+    } finally {
+      onClose?.(); // close after marking all
+    }
+  };
 
   return (
     <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
       <div className="flex items-center justify-between px-3 py-2 border-b">
         <span className="text-sm font-semibold">Notifications</span>
         <button
-          onClick={onMarkAll}
+          onClick={handleMarkAll}
           className="text-xs text-primary hover:underline disabled:text-gray-400"
           disabled={items.length === 0 || unreadCount === 0}
         >
@@ -34,7 +44,14 @@ export default function NotificationsDropdown({
           {items.length === 0 ? (
             <li className="p-3 text-sm text-gray-500">No notifications</li>
           ) : (
-            items.map((n) => <NotificationItem key={n._id} item={n} onMarkRead={onMarkOne} />)
+            items.map((n) => (
+              <NotificationItem
+                key={n._id}
+                item={n}
+                onMarkRead={onMarkOne}
+                onCloseDropdown={onClose} // pass through so row-click can close
+              />
+            ))
           )}
         </ul>
       )}

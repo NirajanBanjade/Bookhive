@@ -112,6 +112,7 @@ const Navbar = () => {
                 unreadCount={unreadCount}
                 onMarkAll={onMarkAll}
                 onMarkOne={onMarkOne}
+                onClose={() => setOpen(false)}
               />
             </div>
 
