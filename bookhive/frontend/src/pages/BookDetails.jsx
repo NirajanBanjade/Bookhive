@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Book as BookIcon } from 'lucide-react';
+import { Book as BookIcon, Star, User } from 'lucide-react';
 import { getBookById } from '../api/books';
+import { getReviewsByBook, calculateAverageRating } from '../services/reviewsService';
 
 const BookDetails = () => {
   const { googleBookId } = useParams();
   const [bookInfo, setBookInfo] = useState(null);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Fetch book details from YOUR backend
@@ -33,6 +36,73 @@ const BookDetails = () => {
     
     return () => controller.abort();
   }, [googleBookId]);
+
+  // Fetch reviews from YOUR backend
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        setReviewsLoading(true);
+        const data = await getReviewsByBook(googleBookId);
+        // Sort by most recent first
+        const sorted = (data || []).sort((a, b) => 
+          new Date(b.reviewedAt) - new Date(a.reviewedAt)
+        );
+        setReviews(sorted);
+      } catch (error) {
+        console.error('Error getting reviews:', error);
+        setReviews([]);
+      } finally {
+        setReviewsLoading(false);
+      }
+    };
+    fetchReviews();
+  }, [googleBookId]);
+
+  // Calculate average rating
+  const averageRating = calculateAverageRating(reviews);
+
+  // Star Rating Component
+  const StarRating = ({ rating, size = 'default' }) => {
+    const sizeClasses = {
+      small: 'h-3 w-3',
+      default: 'h-4 w-4',
+      large: 'h-6 w-6'
+    };
+    
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`${sizeClasses[size]} ${
+              star <= Math.round(rating)
+                ? 'fill-amber-400 text-amber-400'
+                : 'text-gray-300'
+            }`}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  // Format date to relative time
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
 
   if (loading) {
     return (
@@ -103,10 +173,25 @@ const BookDetails = () => {
                 by {Array.isArray(authors) ? authors.join(', ') : authors}
               </p>
 
+              {/* Rating Summary */}
+              {reviews.length > 0 && (
+                <div className="bg-white rounded-lg p-4 inline-block shadow-sm border border-gray-200 mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-4xl font-bold text-gray-900">{averageRating}</div>
+                      <StarRating rating={parseFloat(averageRating)} size="default" />
+                      <div className="text-sm text-gray-600 mt-1">
+                        {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Description */}
               {description && (
                 <div className="prose prose-sm max-w-none">
-                  <p className="text-gray-700 leading-relaxed">
+                  <p className="text-gray-700 leading-relaxed line-clamp-6">
                     {description.replace(/<[^>]*>/g, '')}
                   </p>
                 </div>
@@ -130,9 +215,54 @@ const BookDetails = () => {
         </div>
       </div>
 
-      {/* Placeholder for reviews - will add in next step */}
+      {/* Reviews Section */}
       <div className="max-w-6xl mx-auto px-6 py-12">
-        <p className="text-gray-500 text-center">Reviews section coming next...</p>
+        <h2 className="font-serif text-2xl font-bold mb-6 text-gray-900">
+          Reader Reviews
+        </h2>
+
+        {reviewsLoading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 text-center">
+            <BookIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-600">No reviews yet. Be the first to review this book!</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {reviews.map((review) => (
+              <div 
+                key={review._id} 
+                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+              >
+                {/* Review Header */}
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
+                      <User className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {review.authorName || review.user?.name || 'Anonymous'}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {formatDate(review.reviewedAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <StarRating rating={review.rating} size="small" />
+                </div>
+
+                {/* Review Content */}
+                <p className="text-gray-700 leading-relaxed">
+                  {review.comment}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
