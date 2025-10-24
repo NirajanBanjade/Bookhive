@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   MapPin,
   Calendar,
@@ -15,6 +16,7 @@ import { joinGroup } from '../../services/groupService';
 import { createReview } from '../../services/reviewsService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("currently-reading");
   const [wantToReadBooks, setWantToReadBooks] = useState([]);
   const [collectionBooks, setCollectionBooks] = useState([]);
@@ -338,7 +340,10 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const imgSrc = imagePreview || tempData.profileImageUrl || userInfo.profileImageUrl;
 
   const BookCard = ({ book }) => (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer">
+    <div 
+      onClick={() => navigate(`/book/${book.googleBookId}`)}
+      className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer"
+    >
       <div className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-6">
         {book.thumbnail ? (
           <img src={book.thumbnail} alt={book.title} className="max-h-full max-w-full object-contain" />
@@ -348,7 +353,10 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           </span>
         )}
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="rounded-full h-8 w-8 bg-white shadow-md flex items-center justify-center hover:bg-gray-50">
+          <button 
+            onClick={(e) => e.stopPropagation()}
+            className="rounded-full h-8 w-8 bg-white shadow-md flex items-center justify-center hover:bg-gray-50"
+          >
             <Heart className="h-4 w-4 text-gray-600" />
           </button>
         </div>
@@ -391,6 +399,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             <>
               <select
                 value={book.status}
+                onClick={(e) => e.stopPropagation()}
                 onChange={(e) => { e.stopPropagation(); handleUpdateStatus(book.googleBookId, e.target.value); }}
                 className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
               >
