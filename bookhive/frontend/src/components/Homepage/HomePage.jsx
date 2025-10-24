@@ -500,6 +500,73 @@ const userId = "user123"; // TODO: replace with real auth user id
                       No recommendations yet. Add a few books to your To-Read list.
                     </div>
                   )}
+
+                  {!recsLoading && !recsError && recs.length > 0 && recs.map((item) => {
+                    const v = item.volumeInfo || {};
+                    const cover =
+                      v.imageLinks?.thumbnail ||
+                      v.imageLinks?.smallThumbnail ||
+                      `https://books.google.com/books/content?id=${encodeURIComponent(item.id)}&printsec=frontcover&img=1&zoom=1`;
+
+                    const authors = v.authors?.join(", ") || "Unknown Author";
+                    const rating = typeof v.averageRating === "number" ? v.averageRating : null;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                      >
+                        <div className="aspect-[3/4]">
+                          <img
+                            src={cover}
+                            alt={v.title || "Book cover"}
+                            className="w-full h-full object-cover"
+                            loading="lazy"
+                          />
+                        </div>
+
+                        <div className="p-5">
+                          <h4 className="font-bold text-gray-900 mb-1 line-clamp-2">{v.title}</h4>
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-1">{authors}</p>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-4 w-4 ${rating && i < Math.round(rating) ? "fill-amber-500 text-amber-500" : "text-gray-300"}`}
+                                />
+                              ))}
+                              <span className="text-xs text-gray-700 ml-1">
+                                {rating ? rating.toFixed(1) : "No ratings"}
+                              </span>
+                            </div>
+                            {typeof item.score === "number" && (
+                              <span className="text-[10px] text-gray-500">Score {item.score.toFixed(2)}</span>
+                            )}
+                          </div>
+
+                          <div className="mt-3 flex gap-2">
+                            <button
+                              type="button"
+                              className="flex-1 text-xs py-1.5 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800"
+                              onClick={() => console.log("TODO: Add to To-Read", item.id)}
+                            >
+                              Add to To-Read
+                            </button>
+                            <a
+                              href={`https://books.google.com/books?id=${encodeURIComponent(item.id)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs py-1.5 px-2 rounded-lg border border-gray-200 hover:bg-gray-50"
+                            >
+                              Details
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
