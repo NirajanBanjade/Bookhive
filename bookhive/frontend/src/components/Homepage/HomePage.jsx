@@ -494,6 +494,12 @@ const userId = "user123"; // TODO: replace with real auth user id
                       {recsError}
                     </div>
                   )}
+
+                  {!recsLoading && !recsError && recs.length === 0 && (
+                    <div className="rounded-lg border border-gray-200 bg-white p-4 text-sm text-gray-700">
+                      No recommendations yet. Add a few books to your To-Read list.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
