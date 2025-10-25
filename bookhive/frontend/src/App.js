@@ -10,6 +10,7 @@ import GenrePage from "./pages/GenrePage";
 import GenreResultsPage from "./pages/GenreResultsPage";
 import JoinedGroups from "./components/Joined_groups/Joined_groups";
 import GroupPage from "./components/Grouppage/Grouppage";
+import BookDetails from "./pages/BookDetails";
 /**
  * Main App Component - Application Routing
  *
