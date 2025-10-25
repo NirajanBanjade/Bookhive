@@ -9,8 +9,8 @@ import HomePage from "./components/Homepage/HomePage";
 import GenrePage from "./pages/GenrePage";
 import GenreResultsPage from "./pages/GenreResultsPage";
 import JoinedGroups from "./components/Joined_groups/Joined_groups";
-import GroupPage from "./components/Grouppage/Grouppage";
 import BookDetails from "./pages/BookDetails";
+import GroupPage from "./components/Grouppage/Grouppage";
 /**
  * Main App Component - Application Routing
  *
