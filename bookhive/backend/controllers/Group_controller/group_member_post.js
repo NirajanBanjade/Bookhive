@@ -63,6 +63,7 @@ const deleteGroupPost=async (req,res)=>{
             _id: postId,
             groupId: group._id,
             userId, // post owner can delete it , others cant.
+            
           });
       
         if (!del) {

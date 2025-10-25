@@ -5,6 +5,14 @@ const PostCard = ({ post, currentUserId, onDelete, formatDate }) => {
   const isAuthor = post.userId?._id === currentUserId || post.userId === currentUserId;
   
   const authorName = post.userId?.name || post.userId?.username || 'Unknown User';
+  console.log('POST DEBUG:', {
+    'post._id': post._id,
+    'post.userId': post.userId,
+    'post.userId._id': post.userId?._id,
+    'currentUserId': currentUserId,
+    'Match?': post.userId?._id === currentUserId
+  });
+  
 
   return (
     <div className="post-card">
@@ -19,7 +27,7 @@ const PostCard = ({ post, currentUserId, onDelete, formatDate }) => {
           </div>
         </div>
 
-        {isAuthor && (
+        {isAuthor &&(
           <button 
             className="delete-post-button"
             onClick={onDelete}

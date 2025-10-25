@@ -43,22 +43,22 @@ const GroupPage = () => {
     }
   };
 
-  // useEffect(() => {
-  //   // (Optional) move this to a user service too
-  //   (async () => {
-  //     try {
-  //       const res = await fetch('/api/user/me', {
-  //         headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
-  //       });
-  //       if (res.ok) {
-  //         const userData = await res.json();
-  //         setCurrentUserId(userData._id || userData.id);
-  //       }
-  //     } catch (e) {
-  //       console.error('Error fetching user:', e);
-  //     }
-  //   })();
-  // }, []);
+  useEffect(() => {
+    // (Optional) move this to a user service too
+    (async () => {
+      try {
+        const res = await fetch('/api/user/me', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
+        });
+        if (res.ok) {
+          const userData = await res.json();
+          setCurrentUserId(userData._id || userData.id);
+        }
+      } catch (e) {
+        console.error('Error fetching user:', e);
+      }
+    })();
+  }, []);
 
   useEffect(() => { load(); }, [category]);
 

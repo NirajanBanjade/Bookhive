@@ -58,7 +58,7 @@ const booksRoutes = require('./routes/booksRoutes');
 app.use('/api/books', booksRoutes);
 
 const toUserProfile=require('./routes/toUserData');
-app.use('/api/profile', requireAuth, toUserProfile);
+app.use('/api/user', toUserProfile);
 
 
 const toUpdateUserPassword=require('./routes/toUpdatePassword');
