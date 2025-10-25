@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import './Joined_groups.css';
-
+import { getJoinedGroups } from '../../services/groupService';
 const JoinedGroups = () => {
   const navigate = useNavigate();
   const [joinedGroups, setJoinedGroups] = useState([]);
@@ -23,19 +23,7 @@ const JoinedGroups = () => {
     const fetchJoinedGroups = async (cursor = null) => {
         try {
           setLoading(true);
-          const url = cursor 
-            ? `/api/me/groups?cursor=${cursor}&limit=20`
-            : '/api/me/groups?limit=20';
-          
-          const res = await fetch(url, {
-            headers: { 
-              'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` 
-            }
-          });
-          
-          if (!res.ok) throw new Error('Failed to fetch groups');
-          
-          const data = await res.json();
+          const data = await getJoinedGroups(cursor, 20);
           
           if (cursor) {
             // Pagination: append to existing groups
@@ -92,8 +80,8 @@ const JoinedGroups = () => {
   };
 
   // Navigate to group detail page
-  const handleGroupClick = (groupId) => {
-    navigate(`/groups/${groupId}`);
+  const handleGroupClick = (categoryKey) => {
+    navigate(`/groups/${categoryKey}`);
   };
 
   // Filter groups based on search term
@@ -202,7 +190,7 @@ const JoinedGroups = () => {
                 <div
                   key={group.groupId}
                   className="group-card"
-                  onClick={() => handleGroupClick(group.groupId)}
+                  onClick={() => handleGroupClick(group.categoryKey || group.name)}
                 >
                   <div className="group-card-header">
                     <div className="group-info">

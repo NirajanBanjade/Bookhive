@@ -30,10 +30,10 @@ const createGroupPost = async (req, res) => {
       content: content.trim(),
       linkUrl: linkUrl?.trim() || undefined,
     });
-
+    const populatedPost = await Post.findById(post._id).populate('userId', 'name username email');
     return res.status(201).json({
       created: true,
-      post,
+      post:populatedPost,
     });
   } catch (err) {
     return res.status(500).json({ message: err.message });
@@ -63,6 +63,7 @@ const deleteGroupPost=async (req,res)=>{
             _id: postId,
             groupId: group._id,
             userId, // post owner can delete it , others cant.
+            
           });
       
         if (!del) {
