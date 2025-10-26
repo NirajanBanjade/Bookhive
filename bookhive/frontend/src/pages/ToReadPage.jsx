@@ -3,46 +3,42 @@ import axios from 'axios';
 
 const ToReadPage = () => {
   const [books, setBooks] = useState([]);
-  const userId = 'user123'; // replace with actual logged-in user ID
+  const [userId, setUserId] = useState(null); // Get from logged-in user
+  const [loading, setLoading] = useState(true);
 
-  // Add a demo book
-  const handleAddBook = async () => {
-    const demoBook = {
-      googleBookId: `demo-${Date.now()}`, // unique per click
-      title: 'Demo Book',
-      authors: ['Jane Doe'],
-      thumbnail: 'https://example.com/image.jpg',
+  // Fetch the logged-in user's ID
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert('Please login first');
+          window.location.href = '/login';
+          return;
+        }
+
+        // Get current user info
+        const response = await axios.get('http://localhost:5050/api/user/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        setUserId(response.data._id || response.data.id);
+      } catch (err) {
+        console.error('Error fetching user:', err);
+        alert('Please login first');
+        window.location.href = '/login';
+      } finally {
+        setLoading(false);
+      }
     };
 
-    try {
-      const response = await axios.post(
-        `http://localhost:5050/api/to-read/${userId}`,
-        demoBook // send fields directly, NOT wrapped in 'book'
-      );
-      console.log('Book added:', response.data.books || response.data.list?.books);
-      setBooks(response.data.books || response.data.list?.books);
-    } catch (err) {
-      console.error('Error adding book:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to add book');
-    }
-  };
-
-   // Remove a book
-  const handleRemoveBook = async (bookId) => {
-    try {
-      const response = await axios.delete(
-        `http://localhost:5050/api/to-read/${userId}/${bookId}`
-      );
-      setBooks(response.data.list.books);
-      alert('Book removed from your To-Read list');
-    } catch (err) {
-      console.error('Error removing book:', err.response?.data || err);
-      alert(err.response?.data?.message || 'Failed to remove book');
-    }
-  };
+    fetchUser();
+  }, []);
 
   // Fetch user's to-read list
   useEffect(() => {
+    if (!userId) return;
+
     const fetchBooks = async () => {
       try {
         const response = await axios.get(`http://localhost:5050/api/to-read/${userId}`);
@@ -54,6 +50,66 @@ const ToReadPage = () => {
 
     fetchBooks();
   }, [userId]);
+
+  // Add a demo book
+  const handleAddBook = async () => {
+    if (!userId) {
+      alert('Please wait, loading user info...');
+      return;
+    }
+
+    const demoBook = {
+      googleBookId: `demo-${Date.now()}`,
+      title: 'Demo Book',
+      authors: ['Jane Doe'],
+      thumbnail: 'https://example.com/image.jpg',
+    };
+
+    try {
+      const response = await axios.post(
+        `http://localhost:5050/api/to-read/${userId}`,
+        demoBook
+      );
+      console.log('Book added:', response.data.books || response.data.list?.books);
+      setBooks(response.data.books || response.data.list?.books);
+      
+      // Trigger notification refresh
+      window.dispatchEvent(new Event('notifications:refresh'));
+      
+      alert('Book added! Check your notifications');
+    } catch (err) {
+      console.error('Error adding book:', err.response?.data || err);
+      alert(err.response?.data?.message || 'Failed to add book');
+    }
+  };
+
+  // Remove a book
+  const handleRemoveBook = async (bookId) => {
+    if (!userId) return;
+
+    try {
+      const response = await axios.delete(
+        `http://localhost:5050/api/to-read/${userId}/${bookId}`
+      );
+      setBooks(response.data.list.books);
+      
+      // Trigger notification refresh
+      window.dispatchEvent(new Event('notifications:refresh'));
+      
+      alert('Book removed from your To-Read list');
+    } catch (err) {
+      console.error('Error removing book:', err.response?.data || err);
+      alert(err.response?.data?.message || 'Failed to remove book');
+    }
+  };
+
+  if (loading) {
+    return <div style={{ padding: '20px' }}>Loading...</div>;
+  }
+
+  if (!userId) {
+    return <div style={{ padding: '20px' }}>Please login first</div>;
+  }
 
   return (
     <div style={{ padding: '20px' }}>
