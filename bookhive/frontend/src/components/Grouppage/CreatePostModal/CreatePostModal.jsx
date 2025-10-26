@@ -19,7 +19,7 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
         const res = await fetch(`/api/groups/${category}/posts`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
+            'Authorization': `Bearer ${localStorage.getItem('token')}`, // FIXED: Changed from 'jwt_token' to 'token'
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
@@ -37,6 +37,7 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
         onPostCreated(data.post);
         setContent('');
         setLinkUrl('');
+        onClose(); // ADDED: Close modal after successful post
       } catch (err) {
         console.error('Error creating post:', err);
         alert(err.message || 'Failed to create post');
@@ -44,6 +45,7 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
         setSubmitting(false);
       }
     };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
