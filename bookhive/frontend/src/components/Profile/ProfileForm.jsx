@@ -24,7 +24,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const [userId, setUserId] = useState(null);
   const [favorites, setFavorites] = useState(new Set());
   const [selectedBookId, setSelectedBookId] = useState(null);
-  const [uploadingImage, setUploadingImage] = useState(false); // NEW: Image upload state
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Review state for each book
   const [reviewData, setReviewData] = useState({});
@@ -119,7 +119,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     fetchBooks();
   }, [userId]);
 
-  // NEW: Handle image upload
+  // Handle image upload
   const handleImageUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -277,7 +277,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
-  // Handle review submission - FIXED VERSION
+  // Handle review submission
   const handleSubmitReview = async (googleBookId) => {
     const review = reviewData[googleBookId];
     
@@ -292,26 +292,20 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
 
     try {
-      // Call the API to create the review
       await createReview(userId, googleBookId, review.rating, review.comment.trim());
       
-      // Update the state to mark as submitted
       setReviewData((prev) => ({
         ...prev,
         [googleBookId]: { 
           rating: review.rating, 
           comment: review.comment,
-          submitted: true  // This flag triggers the success UI
+          submitted: true
         }
       }));
 
-      // Show success message
       alert("Review submitted successfully!");
-      
-      // Optional: Refresh notifications
       window.dispatchEvent(new Event("notifications:refresh"));
       
-      // DEBUG: Log to console
       console.log("Review submitted for book:", googleBookId);
       console.log("Updated reviewData:", { 
         [googleBookId]: { 
@@ -324,9 +318,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     } catch (error) {
       console.error("Error submitting review:", error);
       
-      // Check if this is a duplicate review error
       if (error.includes && error.includes("already reviewed")) {
-        // If already reviewed, still mark as submitted to show the success box
         setReviewData((prev) => ({
           ...prev,
           [googleBookId]: { 
@@ -342,7 +334,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
-  // Update review data - memoized to prevent re-renders
   const updateReviewData = useCallback((googleBookId, field, value) => {
     setReviewData((prev) => ({
       ...prev,
@@ -413,7 +404,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       {/* Profile Header Section */}
       <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8 mb-8 shadow-sm border border-orange-100">
         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-          {/* Profile Image - UPDATED WITH UPLOAD BUTTON */}
+          {/* Profile Image */}
           <div className="relative">
             <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-4xl font-bold shadow-lg overflow-hidden">
               {formData.profileImageUrl ? (
@@ -426,7 +417,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
                 formData.name ? formData.name.charAt(0).toUpperCase() : "U"
               )}
             </div>
-            {/* Upload button - only shown when editing */}
             {isEditing && (
               <label 
                 htmlFor="avatar-upload" 
@@ -620,7 +610,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   );
 };
 
-// BookCard component - moved outside and memoized
+// BookCard component
 const BookCard = React.memo(({ 
   book, 
   reviewData, 
@@ -634,7 +624,6 @@ const BookCard = React.memo(({
 }) => {
   const isCompleted = book.status === "completed";
 
-  // DEBUG: Log reviewData to console
   console.log(`BookCard for ${book.title}:`, { 
     googleBookId: book.googleBookId, 
     reviewData,
@@ -671,7 +660,6 @@ const BookCard = React.memo(({
             : "Completed"}
         </span>
 
-        {/* Heart/Favorite Button */}
         <button
           onClick={(e) => onToggleFavorite(book.googleBookId, e)}
           className={`absolute top-2 right-2 p-2 rounded-full ${
@@ -732,6 +720,7 @@ const BookCard = React.memo(({
               className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="completed">Completed</option>
+              <option value="currently-reading">Currently Reading</option>
             </select>
           )}
 
@@ -764,7 +753,7 @@ const BookCard = React.memo(({
           </div>
         )}
 
-        {/* Review Section for Completed Books - FIXED VERSION */}
+        {/* Review Section for Completed Books */}
         {isCompleted && (
           <div className="mt-4 pt-4 border-t border-gray-200">
             {reviewData && reviewData.submitted ? (
