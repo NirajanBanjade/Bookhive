@@ -44,6 +44,12 @@ const User = new mongoose.Schema(
       maxlength: 500,
       default: "",
     },
+    // User location for profile page
+    location: {                    // ← ADD THESE 5 LINES
+      type: String,
+      maxlength: 100,
+      default: "",
+    },
     // URL/path to user's profile picture
     profileImageUrl: {
       type: String,

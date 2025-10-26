@@ -61,6 +61,7 @@ app.use('/api/update-password', toUpdateUserPassword);
 
 const profileRoutes = require('./routes/profileRoutes');
 app.use('/api/profile', profileRoutes);
+app.use('/api/user', profileRoutes); 
 
 const collectionsRoutes = require('./routes/collectionsRoutes');
 app.use('/api/collections', collectionsRoutes);
