@@ -3,37 +3,6 @@ import { useParams, Link } from "react-router-dom";
 import { GENRES, getGenreById } from "../constants/genre";
 import axios from "axios";
 
-/**
- * GenreResultsPage - Display books filtered by genre
- * 
- * CURRENT IMPLEMENTATION (Phase 1):
- * - Fetches books from Google Books API via backend proxy
- * - Filters by genre subject
- * - Basic pagination
- * 
- * FUTURE FEATURES (Phase 2 - Backend Team):
- * Backend should create: GET /api/books/genre/:genreId
- * 
- * Response should include:
- * {
- *   books: [...],           // Book list with our schema
- *   pagination: {...},      // hasMore, nextPage, total
- *   filters: {...},         // Available filter options
- *   trending: [...],        // Top 5 trending books in this genre
- *   friendsReading: [...]   // What friends are reading (if logged in)
- * }
- * 
- * FUTURE UI FEATURES TO ADD:
- * 1. Sort by: Newest, Popular, Rating, Title
- * 2. Filter by: Year range, Rating (3+ stars, 4+ stars)
- * 3. "Trending in Fantasy" section at top
- * 4. "Friends reading Fantasy" sidebar
- * 5. Save genre as favorite (heart icon)
- * 6. Book count badges on genre cards
- * 7. "More like this" recommendations
- * 
- * @component
- */
 const GenreResultsPage = () => {
   const { genreId } = useParams();
   const genre = getGenreById(genreId);
@@ -44,23 +13,31 @@ const GenreResultsPage = () => {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  
-  // TODO Phase 2: Add these filter states when backend supports them
-  // const [sortBy, setSortBy] = useState('relevance'); // 'newest', 'popular', 'rating'
-  // const [minRating, setMinRating] = useState(0); // 0, 3, 4, 5
-  // const [yearRange, setYearRange] = useState(null); // [2020, 2024]
-  
-  const userId = "user123"; // TODO: Get from auth context/Redux store
+  const [userId, setUserId] = useState(null); 
 
-  /**
-   * Fetch books for this genre
-   * 
-   * CURRENT: Uses existing /api/books/search endpoint with subject filter
-   * FUTURE: Replace with dedicated /api/books/genre/:genreId endpoint
-   * 
-   * When backend is ready, change this to:
-   * const response = await fetch(`/api/books/genre/${genreId}?page=${page}&sort=${sortBy}&minRating=${minRating}`);
-   */
+  // FIXED: Fetch current user ID
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await fetch('http://localhost:5050/api/user/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          const user = await response.json();
+          setUserId(user._id || user.id);
+        }
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   useEffect(() => {
     if (!genre) return;
 
@@ -69,11 +46,9 @@ const GenreResultsPage = () => {
       setError("");
 
       try {
-        // PHASE 1: Using existing search endpoint
-        // Google Books API uses "subject" parameter for genre filtering
-       const response = await fetch(
-         `/api/books/genre/${genreId}?page=${page}&limit=20`
-       );
+        const response = await fetch(
+          `/api/books/genre/${genreId}?page=${page}&limit=20`
+        );
         
         if (!response.ok) {
           throw new Error("Failed to fetch books");
@@ -81,7 +56,6 @@ const GenreResultsPage = () => {
 
         const data = await response.json();
         
-        // Update books (append for pagination)
         if (page === 1) {
           setBooks(data.items || []);
         } else {
@@ -89,14 +63,6 @@ const GenreResultsPage = () => {
         }
         
         setHasMore(data.hasMore || false);
-
-        // PHASE 2: When using dedicated endpoint, you'll get:
-        // {
-        //   books: [...],
-        //   pagination: { hasMore, nextPage, totalResults },
-        //   trending: [...],  // Use this for "Trending in [Genre]" section
-        //   friendsReading: [...] // Use this for sidebar widget
-        // }
         
       } catch (err) {
         setError(err.message || "Something went wrong");
@@ -107,25 +73,40 @@ const GenreResultsPage = () => {
     };
 
     fetchGenreBooks();
-  }, [genre, page]); // TODO Phase 2: Add sortBy, minRating to dependencies
+  }, [genre, page]);
 
-  /**
-   * Add book to user's to-read list
-   * TODO Phase 2: Move this to a shared hook/service (useToReadList)
-   * so it can be reused across SearchPage, GenrePage, etc.
-   */
+  // FIXED: Add book with proper authentication and notification refresh
   const handleAddToRead = async (book) => {
+    if (!userId) {
+      alert('Please log in to add books to your reading list');
+      return;
+    }
+
     try {
-      await axios.post(`http://localhost:5050/api/to-read/${userId}`, book);
+      const token = localStorage.getItem('token'); // FIXED: Get token
+      
+      await axios.post(
+        `http://localhost:5050/api/to-read/${userId}`, 
+        {
+          googleBookId: book.googleBookId,
+          title: book.title,
+          authors: book.authors || [],
+          thumbnail: book.thumbnail,
+          categories: book.categories || []
+        },
+        {
+          headers: { 'Authorization': `Bearer ${token}` } // FIXED: Add auth header
+        }
+      );
+      
       alert(`Added "${book.title}" to your To-Read list!`);
       
-      // TODO Phase 2: Replace alert with toast notification
-      // TODO Phase 2: Update UI to show "Added" state on button
-      // TODO Phase 2: Dispatch Redux action if using state management
+      // FIXED: Trigger notification refresh
+      window.dispatchEvent(new Event('notifications:refresh'));
       
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to add book");
+      alert(err.response?.data?.error || "Failed to add book");
     }
   };
 
@@ -134,7 +115,6 @@ const GenreResultsPage = () => {
     setPage(prev => prev + 1);
   };
 
-  // Genre not found - 404 state
   if (!genre) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#fafaf9' }}>
@@ -158,7 +138,6 @@ const GenreResultsPage = () => {
       {/* Genre Header */}
       <div className={`bg-gradient-to-br ${genre.color} border-b border-gray-200`}>
         <div className="max-w-7xl mx-auto px-6 py-12">
-          {/* Back Button */}
           <Link 
             to="/genre" 
             className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 mb-4"
@@ -181,45 +160,12 @@ const GenreResultsPage = () => {
                 </p>
               </div>
             </div>
-
-            {/* TODO Phase 2: Add "Save Genre" button here */}
-            {/* 
-            <button className="px-4 py-2 bg-white rounded-lg border-2 border-gray-300 hover:border-primary transition-colors">
-              <Heart className="w-5 h-5" />
-            </button>
-            */}
           </div>
         </div>
       </div>
-
-      {/* TODO Phase 2: Add Filters & Sort Bar */}
-      {/* 
-      <div className="bg-white border-b border-gray-200 sticky top-16 z-40">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center gap-4">
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-              <option value="relevance">Most Relevant</option>
-              <option value="newest">Newest First</option>
-              <option value="rating">Highest Rated</option>
-              <option value="popular">Most Popular</option>
-            </select>
-            
-            <select value={minRating} onChange={(e) => setMinRating(Number(e.target.value))}>
-              <option value={0}>All Ratings</option>
-              <option value={3}>3+ Stars</option>
-              <option value={4}>4+ Stars</option>
-            </select>
-          </div>
-        </div>
-      </div>
-      */}
 
       {/* Results Section */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        {/* TODO Phase 2: Add "Trending in [Genre]" section here */}
-        {/* Show top 5 trending books as a horizontal scroll carousel */}
-
-        {/* Loading State */}
         {loading && page === 1 && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
@@ -227,7 +173,6 @@ const GenreResultsPage = () => {
           </div>
         )}
 
-        {/* Error State */}
         {error && !loading && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
             <p className="text-red-600 font-medium">Error: {error}</p>
@@ -240,7 +185,6 @@ const GenreResultsPage = () => {
           </div>
         )}
 
-        {/* No Results */}
         {!loading && !error && books.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📖</div>
@@ -257,26 +201,20 @@ const GenreResultsPage = () => {
           </div>
         )}
 
-        {/* Book Grid */}
         {books.length > 0 && (
           <>
-            {/* Results Count */}
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-2xl font-bold text-gray-900">
                 {books.length} {books.length === 1 ? 'Book' : 'Books'}
               </h2>
-              
-              {/* TODO Phase 2: Add view toggle (grid/list) here */}
             </div>
 
-            {/* Book Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {books.map((book) => (
                 <div
                   key={book.googleBookId}
                   className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
                 >
-                  {/* Book Cover */}
                   <div className="aspect-[2/3] bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
                     {book.thumbnail ? (
                       <img
@@ -294,7 +232,6 @@ const GenreResultsPage = () => {
                     )}
                   </div>
 
-                  {/* Book Info */}
                   <div className="p-4">
                     <h3 className="font-bold text-gray-900 mb-1 line-clamp-2 min-h-[3rem]">
                       {book.title}
@@ -303,24 +240,17 @@ const GenreResultsPage = () => {
                       {(book.authors || []).join(", ") || "Unknown Author"}
                     </p>
 
-                    {/* TODO Phase 2: Add rating stars here if available */}
-                    {/* {book.averageRating && <StarRating rating={book.averageRating} />} */}
-
-                    {/* Add to To-Read Button */}
                     <button
                       onClick={() => handleAddToRead(book)}
                       className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
                     >
                       Add to To-Read
                     </button>
-                    
-                    {/* TODO Phase 2: Add "Quick View" button that opens modal with book details */}
                   </div>
                 </div>
               ))}
             </div>
 
-            {/* Load More Button */}
             {hasMore && (
               <div className="mt-12 text-center">
                 <button
@@ -343,13 +273,9 @@ const GenreResultsPage = () => {
                 </button>
               </div>
             )}
-
-            {/* TODO Phase 2: Replace "Load More" with infinite scroll using Intersection Observer */}
           </>
         )}
       </div>
-
-      {/* TODO Phase 2: Add right sidebar for "Friends Reading This Genre" */}
     </div>
   );
 };
