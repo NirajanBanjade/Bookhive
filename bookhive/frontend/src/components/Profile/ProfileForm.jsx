@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
+  Heart,
   MapPin,
   Calendar,
   Book,
@@ -18,6 +19,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
+  const [favorites, setFavorites] = useState(new Set());
 
   const [formData, setFormData] = useState({
     name: "",
@@ -56,6 +58,23 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
 
     fetchCurrentUser();
   }, []);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (!userId) return;
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`http://localhost:5050/api/favorites/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFavorites(new Set(response.data.map((fav) => fav.googleBookId)));
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+      }
+    };
+
+    fetchFavorites();
+  }, [userId]);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -112,7 +131,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         prev.filter((book) => book.googleBookId !== googleBookId)
       );
 
-      // Trigger notification refresh
       window.dispatchEvent(new Event("notifications:refresh"));
 
       alert("Book removed");
@@ -150,11 +168,35 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         )
       );
 
-      // Trigger notification refresh
       window.dispatchEvent(new Event("notifications:refresh"));
     } catch (error) {
       console.error("Error updating status:", error);
       alert("Failed to update status");
+    }
+  };
+
+  const handleToggleFavorite = async (googleBookId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const isFavorited = favorites.has(googleBookId);
+
+      if (isFavorited) {
+        await axios.delete(`http://localhost:5050/api/favorites/${userId}/${googleBookId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFavorites((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(googleBookId);
+          return newSet;
+        });
+      } else {
+        await axios.post(`http://localhost:5050/api/favorites/${userId}/${googleBookId}`, {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFavorites((prev) => new Set(prev).add(googleBookId));
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
     }
   };
 
@@ -189,7 +231,6 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         alert(`Successfully joined ${categoryKey} group!`);
       }
 
-      // Trigger notification refresh
       window.dispatchEvent(new Event("notifications:refresh"));
     } catch (error) {
       console.error("Error joining group:", error);
@@ -273,6 +314,25 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
             ? "Reading"
             : "Completed"}
         </span>
+
+        {/* Heart/Favorite Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggleFavorite(book.googleBookId);
+          }}
+          className={`absolute top-2 right-2 p-2 rounded-full ${
+            favorites.has(book.googleBookId)
+              ? 'bg-red-100 text-red-600'
+              : 'bg-white/80 text-gray-400'
+          } hover:scale-110 transition-all`}
+        >
+          <Heart
+            className={`h-5 w-5 ${
+              favorites.has(book.googleBookId) ? 'fill-current' : ''
+            }`}
+          />
+        </button>
       </div>
 
       <div className="p-4">
