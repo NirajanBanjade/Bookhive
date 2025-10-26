@@ -11,6 +11,7 @@ import {
 import CreatePostModal from './CreatePostModal/CreatePostModal';
 import PostCard from './PostCard/PostCard';
 import { fetchGroupPosts, createGroupPost, deleteGroupPost } from '../../services/grouppostService';
+
 const GroupPage = () => {
   const { category } = useParams();
   const navigate = useNavigate();
@@ -44,11 +45,10 @@ const GroupPage = () => {
   };
 
   useEffect(() => {
-    // (Optional) move this to a user service too
     (async () => {
       try {
         const res = await fetch('/api/user/me', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } // FIXED: was 'jwt_token'
         });
         if (res.ok) {
           const userData = await res.json();
@@ -77,6 +77,7 @@ const GroupPage = () => {
       alert('Failed to delete post');
     }
   };
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -110,7 +111,7 @@ const GroupPage = () => {
 
         <div className="group-header-info">
           <Users className="group-header-icon" />
-          <div >
+          <div>
             <h1 className="group-title">{decodeCategory(category)}</h1>
             <p className="group-subtitle">
               {posts.length} {posts.length === 1 ? 'post' : 'posts'}

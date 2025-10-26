@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   MapPin,
   Calendar,
@@ -8,86 +8,213 @@ import {
   Users,
   UserPlus,
   Settings,
-  Heart,
+  Save,
+  X,
 } from "lucide-react";
-import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
-import { getCollections, moveToCollections, updateBookStatus, removeFromCollections } from '../../services/collectionsService';
-import { joinGroup } from '../../services/groupService';
-import { createReview } from '../../services/reviewsService';
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("currently-reading");
-  const [wantToReadBooks, setWantToReadBooks] = useState([]);
-  const [collectionBooks, setCollectionBooks] = useState([]);
-  const [joinedGroups, setJoinedGroups] = useState([]);
-  const [joiningCategory, setJoiningCategory] = useState(null);
-  const userId = 'user123';
-
-  const defaultUser = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    bio: "Avid reader and book enthusiast. Love fantasy, sci-fi, and mystery novels.",
-    profileImageUrl: null,
-    location: "San Francisco, CA",
-    joinDate: "March 2024",
-  };
-
-  const initialUser = userData || defaultUser;
-
-  const [userInfo, setUserInfo] = useState(initialUser);
   const [isEditing, setIsEditing] = useState(false);
-  const [tempData, setTempData] = useState(initialUser);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [activeTab, setActiveTab] = useState("want-to-read");
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
 
-  // --- Fetch To-Read ---
-  useEffect(() => {
-    if (activeTab === 'want-to-read') {
-      const fetchBooks = async () => {
-        try {
-          const books = await getToReadBooks(userId);
-          setWantToReadBooks(Array.isArray(books) ? books : []);
-        } catch (err) {
-          console.error('Error fetching to-read list:', err);
-          setWantToReadBooks([]);
-        }
-      };
-      fetchBooks();
-    }
-  }, [activeTab, userId]);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    bio: "",
+    location: "",
+    profileImageUrl: "",
+  });
 
-  // --- Fetch Collections ---
   useEffect(() => {
-    if (activeTab === 'currently-reading' || activeTab === 'completed') {
-      const fetchCollections = async () => {
-        try {
-          const books = await getCollections(userId);
-          setCollectionBooks(Array.isArray(books) ? books : []);
-        } catch (err) {
-          console.error('Error fetching collections:', err);
-          setCollectionBooks([]);
-        }
-      };
-      fetchCollections();
-    }
-  }, [activeTab, userId]);
-
-  // --- Fetch Joined Groups ---
-  useEffect(() => {
-    const fetchJoinedGroups = async () => {
+    const fetchCurrentUser = async () => {
       try {
-        const res = await fetch('/api/me/groups', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        const response = await axios.get("http://localhost:5050/api/user/me", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        setJoinedGroups(Array.isArray(data.items) ? data.items : []);
-      } catch (err) {
-        console.error('Error fetching joined groups:', err);
-        setJoinedGroups([]);
+
+        const user = response.data;
+        setUserId(user._id || user.id);
+        setFormData({
+          name: user.username || user.name || "",
+          email: user.email || "",
+          bio: user.bio || "",
+          location: user.location || "",
+          profileImageUrl: user.profileImageUrl || "",
+        });
+      } catch (error) {
+        console.error("Error fetching user:", error);
       }
     };
-    fetchJoinedGroups();
+
+    fetchCurrentUser();
   }, []);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      if (!userId) return;
+
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+
+        const [toReadRes, collectionsRes] = await Promise.all([
+          axios.get(`http://localhost:5050/api/to-read/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`http://localhost:5050/api/collections/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        const toReadBooks = (toReadRes.data.books || []).map((book) => ({
+          ...book,
+          status: "want-to-read",
+        }));
+
+        const collectionBooks = collectionsRes.data.books || [];
+
+        setBooks([...toReadBooks, ...collectionBooks]);
+      } catch (error) {
+        console.error("Error fetching books:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, [userId]);
+
+  const handleRemove = async (googleBookId, currentStatus) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (currentStatus === "want-to-read") {
+        await axios.delete(
+          `http://localhost:5050/api/to-read/${userId}/${googleBookId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        await axios.delete(
+          `http://localhost:5050/api/collections/${userId}/${googleBookId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      setBooks((prev) =>
+        prev.filter((book) => book.googleBookId !== googleBookId)
+      );
+
+      // Trigger notification refresh
+      window.dispatchEvent(new Event("notifications:refresh"));
+
+      alert("Book removed");
+    } catch (error) {
+      console.error("Error removing book:", error);
+      alert("Failed to remove book");
+    }
+  };
+
+  const handleStatusChange = async (googleBookId, currentStatus, newStatus) => {
+    if (currentStatus === newStatus) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (currentStatus === "want-to-read") {
+        await axios.post(
+          `http://localhost:5050/api/to-read/${userId}/${googleBookId}/move`,
+          { status: newStatus },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        await axios.patch(
+          `http://localhost:5050/api/collections/${userId}/${googleBookId}`,
+          { status: newStatus },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      setBooks((prev) =>
+        prev.map((book) =>
+          book.googleBookId === googleBookId
+            ? { ...book, status: newStatus }
+            : book
+        )
+      );
+
+      // Trigger notification refresh
+      window.dispatchEvent(new Event("notifications:refresh"));
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update status");
+    }
+  };
+
+  const handleCategoryJoin = async (categoryKey) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5050/api/groups/${encodeURIComponent(
+          categoryKey
+        )}/join`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name: categoryKey }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to join group");
+      }
+
+      const data = await response.json();
+
+      if (data.alreadyMember) {
+        alert(`You are already a member of ${categoryKey}`);
+      } else {
+        alert(`Successfully joined ${categoryKey} group!`);
+      }
+
+      // Trigger notification refresh
+      window.dispatchEvent(new Event("notifications:refresh"));
+    } catch (error) {
+      console.error("Error joining group:", error);
+      alert(error.message || "Failed to join group");
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      await axios.put(
+        `http://localhost:5050/api/profile/${userId}`,
+        formData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setIsEditing(false);
+      if (onSave) onSave(formData);
+      alert("Profile updated successfully");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile");
+    }
+  };
 
   const getInitials = (name) => {
     return name
@@ -98,371 +225,155 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       .slice(0, 2);
   };
 
-  const handleInputChange = (field, value) => {
-    setTempData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      setImagePreview(dataUrl);
-      setTempData((prev) => ({ ...prev, profileImageUrl: dataUrl }));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleSave = () => {
-    setUserInfo((prev) => ({
-      ...tempData,
-      profileImageUrl:
-        imagePreview ?? tempData.profileImageUrl ?? prev.profileImageUrl,
-    }));
-    setIsEditing(false);
-    setImagePreview(null);
-
-    if (onSave) {
-      onSave({
-        ...tempData,
-        profileImageUrl: imagePreview ?? tempData.profileImageUrl,
-      });
-    }
-  };
-
-  const handleCancel = () => {
-    setTempData(userInfo);
-    setIsEditing(false);
-    setImagePreview(null);
-  };
-
-  const handleAddDemo = async () => {
-    try {
-      const updatedBooks = await addDemoBookToRead(userId);
-      setWantToReadBooks(Array.isArray(updatedBooks) ? updatedBooks : []);
-      alert('Demo book added to To-Read list');
-    } catch (err) {
-      console.error('Error adding book:', err);
-      alert('Failed to add book');
-    }
-  };
-
-  // --- Unified Remove (handles both tabs) ---
-  const handleRemove = async (googleBookId) => {
-    try {
-      let updatedWantToRead = wantToReadBooks;
-      let updatedCollection = collectionBooks;
-
-      if (activeTab === 'want-to-read') {
-        const res = await removeBookFromToRead(userId, googleBookId);
-        updatedWantToRead = Array.isArray(res) ? res : (res?.toRead || []);
-      } else {
-        const res = await removeFromCollections(userId, googleBookId);
-        updatedCollection = Array.isArray(res) ? res : (res?.collections || []);
-      }
-
-      setWantToReadBooks(updatedWantToRead);
-      setCollectionBooks(updatedCollection);
-      alert('Book removed');
-    } catch (err) {
-      console.error('Remove error:', err);
-      alert(err.response?.data?.error || 'Failed to remove book');
-    }
-  };
-
-  const handleMoveToCollections = async (googleBookId, status) => {
-    try {
-      const response = await moveToCollections(userId, googleBookId, status);
-      setWantToReadBooks(Array.isArray(response.toRead) ? response.toRead : []);
-      setCollectionBooks(Array.isArray(response.collections) ? response.collections : []);
-      alert(`Book moved to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
-    } catch (err) {
-      console.error('Error moving book:', err);
-      alert(err.response?.data?.error || 'Failed to move book');
-    }
-  };
-
-  const handleUpdateStatus = async (googleBookId, newStatus) => {
-    try {
-      const updatedBooks = await updateBookStatus(userId, googleBookId, newStatus);
-      setCollectionBooks(Array.isArray(updatedBooks) ? updatedBooks : []);
-      alert(`Book status updated to ${newStatus === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
-    } catch (err) {
-      console.error('Error updating book status:', err);
-      alert(err.response?.data?.error || 'Failed to update book status');
-    }
-  };
-
-  const toKey = (raw) => (raw || '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/&/g, 'and')
-    .replace(/-+/g, '-');
-
-  const handleJoinCategory = async (rawLabel) => {
-    try {
-      setJoiningCategory(rawLabel);
-      const categoryForUrl = encodeURIComponent(rawLabel);
-      const res = await joinGroup(categoryForUrl);
-
-      const key = toKey(rawLabel);
-      setJoinedGroups((prev) => {
-        if (prev.some(g => g.categoryKey === key)) return prev;
-        return [{ categoryKey: key, name: rawLabel, role: 'member', membersCount: (res.membersCount ?? 1) }, ...prev];
-      });
-
-      alert(res.alreadyMember ? `Already in ${rawLabel}` : `Joined ${rawLabel}!`);
-    } catch (err) {
-      console.error('Join failed:', err);
-      alert('Failed to join group');
-    } finally {
-      setJoiningCategory(null);
-    }
-  };
-
-  // --- REVIEW FORM ---
-  const ReviewForm = ({ book }) => {
-    const [rating, setRating] = useState(0);
-    const [comment, setComment] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [data, setData] = useState(null);
-    const [isSubmitted, setIsSubmitted] = useState(false);
-
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      if (!comment.trim()) {
-        setError('Comment cannot be empty');
-        return;
-      }
-      if (rating < 1 || rating > 5) {
-        setError('Rating must be 1-5');
-        return;
-      }
-      setError('');
-      setLoading(true);
-
-      const optimistic = {
-        _id: `temp-${Date.now()}`,
-        userId,
-        googleBookId: book.googleBookId,
-        rating,
-        comment,
-        reviewedAt: new Date().toISOString(),
-      };
-      setData(optimistic);
-
-      try {
-        const saved = await createReview(userId, book.googleBookId, rating, comment);
-        setData(saved);
-        setIsSubmitted(true);
-      } catch (err) {
-        setData(null);
-        setError('Failed to save review');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    return (
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-        {isSubmitted ? (
-          <div className="p-3 bg-green-50 border border-green-200 rounded text-sm">
-            <p className="text-green-800 font-medium">Review submitted!</p>
-            <p className="text-green-700">
-              <strong>{rating} stars</strong> – {comment}
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">Rating:</label>
-              <select
-                value={rating}
-                onChange={(e) => setRating(Number(e.target.value))}
-                className="px-2 py-1 border rounded text-sm"
-              >
-                <option value={0}>Select</option>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>{n} stars</option>
-                ))}
-              </select>
-            </div>
-
-            <textarea
-              placeholder="Write your review..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="w-full p-2 border rounded resize-none text-sm"
-              rows={3}
-            />
-
-            {error && <p className="text-red-600 text-xs">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : 'Submit Review'}
-            </button>
-          </form>
-        )}
-
-        {data && !isSubmitted && (
-          <div className="mt-3 p-3 bg-white rounded border text-sm">
-            <p>
-              <strong>{data.rating} stars</strong> – {data.comment}
-            </p>
-            <p className="text-xs text-gray-500">
-              {new Date(data.reviewedAt).toLocaleString()}
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // --- Safe Stats ---
-  const booksReadCount = Array.isArray(collectionBooks)
-    ? collectionBooks.filter(book => book.status === 'completed').length
-    : 0;
-
   const stats = [
-    { label: "Books Read", value: booksReadCount.toString(), icon: Book },
+    {
+      label: "Books Read",
+      value: books.filter((b) => b.status === "completed").length,
+      icon: Book,
+    },
     { label: "Reviews", value: "0", icon: Star },
     { label: "Followers", value: "0", icon: Users },
     { label: "Following", value: "0", icon: UserPlus },
   ];
 
-  const imgSrc = imagePreview || tempData.profileImageUrl || userInfo.profileImageUrl;
+  const filteredBooks = books.filter((book) => {
+    if (activeTab === "want-to-read") return book.status === "want-to-read";
+    if (activeTab === "currently-reading")
+      return book.status === "currently-reading";
+    if (activeTab === "completed") return book.status === "completed";
+    return false;
+  });
 
   const BookCard = ({ book }) => (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group">
-      {/* Clickable Cover */}
-      <div 
-        onClick={() => navigate(`/book/${book.googleBookId}`)}
-        className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-6 cursor-pointer"
-      >
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all">
+      <div className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-4">
         {book.thumbnail ? (
-          <img src={book.thumbnail} alt={book.title} className="max-h-full max-w-full object-contain" />
+          <img
+            src={book.thumbnail}
+            alt={book.title}
+            className="w-full h-full object-cover"
+          />
         ) : (
-          <span className="font-serif text-xl text-center text-gray-800 font-semibold leading-tight">
+          <span className="font-serif text-lg text-center text-gray-800 font-semibold leading-tight">
             {book.title}
           </span>
         )}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="rounded-full h-8 w-8 bg-white shadow-md flex items-center justify-center hover:bg-gray-50">
-            <Heart className="h-4 w-4 text-gray-600" />
-          </button>
-        </div>
-        <span className="absolute bottom-2 left-2 px-3 py-1 rounded-full text-xs font-medium bg-teal-600 text-white">
-          {activeTab === 'want-to-read' ? 'Want to Read' : book.status === 'currently-reading' ? 'Currently Reading' : 'Completed'}
+        <span
+          className={`absolute top-2 left-2 px-3 py-1 rounded-full text-xs font-medium ${
+            book.status === "completed"
+              ? "bg-teal-600 text-white"
+              : book.status === "currently-reading"
+              ? "bg-blue-600 text-white"
+              : "bg-teal-600 text-white"
+          }`}
+        >
+          {book.status === "want-to-read"
+            ? "Want to Read"
+            : book.status === "currently-reading"
+            ? "Reading"
+            : "Completed"}
         </span>
       </div>
 
       <div className="p-4">
-        {/* Clickable Title */}
-        <h3 
-          onClick={() => navigate(`/book/${book.googleBookId}`)}
-          className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900 cursor-pointer hover:text-orange-600 transition-colors"
-        >
+        <h3 className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900">
           {book.title}
         </h3>
-        <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
+        <p className="text-sm text-gray-600 mb-3">
+          {(book.authors || []).join(", ")}
+        </p>
 
-        {/* Buttons */}
-        <div className="mt-2 flex justify-between">
-          {activeTab === 'want-to-read' ? (
+        <div className="flex gap-2 mb-3">
+          {book.status === "want-to-read" && (
             <>
               <button
-                onClick={() => handleRemove(book.googleBookId)}
-                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+                onClick={() =>
+                  handleStatusChange(
+                    book.googleBookId,
+                    "want-to-read",
+                    "currently-reading"
+                  )
+                }
+                className="flex-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
               >
-                Remove
+                Start
               </button>
-              <div>
-                <button
-                  onClick={() => handleMoveToCollections(book.googleBookId, 'currently-reading')}
-                  className="text-xs px-2 py-1 bg-green-500 text-white rounded mr-1"
-                >
-                  Start
-                </button>
-                <button
-                  onClick={() => handleMoveToCollections(book.googleBookId, 'completed')}
-                  className="text-xs px-2 py-1 bg-blue-500 text-white rounded"
-                >
-                  Finish
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <select
-                value={book.status}
-                onChange={(e) => handleUpdateStatus(book.googleBookId, e.target.value)}
-                className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="currently-reading">Currently Reading</option>
-                <option value="completed">Completed</option>
-              </select>
               <button
-                onClick={() => handleRemove(book.googleBookId)}
-                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
+                onClick={() =>
+                  handleStatusChange(
+                    book.googleBookId,
+                    "want-to-read",
+                    "completed"
+                  )
+                }
+                className="flex-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Remove
+                Finish
               </button>
             </>
           )}
+
+          {book.status === "currently-reading" && (
+            <select
+              value={book.status}
+              onChange={(e) =>
+                handleStatusChange(
+                  book.googleBookId,
+                  book.status,
+                  e.target.value
+                )
+              }
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="currently-reading">Currently Reading</option>
+              <option value="completed">Completed</option>
+            </select>
+          )}
+
+          {book.status === "completed" && (
+            <select
+              value={book.status}
+              onChange={(e) =>
+                handleStatusChange(
+                  book.googleBookId,
+                  book.status,
+                  e.target.value
+                )
+              }
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="completed">Completed</option>
+            </select>
+          )}
+
+          <button
+            onClick={() => handleRemove(book.googleBookId, book.status)}
+            className="px-4 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Remove
+          </button>
         </div>
 
-        {/* Categories */}
-        {Array.isArray(book.categories) && book.categories.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-gray-100">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Book className="h-3.5 w-3.5 text-gray-500" />
-              <span className="text-xs font-medium text-gray-600">Categories</span>
+        {book.categories && book.categories.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-1 text-xs text-gray-600">
+              <Book className="h-3 w-3" />
+              <span>Categories</span>
             </div>
             <div className="flex flex-wrap gap-2">
-              {book.categories.map((c, idx) => {
-                const label = typeof c === "string" ? c : c?.name ?? "";
-                if (!label) return null;
-
-                const key = toKey(label);
-                const alreadyJoined = joinedGroups.some(g => g.categoryKey === key);
-                const isJoining = joiningCategory === label;
-
-                return (
-                  <button
-                    key={`${label}-${idx}`}
-                    onClick={() => {
-                      if (!alreadyJoined && !isJoining) handleJoinCategory(label);
-                    }}
-                    className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 shadow-sm hover:shadow-md font-medium
-                      ${alreadyJoined
-                        ? 'border-green-200 bg-green-50 text-green-800'
-                        : 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-gray-800 hover:from-amber-100 hover:to-orange-100'}
-                    `}
-                    title={alreadyJoined ? `Joined ${label}` : `Join ${label}`}
-                    disabled={isJoining}
-                  >
-                    <Book className="h-3 w-3" />
-                    {alreadyJoined
-                      ? `Joined ${label}`
-                      : isJoining
-                        ? `Joining… ${label}`
-                        : label}
-                  </button>
-                );
-              })}
+              {book.categories.slice(0, 3).map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleCategoryJoin(cat)}
+                  className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full hover:bg-yellow-200 transition-colors"
+                >
+                  <Book className="h-3 w-3" />
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
         )}
-
-        {/* Review Form */}
-        {activeTab === 'completed' && <ReviewForm book={book} />}
       </div>
     </div>
   );
@@ -472,68 +383,113 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="relative">
-              <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg bg-orange-500 flex items-center justify-center">
-                {imgSrc ? (
-                  <img src={imgSrc} alt={userInfo.name} className="h-full w-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-4xl font-serif font-bold text-white">{getInitials(userInfo.name)}</span>
-                )}
-              </div>
-              {isEditing && (
-                <div className="mt-3">
-                  <input type="file" id="profileImage" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  <label htmlFor="profileImage" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
-                    Change Photo
-                  </label>
-                </div>
+            <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg bg-orange-500 flex items-center justify-center">
+              {formData.profileImageUrl ? (
+                <img
+                  src={formData.profileImageUrl}
+                  alt={formData.name}
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                <span className="text-4xl font-serif font-bold text-white">
+                  {getInitials(formData.name)}
+                </span>
               )}
             </div>
 
             <div className="flex-1">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h1 className="font-serif text-3xl font-bold mb-2 text-gray-900">{userInfo.name}</h1>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{userInfo.location}</span>
-                    <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />Joined {userInfo.joinDate}</span>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className="font-serif text-3xl font-bold mb-2 text-gray-900 border-b-2 border-orange-500 focus:outline-none bg-transparent"
+                    />
+                  ) : (
+                    <h1 className="font-serif text-3xl font-bold mb-2 text-gray-900">
+                      {formData.name}
+                    </h1>
+                  )}
+
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-600 mb-4">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={formData.location}
+                        onChange={(e) =>
+                          setFormData({ ...formData, location: e.target.value })
+                        }
+                        placeholder="Location"
+                        className="flex items-center gap-1 border-b border-gray-300 focus:outline-none focus:border-orange-500"
+                      />
+                    ) : (
+                      <span className="flex items-center gap-1">
+                        <MapPin className="h-4 w-4" />
+                        {formData.location || "Location not set"}
+                      </span>
+                    )}
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      Joined March 2024
+                    </span>
                   </div>
                 </div>
-                {!isEditing && (
-                  <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
-                    <Settings className="h-4 w-4" />Edit Profile
-                  </button>
-                )}
+
+                <button
+                  onClick={() => {
+                    if (isEditing) {
+                      handleSaveProfile();
+                    } else {
+                      setIsEditing(true);
+                    }
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  {isEditing ? (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save
+                    </>
+                  ) : (
+                    <>
+                      <Settings className="h-4 w-4" />
+                      Edit Profile
+                    </>
+                  )}
+                </button>
               </div>
 
               {isEditing ? (
                 <textarea
-                  value={tempData.bio}
-                  onChange={(e) => handleInputChange("bio", e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg mb-4 text-gray-700 leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  value={formData.bio}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bio: e.target.value })
+                  }
+                  placeholder="Tell us about yourself..."
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 mb-6"
                   rows="3"
-                  placeholder="Tell us about your reading preferences..."
                 />
               ) : (
-                <p className="text-gray-700 mb-6 max-w-2xl leading-relaxed">{userInfo.bio}</p>
-              )}
-
-              {isEditing && (
-                <div className="flex gap-3 mb-6">
-                  <button onClick={handleSave} className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
-                    Save Changes
-                  </button>
-                  <button onClick={handleCancel} className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700">
-                    Cancel
-                  </button>
-                </div>
+                <p className="text-gray-700 mb-6 max-w-2xl leading-relaxed">
+                  {formData.bio ||
+                    "Avid reader and book enthusiast. Love fantasy, sci-fi, and mystery novels."}
+                </p>
               )}
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat) => (
-                  <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
+                  <div
+                    key={stat.label}
+                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow"
+                  >
                     <stat.icon className="h-5 w-5 mx-auto mb-2 text-orange-500" />
-                    <div className="text-2xl font-bold font-serif text-gray-900">{stat.value}</div>
+                    <div className="text-2xl font-bold font-serif text-gray-900">
+                      {stat.value}
+                    </div>
                     <div className="text-xs text-gray-600">{stat.label}</div>
                   </div>
                 ))}
@@ -546,40 +502,54 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
           <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
-            <button onClick={() => setActiveTab("currently-reading")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "currently-reading" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Currently Reading</button>
-            <button onClick={() => setActiveTab("want-to-read")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "want-to-read" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Want to Read</button>
-            <button onClick={() => setActiveTab("completed")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "completed" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Completed</button>
+            <button
+              onClick={() => setActiveTab("want-to-read")}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === "want-to-read"
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Want to Read
+            </button>
+            <button
+              onClick={() => setActiveTab("currently-reading")}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === "currently-reading"
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Currently Reading
+            </button>
+            <button
+              onClick={() => setActiveTab("completed")}
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                activeTab === "completed"
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Completed
+            </button>
           </div>
         </div>
 
-        <div className="py-8">
-          {activeTab === 'want-to-read' ? (
-            <>
-              <button onClick={handleAddDemo} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">Add Demo Book</button>
-              {(!Array.isArray(wantToReadBooks) || wantToReadBooks.length === 0) ? (
-                <p className="text-center text-gray-500 py-12">No books yet. Go add some!</p>
-              ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {wantToReadBooks.map((book) => (
-                    <BookCard key={book.googleBookId} book={book} />
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {(!Array.isArray(collectionBooks) || collectionBooks.length === 0) ? (
-                <p className="text-center text-gray-500 py-12">No books yet in this collection.</p>
-              ) : (
-                collectionBooks
-                  .filter(book => book.status === activeTab)
-                  .map((book) => (
-                    <BookCard key={book.googleBookId} book={book} />
-                  ))
-              )}
-            </div>
-          )}
-        </div>
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">Loading books...</p>
+          </div>
+        ) : filteredBooks.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600">No books in this category yet.</p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredBooks.map((book) => (
+              <BookCard key={book.googleBookId} book={book} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

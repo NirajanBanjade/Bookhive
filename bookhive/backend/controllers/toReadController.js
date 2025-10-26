@@ -2,7 +2,7 @@
 const ToRead = require('../models/ToRead');
 const Collection = require('../models/Collection');
 const Notification = require('../models/Notification');
-const NotificationService = require('../services/NotificationService'); // add service
+const NotificationService = require('../services/NotificationService');
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 
 // Utility to clamp a number within min/max or return default
@@ -98,7 +98,6 @@ exports.searchToReadBooks = async (req, res) => {
 
 exports.addBookToToRead = async (req, res) => {
   try {
-    // TIP: if this route is behind auth, prefer req.user.id (and validate it matches the param)
     const userId = req.params.userId;
     const { googleBookId, title, authors = [], thumbnail, categories = [] } = req.body;
 
@@ -120,7 +119,7 @@ exports.addBookToToRead = async (req, res) => {
       list = new ToRead({ userId, books: [book] });
       await list.save();
 
-      // create notification (new list case)
+      // create notification
       await NotificationService.createToReadAdded({
         recipientId: userId,
         actorId: userId,
@@ -139,7 +138,7 @@ exports.addBookToToRead = async (req, res) => {
     list.books.push(book);
     await list.save();
 
-    // create notification (added-to-existing-list case)
+    // create notification
     await NotificationService.createToReadAdded({
       recipientId: userId,
       actorId: userId,
@@ -168,7 +167,7 @@ exports.removeBookFromToRead = async (req, res) => {
     list.books = list.books.filter(b => b.googleBookId !== googleBookId);
     await list.save();
 
-    // Create notification (kept as-is)
+    // Create notification
     await Notification.create({
       userId,
       message: `Book "${bookToRemove.title}" was removed from your to-read list.`,
@@ -181,45 +180,93 @@ exports.removeBookFromToRead = async (req, res) => {
   }
 };
 
-exports.moveBookToCollections = async (req, res) => {
+// NEW: Move book from To-Read to Collections (for Start/Finish buttons)
+exports.moveBookToCollectionsRoute = async (req, res) => {
   try {
     const { userId, googleBookId } = req.params;
-    const { status = 'currently-reading' } = req.body; // Default to currently-reading
+    const { status = 'currently-reading' } = req.body;
 
     if (!['currently-reading', 'completed'].includes(status)) {
       return res.status(400).json({ error: 'Invalid status' });
     }
 
-    // Find the user's To-Read document
     const toReadList = await ToRead.findOne({ userId });
     if (!toReadList) {
       return res.status(404).json({ error: 'User to-read list not found' });
     }
 
-    // Find the book object
     const book = toReadList.books.find(b => b.googleBookId === googleBookId);
     if (!book) {
       return res.status(404).json({ error: 'Book not found in to-read list' });
     }
 
-    // Add to Collections with status
+    // Add to Collections
+    let collection = await Collection.findOne({ userId });
+    if (!collection) {
+      collection = new Collection({ userId, books: [] });
+    }
+
+    const existsInCollection = collection.books.some(b => b.googleBookId === googleBookId);
+    if (!existsInCollection) {
+      collection.books.push({ ...book.toObject(), status });
+      await collection.save();
+    }
+
+    // Remove from To-Read
+    toReadList.books = toReadList.books.filter(b => b.googleBookId !== googleBookId);
+    await toReadList.save();
+
+    // Create notification
+    await Notification.create({
+      userId,
+      message: `Book "${book.title}" moved to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}.`,
+      type: 'success',
+    });
+
+    return res.status(200).json({
+      message: 'Book moved successfully',
+      toRead: toReadList.books,
+      collections: collection.books,
+    });
+  } catch (err) {
+    console.error('Error moving book:', err);
+    return res.status(500).json({ error: err.message });
+  }
+};
+
+exports.moveBookToCollections = async (req, res) => {
+  try {
+    const { userId, googleBookId } = req.params;
+    const { status = 'currently-reading' } = req.body;
+
+    if (!['currently-reading', 'completed'].includes(status)) {
+      return res.status(400).json({ error: 'Invalid status' });
+    }
+
+    const toReadList = await ToRead.findOne({ userId });
+    if (!toReadList) {
+      return res.status(404).json({ error: 'User to-read list not found' });
+    }
+
+    const book = toReadList.books.find(b => b.googleBookId === googleBookId);
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found in to-read list' });
+    }
+
     const collection = await Collection.findOneAndUpdate(
       { userId, 'books.googleBookId': { $ne: googleBookId } },
       { $push: { books: { ...book.toObject(), status } }, $setOnInsert: { userId } },
       { upsert: true, new: true }
     );
 
-    // Remove from To-Read
     await ToRead.updateOne({ userId }, { $pull: { books: { googleBookId } } });
 
-    // Create notification (kept as-is)
     await Notification.create({
       userId,
       message: `Book "${book.title}" moved from To-Read to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}.`,
       type: 'success',
     });
 
-    // Return updated lists
     const updatedToRead = (await ToRead.findOne({ userId })) || { userId, books: [] };
     const updatedCollection = (await Collection.findOne({ userId })) || { userId, books: [] };
 
@@ -260,7 +307,6 @@ exports.removeBookFromCollections = async (req, res) => {
     collection.books = collection.books.filter(b => b.googleBookId !== googleBookId);
     await collection.save();
 
-    // Create notification (kept as-is)
     await Notification.create({
       userId,
       message: `Book "${bookToRemove.title}" was removed from your collection.`,

@@ -8,18 +8,17 @@ const {
   removeBookFromToRead,
   searchToReadBooks,
   moveBookToCollections,
+  moveBookToCollectionsRoute, 
 } = require('../controllers/toReadController');
 
-
-// get routes
+// GET routes
 router.get('/:userId/search', searchToReadBooks);
-
-// ✅ THEN PUT GENERIC ROUTES
 router.get('/:userId', getToReadList);
 
 // POST routes
 router.post('/:userId', addBookToToRead);
 router.post('/:userId/:googleBookId/move-to-collections', moveBookToCollections);
+router.post('/:userId/:googleBookId/move', moveBookToCollectionsRoute); // NEW: Add this route
 
 // DELETE routes
 router.delete('/:userId/:googleBookId', removeBookFromToRead);
