@@ -11,6 +11,7 @@ import {
   Settings,
   Save,
   X,
+  Camera,
 } from "lucide-react";
 import BookModal from "../model/BookModal";
 import { createReview } from "../../services/reviewsService";
@@ -23,6 +24,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const [userId, setUserId] = useState(null);
   const [favorites, setFavorites] = useState(new Set());
   const [selectedBookId, setSelectedBookId] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false); // NEW: Image upload state
 
   // Review state for each book
   const [reviewData, setReviewData] = useState({});
@@ -116,6 +118,57 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
 
     fetchBooks();
   }, [userId]);
+
+  // NEW: Handle image upload
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload an image file (JPEG, PNG, GIF, or WebP)');
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      const token = localStorage.getItem('token');
+
+      const formDataUpload = new FormData();
+      formDataUpload.append('avatar', file);
+
+      const response = await axios.post(
+        'http://localhost:5050/api/user/upload-avatar',
+        formDataUpload,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // Update the formData state with the new image URL
+      setFormData((prev) => ({
+        ...prev,
+        profileImageUrl: response.data.profileImageUrl,
+      }));
+
+      alert('Profile picture updated successfully!');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload profile picture. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   const handleRemove = async (googleBookId, currentStatus) => {
     try {
@@ -260,7 +313,13 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       
       // DEBUG: Log to console
       console.log("Review submitted for book:", googleBookId);
-      console.log("Updated reviewData:", { [googleBookId]: { rating: review.rating, comment: review.comment, submitted: true }});
+      console.log("Updated reviewData:", { 
+        [googleBookId]: { 
+          rating: review.rating, 
+          comment: review.comment, 
+          submitted: true 
+        }
+      });
       
     } catch (error) {
       console.error("Error submitting review:", error);
@@ -354,11 +413,41 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
       {/* Profile Header Section */}
       <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8 mb-8 shadow-sm border border-orange-100">
         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
-          {/* Profile Image */}
+          {/* Profile Image - UPDATED WITH UPLOAD BUTTON */}
           <div className="relative">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
-              {formData.name ? formData.name.charAt(0).toUpperCase() : "U"}
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-4xl font-bold shadow-lg overflow-hidden">
+              {formData.profileImageUrl ? (
+                <img 
+                  src={`http://localhost:5050${formData.profileImageUrl}`} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                formData.name ? formData.name.charAt(0).toUpperCase() : "U"
+              )}
             </div>
+            {/* Upload button - only shown when editing */}
+            {isEditing && (
+              <label 
+                htmlFor="avatar-upload" 
+                className="absolute bottom-0 right-0 bg-orange-500 text-white rounded-full p-2 cursor-pointer hover:bg-orange-600 transition-colors shadow-lg"
+                title="Change profile picture"
+              >
+                {uploadingImage ? (
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                ) : (
+                  <Camera className="h-5 w-5" />
+                )}
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={uploadingImage}
+                />
+              </label>
+            )}
           </div>
 
           {/* Profile Info */}

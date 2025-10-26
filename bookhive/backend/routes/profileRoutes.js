@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const authenticateToken = require("../middleware/jwt_auth");
+const upload = require("../middleware/upload"); // ← ADD THIS LINE
 const {
   getUserProfile,
   updateProfile,
+  uploadAvatar, // ← ADD THIS
 } = require("../controllers/profileController");
 
 /**
@@ -29,10 +31,14 @@ router.get("/:userId", getUserProfile);
 // Body: { username, name, bio, location, profileImageUrl }
 // Note: Email cannot be changed through this endpoint
 router.put("/", authenticateToken, updateProfile);
-router.put("/profile", authenticateToken, updateProfile);  // Alternative path for frontend
+router.put("/profile", authenticateToken, updateProfile);
+
+// POST /api/profile/upload-avatar OR /api/user/upload-avatar - Upload profile picture (protected)
+// Requires: Authorization: Bearer <jwt_token> header
+// Accepts: multipart/form-data with 'avatar' field
+router.post("/upload-avatar", authenticateToken, upload.single('avatar'), uploadAvatar); 
 
 // TODO: Future endpoints to implement:
-// POST /api/profile/avatar - Upload profile picture
 // PUT /api/profile/email - Change email (requires verification + 2FA)
 
 module.exports = router;

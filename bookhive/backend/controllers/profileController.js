@@ -100,5 +100,50 @@ const updateProfile = async (req, res) => {
   }
 };
 
+/**
+ * POST /api/profile/upload-avatar
+ * Uploads user's profile picture
+ * Protected route - requires valid JWT token
+ * Handles file upload via multer middleware
+ */
+const uploadAvatar = async (req, res) => {
+  try {
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const userId = req.user.id;
+
+    // Construct the URL path for the uploaded image
+    const profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+
+    // Update user's profileImageUrl in database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profileImageUrl },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      message: 'Profile picture uploaded successfully',
+      profileImageUrl: profileImageUrl,
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        profileImageUrl: updatedUser.profileImageUrl,
+      }
+    });
+  } catch (err) {
+    console.error('Error uploading avatar:', err);
+    res.status(500).json({ error: err.message || 'Failed to upload profile picture' });
+  }
+};
+
 // Export functions for use in routes
-module.exports = { getUserProfile, updateProfile };
+module.exports = { getUserProfile, updateProfile, uploadAvatar };
