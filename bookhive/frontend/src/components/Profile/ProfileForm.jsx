@@ -12,6 +12,7 @@ import {
   Save,
   X,
 } from "lucide-react";
+import BookModal from "../model/BookModal";
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -20,6 +21,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState(null);
   const [favorites, setFavorites] = useState(new Set());
+  const [selectedBookId, setSelectedBookId] = useState(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -175,29 +177,11 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
-  const handleToggleFavorite = async (googleBookId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const isFavorited = favorites.has(googleBookId);
-
-      if (isFavorited) {
-        await axios.delete(`http://localhost:5050/api/favorites/${userId}/${googleBookId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setFavorites((prev) => {
-          const newSet = new Set(prev);
-          newSet.delete(googleBookId);
-          return newSet;
-        });
-      } else {
-        await axios.post(`http://localhost:5050/api/favorites/${userId}/${googleBookId}`, {}, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setFavorites((prev) => new Set(prev).add(googleBookId));
-      }
-    } catch (error) {
-      console.error("Error toggling favorite:", error);
-    }
+  const handleToggleFavorite = (googleBookId, e) => {
+    if (e) e.stopPropagation();
+    
+    // Open modal to show book details
+    setSelectedBookId(googleBookId);
   };
 
   const handleCategoryJoin = async (categoryKey) => {
@@ -317,10 +301,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
 
         {/* Heart/Favorite Button */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleToggleFavorite(book.googleBookId);
-          }}
+          onClick={(e) => handleToggleFavorite(book.googleBookId, e)}
           className={`absolute top-2 right-2 p-2 rounded-full ${
             favorites.has(book.googleBookId)
               ? 'bg-red-100 text-red-600'
@@ -611,6 +592,14 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           </div>
         )}
       </div>
+
+      {/* Book Details Modal */}
+      {selectedBookId && (
+        <BookModal
+          googleBookId={selectedBookId}
+          onClose={() => setSelectedBookId(null)}
+        />
+      )}
     </div>
   );
 };
