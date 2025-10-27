@@ -1,7 +1,6 @@
 const path = require('path');
-// require('dotenv').config();
-
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+
 // Load Google Books API key from environment
 const GOOGLE_BOOKS_API_KEY = process.env.GOOGLE_BOOKS_API_KEY;
 console.log('=================================');
@@ -16,13 +15,13 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 
 const app = express();
-// app.use(cors());
+
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true
 }));
 app.use(express.json());
-const requireAuth = require('./middleware/jwt_auth');
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'))); 
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
@@ -33,7 +32,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.log(err));
 
-// Placeholder root route for temporary test of google books api key
+// Test routes
 app.get('/api/test-google-books', (req, res) => {
   if (GOOGLE_BOOKS_API_KEY) {
     res.send(`Google Books API key loaded: ${GOOGLE_BOOKS_API_KEY.substring(0, 5)}...`);
@@ -49,48 +48,35 @@ app.get('/health', (_req, res) => res.json({ ok: true, service: 'bookhive-backen
 const toReadRoutes = require('./routes/toReadRoutes');
 app.use('/api/to-read', toReadRoutes);
 
-// Register user routes
 const toGetUserRoutes = require('./routes/toGetUserRoutes');
 app.use('/api/users', toGetUserRoutes);
 
-// Consolidated books routes 
 const booksRoutes = require('./routes/booksRoutes');
 app.use('/api/books', booksRoutes);
 
-const toUserProfile=require('./routes/toUserData');
+const toUserProfile = require('./routes/toUserData');
 app.use('/api/user', toUserProfile);
 
-
-const toUpdateUserPassword=require('./routes/toUpdatePassword');
+const toUpdateUserPassword = require('./routes/toUpdatePassword');
 app.use('/api/update-password', toUpdateUserPassword);
 
-// Profile API routes - handles user profile viewing and editing
 const profileRoutes = require('./routes/profileRoutes');
 app.use('/api/profile', profileRoutes);
-const collectionsRoutes = require('./routes/collectionsRoutes');  
+app.use('/api/user', profileRoutes); 
+
+const collectionsRoutes = require('./routes/collectionsRoutes');
 app.use('/api/collections', collectionsRoutes);
 
-const notificationRoutes = require("./routes/notifications");
-app.use("/api/notifications", notificationRoutes);
+const notificationRoutes = require('./routes/notifications');
+app.use('/api/notifications', notificationRoutes);
 
-const reviewsRoutes = require('./routes/reviewsRoutes'); 
+const reviewsRoutes = require('./routes/reviewsRoutes');
 app.use('/api/reviews', reviewsRoutes);
 
-// Recommendation API routes - handles interest profile and recommendations
 const recommendationsRoutes = require('./routes/recommendationsRoutes');
 app.use('/api/recommendations', recommendationsRoutes);
 
-// Group join/leave (and later posts)
-//Temporarily disabled Group Routes in app.js (lines 82-89) due to existing bugs:
-//- Missing models/Post.js
-//- Incorrect auth middleware reference in groupRoutes.js
-
 const groupRoutes = require('./routes/groupRoutes');
-app.use('/api', requireAuth, groupRoutes);
-
-//display user details in a specific group.
-//const groupsRouter = require('./routes/userDetailsSameGroup');
-//app.use('/api', groupsRouter);
-
+app.use('/api', groupRoutes);
 
 module.exports = app;

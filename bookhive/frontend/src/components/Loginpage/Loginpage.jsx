@@ -23,7 +23,7 @@ const Loginpage = () => {
 
 
   const handleModeSwitch = () => {
-    setMode((m) => (m === "login" ? "register" : "login")); // here the modes are: login, register, forgot, reset.
+    setMode((m) => (m === "login" ? "register" : "login"));
     setuser("");
     setemail("");
     setpassword("");
@@ -47,7 +47,7 @@ const Loginpage = () => {
     setSuccessMsg("");
     try {
       if (mode === "login") {
-        if (!identifier || !password) return alert("Please fill all fields."); // this is specifically for login field only.
+        if (!identifier || !password) return alert("Please fill all fields.");
         console.log("Login", { identifier, password });
         const res = await fetch(`${BASE_URL}/api/users/login`, {
           method: "POST",
@@ -55,9 +55,9 @@ const Loginpage = () => {
           body: JSON.stringify({ name_email: identifier, password }),
         });
         const data = await handle(res);
-        localStorage.setItem("jwt_token", data.token);
+        localStorage.setItem("token", data.token); //FIXED: changed "jwt_token" to "token"
         setSuccessMsg("Log in successful!!!");
-      } else if (mode === "register") { // this is specifically for register field only.
+      } else if (mode === "register") {
         if (!user || !email || !password || !confirmPassword)
           return alert("Please fill all fields.");
         if (password !== confirmPassword)
@@ -84,7 +84,7 @@ const Loginpage = () => {
         setSuccessMsg("If the email is registered, a reset code has been sent.");
         setMode("reset");
 
-      }// three are like enums above so only one can be choosen. but reset is inside the forgot mode. so we need to handle it separately.
+      }
       if (mode === "reset") {
         if (!resetCode || !newPw || !newPw2) return setErrorMsg("Please fill all fields.");
         if (newPw !== newPw2) return setErrorMsg("Passwords do not match.");
@@ -113,12 +113,12 @@ const Loginpage = () => {
         </div>
 
         <form className="formSection" onSubmit={onSubmit}>
-          {errorMsg && ( // red letters of error functionality.
+          {errorMsg && (
             <div className="formError" role="alert" aria-live="polite">
               {errorMsg}
             </div>
           )}
-          {successMsg && ( // green letters of success
+          {successMsg && (
             <div className="formSuccess" role="status" aria-live="polite">
               {successMsg}
             </div>
@@ -251,4 +251,4 @@ const Loginpage = () => {
     </div>
   );
 }
-export default Loginpage; 
+export default Loginpage;

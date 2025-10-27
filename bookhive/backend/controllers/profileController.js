@@ -1,4 +1,4 @@
-const getUser = require("../models/User");
+const User = require("../models/User");
 
 /**
  * GET /api/profile/:userId
@@ -11,7 +11,7 @@ const getUserProfile = async (req, res) => {
     const { userId } = req.params;
 
     // Find user by MongoDB _id, exclude sensitive fields like passwordHash
-    const user = await getUser.findById(userId);
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -25,6 +25,7 @@ const getUserProfile = async (req, res) => {
         name: user.name || user.username,
         email: user.email, // Returned for display but cannot be edited
         bio: user.bio,
+        location: user.location, // Added location field
         profileImageUrl: user.profileImageUrl,
         booksRead: user.booksRead,
         currentlyReading: user.currentlyReading,
@@ -32,6 +33,7 @@ const getUserProfile = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error('Error fetching user profile:', err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -42,7 +44,7 @@ const getUserProfile = async (req, res) => {
  * Protected route - requires valid JWT token
  * Used by ProfileForm component when user saves changes
  *
- * EDITABLE FIELDS: name, bio
+ * EDITABLE FIELDS: username, name, bio, location, profileImageUrl
  * NON-EDITABLE FIELDS: email (requires separate verification flow for security)
  */
 const updateProfile = async (req, res) => {
@@ -50,19 +52,21 @@ const updateProfile = async (req, res) => {
     // Get user ID from JWT token (set by authenticateToken middleware)
     const userId = req.user.id;
 
-    // Only allow updating name and bio
-    // Email is excluded for security - changing email requires separate verification
-    const { name, bio } = req.body;
+    // Extract allowed fields from request body
+    const { username, name, bio, location, profileImageUrl } = req.body;
 
     // Build update object with only allowed fields
     const updateData = {};
+    if (username !== undefined) updateData.username = username;
     if (name !== undefined) updateData.name = name;
     if (bio !== undefined) updateData.bio = bio;
+    if (location !== undefined) updateData.location = location;
+    if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
 
     // Update user profile fields in MongoDB
     // new: true returns updated document
     // runValidators: true runs schema validation on update
-    const updatedUser = await getUser.findByIdAndUpdate(userId, updateData, {
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, {
       new: true,
       runValidators: true,
     });
@@ -80,13 +84,66 @@ const updateProfile = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email, // Return for display but wasn't updated
         bio: updatedUser.bio,
+        location: updatedUser.location,
         profileImageUrl: updatedUser.profileImageUrl,
       },
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Error updating profile:', err);
+    
+    // Handle duplicate username error
+    if (err.code === 11000 && err.keyPattern && err.keyPattern.username) {
+      return res.status(400).json({ error: 'Username already exists. Please choose a different username.' });
+    }
+    
+    res.status(500).json({ error: err.message || 'Failed to update profile' });
+  }
+};
+
+/**
+ * POST /api/profile/upload-avatar
+ * Uploads user's profile picture
+ * Protected route - requires valid JWT token
+ * Handles file upload via multer middleware
+ */
+const uploadAvatar = async (req, res) => {
+  try {
+    // Check if file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const userId = req.user.id;
+
+    // Construct the URL path for the uploaded image
+    const profileImageUrl = `/uploads/profiles/${req.file.filename}`;
+
+    // Update user's profileImageUrl in database
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { profileImageUrl },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({
+      message: 'Profile picture uploaded successfully',
+      profileImageUrl: profileImageUrl,
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        profileImageUrl: updatedUser.profileImageUrl,
+      }
+    });
+  } catch (err) {
+    console.error('Error uploading avatar:', err);
+    res.status(500).json({ error: err.message || 'Failed to upload profile picture' });
   }
 };
 
 // Export functions for use in routes
-module.exports = { getUserProfile, updateProfile };
+module.exports = { getUserProfile, updateProfile, uploadAvatar };

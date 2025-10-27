@@ -17,7 +17,29 @@ export default function SearchPage() {
   const [nextPage, setNextPage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const userId = "user123"; // replace with actual logged-in user ID
+  
+  // FIXED: Get real userId from logged-in user
+  const [userId, setUserId] = useState(null);
+
+  // Fetch logged-in user ID
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const response = await axios.get('http://localhost:5050/api/user/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        setUserId(response.data._id || response.data.id);
+      } catch (err) {
+        console.error('Error fetching user:', err);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   // Auto-search when URL query changes
   useEffect(() => {
@@ -88,10 +110,19 @@ export default function SearchPage() {
     setPage(target);
   };
 
-  // Add to To-Read list (from your friend's code)
+  // FIXED: Add to To-Read with notification refresh
   const handleAddToRead = async (book) => {
+    if (!userId) {
+      alert('Please login first');
+      return;
+    }
+
     try {
       await axios.post(`http://localhost:5050/api/to-read/${userId}`, book);
+      
+      // Trigger notification refresh
+      window.dispatchEvent(new Event('notifications:refresh'));
+      
       alert(`Added "${book.title}" to your To-Read list!`);
     } catch (err) {
       console.error(err);
@@ -156,12 +187,13 @@ export default function SearchPage() {
               </div>
             </div>
 
-            {/* Add to To-Read button (from your friend's code) */}
+            {/* Add to To-Read button */}
             <button
               onClick={() => handleAddToRead(b)}
-              className="w-full px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+              disabled={!userId}
+              className="w-full px-3 py-2 text-sm bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add to To-Read
+              {userId ? 'Add to To-Read' : 'Login to Add'}
             </button>
           </div>
         ))}

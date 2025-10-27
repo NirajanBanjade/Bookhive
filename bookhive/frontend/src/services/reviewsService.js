@@ -7,9 +7,19 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+// Add token to requests
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const createReview = async (userId, googleBookId, rating, comment) => {
   try {
-    const response = await api.post('/reviews', { userId, googleBookId, rating, comment });
+    const response = await api.post(
+      '/reviews', 
+      { userId, googleBookId, rating, comment },
+      { headers: getAuthHeaders() }
+    );
     return response.data;
   } catch (error) {
     console.error('Create review failed:', error);
@@ -17,7 +27,6 @@ export const createReview = async (userId, googleBookId, rating, comment) => {
   }
 };
 
-// Get all reviews for a specific book
 export const getReviewsByBook = async (googleBookId) => {
   try {
     const response = await api.get(`/reviews/${googleBookId}`);
@@ -28,7 +37,6 @@ export const getReviewsByBook = async (googleBookId) => {
   }
 };
 
-// Calculate average rating from reviews array
 export const calculateAverageRating = (reviews) => {
   if (!reviews || reviews.length === 0) return 0;
   const sum = reviews.reduce((acc, review) => acc + (review.rating || 0), 0);

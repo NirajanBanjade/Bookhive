@@ -12,11 +12,11 @@ exports.getCollectionsList = async (req, res) => {
   }
 };
 
-// Add a book directly to collections (optional for later)
+// Add a book directly to collections
 exports.addBookToCollections = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { googleBookId, title, authors = [], thumbnail, categories=[] } = req.body;
+    const { googleBookId, title, authors = [], thumbnail, categories = [] } = req.body;
 
     if (!googleBookId || !title) {
       return res.status(400).json({ error: 'googleBookId and title are required' });
@@ -24,7 +24,7 @@ exports.addBookToCollections = async (req, res) => {
 
     let list = await Collection.findOne({ userId });
     if (!list) {
-      list = new Collection({ userId, books: [{ googleBookId, title, authors, thumbnail,categories }] });
+      list = new Collection({ userId, books: [{ googleBookId, title, authors, thumbnail, categories }] });
     } else {
       const exists = list.books.some(b => b.googleBookId === googleBookId);
       if (!exists) list.books.push({ googleBookId, title, authors, thumbnail, categories });
@@ -37,8 +37,7 @@ exports.addBookToCollections = async (req, res) => {
   }
 };
 
-
-// Update book status (in-progress <-> finished)
+// Update book status (currently-reading <-> completed)
 exports.updateBookStatus = async (req, res) => {
   try {
     const userId = req.params.userId;
@@ -47,25 +46,41 @@ exports.updateBookStatus = async (req, res) => {
 
     const validStatuses = ['currently-reading', 'completed'];
     if (!validStatuses.includes(status)) {
-      return res.status(400).json({ error: 'Invalid status: must be currently-reading or completed' });
+      return res.status(400).json({ error: 'Invalid status' });
     }
 
-    const list = await Collection.findOneAndUpdate(
-      { userId, 'books.googleBookId': googleBookId },
-      { $set: { 'books.$.status': status } },
-      { new: true }
-    );
+    const collection = await Collection.findOne({ userId });
+    if (!collection) {
+      return res.status(404).json({ error: 'Collection not found' });
+    }
 
-    if (!list) {
+    const book = collection.books.find(b => b.googleBookId === googleBookId);
+    if (!book) {
       return res.status(404).json({ error: 'Book not found in collection' });
     }
 
-    res.status(200).json(list);
+    // Update status
+    book.status = status;
+    await collection.save();
+
+    // Create notification
+    await Notification.create({
+      userId,
+      message: `Book "${book.title}" marked as ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}.`,
+      type: 'success',
+    });
+
+    res.status(200).json({
+      message: 'Status updated',
+      books: collection.books,
+    });
   } catch (err) {
+    console.error('Error updating status:', err);
     res.status(500).json({ error: err.message });
   }
 };
 
+// Remove book from collections
 exports.removeBookFromCollections = async (req, res) => {
   try {
     const { userId, googleBookId } = req.params;

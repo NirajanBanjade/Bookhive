@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 import {
+  Heart,
   MapPin,
   Calendar,
   Book,
@@ -8,581 +9,824 @@ import {
   Users,
   UserPlus,
   Settings,
-  Heart,
+  Save,
+  X,
+  Camera,
 } from "lucide-react";
-import { getToReadBooks, addDemoBookToRead, removeBookFromToRead } from '../../services/toReadService';
-import { getCollections, moveToCollections, updateBookStatus, removeFromCollections } from '../../services/collectionsService';
-import { joinGroup } from '../../services/groupService';
-import { createReview } from '../../services/reviewsService';
+import BookModal from "../model/BookModal";
+import { createReview } from "../../services/reviewsService";
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
-  const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("currently-reading");
-  const [wantToReadBooks, setWantToReadBooks] = useState([]);
-  const [collectionBooks, setCollectionBooks] = useState([]);
-  const [joinedGroups, setJoinedGroups] = useState([]);
-  const [joiningCategory, setJoiningCategory] = useState(null);
-  const userId = 'user123';
-
-  const defaultUser = {
-    name: "John Doe",
-    email: "john.doe@example.com",
-    bio: "Avid reader and book enthusiast. Love fantasy, sci-fi, and mystery novels.",
-    profileImageUrl: null,
-    location: "San Francisco, CA",
-    joinDate: "March 2024",
-  };
-
-  const initialUser = userData || defaultUser;
-
-  const [userInfo, setUserInfo] = useState(initialUser);
   const [isEditing, setIsEditing] = useState(false);
-  const [tempData, setTempData] = useState(initialUser);
-  const [imagePreview, setImagePreview] = useState(null);
+  const [activeTab, setActiveTab] = useState("want-to-read");
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState(null);
+  const [favorites, setFavorites] = useState(new Set());
+  const [selectedBookId, setSelectedBookId] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
-  // --- Fetch To-Read ---
-  useEffect(() => {
-    if (activeTab === 'want-to-read') {
-      const fetchBooks = async () => {
-        try {
-          const books = await getToReadBooks(userId);
-          setWantToReadBooks(Array.isArray(books) ? books : []);
-        } catch (err) {
-          console.error('Error fetching to-read list:', err);
-          setWantToReadBooks([]);
-        }
-      };
-      fetchBooks();
-    }
-  }, [activeTab, userId]);
+  // Review state for each book
+  const [reviewData, setReviewData] = useState({});
 
-  // --- Fetch Collections ---
-  useEffect(() => {
-    if (activeTab === 'currently-reading' || activeTab === 'completed') {
-      const fetchCollections = async () => {
-        try {
-          const books = await getCollections(userId);
-          setCollectionBooks(Array.isArray(books) ? books : []);
-        } catch (err) {
-          console.error('Error fetching collections:', err);
-          setCollectionBooks([]);
-        }
-      };
-      fetchCollections();
-    }
-  }, [activeTab, userId]);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    bio: "",
+    location: "",
+    profileImageUrl: "",
+  });
 
-  // --- Fetch Joined Groups ---
   useEffect(() => {
-    const fetchJoinedGroups = async () => {
+    const fetchCurrentUser = async () => {
       try {
-        const res = await fetch('/api/me/groups', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('jwt_token')}` }
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
+
+        const response = await axios.get("http://localhost:5050/api/user/me", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const data = await res.json();
-        setJoinedGroups(Array.isArray(data.items) ? data.items : []);
-      } catch (err) {
-        console.error('Error fetching joined groups:', err);
-        setJoinedGroups([]);
+
+        const user = response.data;
+        setUserId(user._id || user.id);
+        setFormData({
+          name: user.username || user.name || "",
+          email: user.email || "",
+          bio: user.bio || "",
+          location: user.location || "",
+          profileImageUrl: user.profileImageUrl || "",
+        });
+      } catch (error) {
+        console.error("Error fetching user:", error);
       }
     };
-    fetchJoinedGroups();
+
+    fetchCurrentUser();
   }, []);
 
-  const getInitials = (name) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
-  const handleInputChange = (field, value) => {
-    setTempData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target.result;
-      setImagePreview(dataUrl);
-      setTempData((prev) => ({ ...prev, profileImageUrl: dataUrl }));
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (!userId) return;
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(`http://localhost:5050/api/favorites/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFavorites(new Set(response.data.map((fav) => fav.googleBookId)));
+      } catch (error) {
+        console.error("Error fetching favorites:", error);
+      }
     };
-    reader.readAsDataURL(file);
-  };
 
-  const handleSave = () => {
-    setUserInfo((prev) => ({
-      ...tempData,
-      profileImageUrl:
-        imagePreview ?? tempData.profileImageUrl ?? prev.profileImageUrl,
-    }));
-    setIsEditing(false);
-    setImagePreview(null);
+    fetchFavorites();
+  }, [userId]);
 
-    if (onSave) {
-      onSave({
-        ...tempData,
-        profileImageUrl: imagePreview ?? tempData.profileImageUrl,
-      });
-    }
-  };
-
-  const handleCancel = () => {
-    setTempData(userInfo);
-    setIsEditing(false);
-    setImagePreview(null);
-  };
-
-  const handleAddDemo = async () => {
-    try {
-      const updatedBooks = await addDemoBookToRead(userId);
-      setWantToReadBooks(Array.isArray(updatedBooks) ? updatedBooks : []);
-      alert('Demo book added to To-Read list');
-    } catch (err) {
-      console.error('Error adding book:', err);
-      alert('Failed to add book');
-    }
-  };
-
-  // --- Unified Remove (handles both tabs) ---
-  const handleRemove = async (googleBookId) => {
-    try {
-      let updatedWantToRead = wantToReadBooks;
-      let updatedCollection = collectionBooks;
-
-      if (activeTab === 'want-to-read') {
-        const res = await removeBookFromToRead(userId, googleBookId);
-        updatedWantToRead = Array.isArray(res) ? res : (res?.toRead || []);
-      } else {
-        const res = await removeFromCollections(userId, googleBookId);
-        updatedCollection = Array.isArray(res) ? res : (res?.collections || []);
-      }
-
-      setWantToReadBooks(updatedWantToRead);
-      setCollectionBooks(updatedCollection);
-      alert('Book removed');
-    } catch (err) {
-      console.error('Remove error:', err);
-      alert(err.response?.data?.error || 'Failed to remove book');
-    }
-  };
-
-  const handleMoveToCollections = async (googleBookId, status) => {
-    try {
-      const response = await moveToCollections(userId, googleBookId, status);
-      setWantToReadBooks(Array.isArray(response.toRead) ? response.toRead : []);
-      setCollectionBooks(Array.isArray(response.collections) ? response.collections : []);
-      alert(`Book moved to ${status === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
-    } catch (err) {
-      console.error('Error moving book:', err);
-      alert(err.response?.data?.error || 'Failed to move book');
-    }
-  };
-
-  const handleUpdateStatus = async (googleBookId, newStatus) => {
-    try {
-      const updatedBooks = await updateBookStatus(userId, googleBookId, newStatus);
-      setCollectionBooks(Array.isArray(updatedBooks) ? updatedBooks : []);
-      alert(`Book status updated to ${newStatus === 'currently-reading' ? 'Currently Reading' : 'Completed'}`);
-    } catch (err) {
-      console.error('Error updating book status:', err);
-      alert(err.response?.data?.error || 'Failed to update book status');
-    }
-  };
-
-  const toKey = (raw) => (raw || '')
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/&/g, 'and')
-    .replace(/-+/g, '-');
-
-  const handleJoinCategory = async (rawLabel) => {
-    try {
-      setJoiningCategory(rawLabel);
-      const categoryForUrl = encodeURIComponent(rawLabel);
-      const res = await joinGroup(categoryForUrl);
-
-      const key = toKey(rawLabel);
-      setJoinedGroups((prev) => {
-        if (prev.some(g => g.categoryKey === key)) return prev;
-        return [{ categoryKey: key, name: rawLabel, role: 'member', membersCount: (res.membersCount ?? 1) }, ...prev];
-      });
-
-      alert(res.alreadyMember ? `Already in ${rawLabel}` : `Joined ${rawLabel}!`);
-    } catch (err) {
-      console.error('Join failed:', err);
-      alert('Failed to join group');
-    } finally {
-      setJoiningCategory(null);
-    }
-  };
-
-  // --- REVIEW FORM ---
-  const ReviewForm = ({ book }) => {
-    const [rating, setRating] = useState(0);
-    const [comment, setComment] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [data, setData] = useState(null);
-    const [isSubmitted, setIsSubmitted] = useState(false);
-
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      if (!comment.trim()) {
-        setError('Comment cannot be empty');
-        return;
-      }
-      if (rating < 1 || rating > 5) {
-        setError('Rating must be 1-5');
-        return;
-      }
-      setError('');
-      setLoading(true);
-
-      const optimistic = {
-        _id: `temp-${Date.now()}`,
-        userId,
-        googleBookId: book.googleBookId,
-        rating,
-        comment,
-        reviewedAt: new Date().toISOString(),
-      };
-      setData(optimistic);
+  useEffect(() => {
+    const fetchBooks = async () => {
+      if (!userId) return;
 
       try {
-        const saved = await createReview(userId, book.googleBookId, rating, comment);
-        setData(saved);
-        setIsSubmitted(true);
-      } catch (err) {
-        setData(null);
-        setError('Failed to save review');
+        setLoading(true);
+        const token = localStorage.getItem("token");
+
+        const [toReadRes, collectionsRes] = await Promise.all([
+          axios.get(`http://localhost:5050/api/to-read/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axios.get(`http://localhost:5050/api/collections/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+
+        const toReadBooks = (toReadRes.data.books || []).map((book) => ({
+          ...book,
+          status: "want-to-read",
+        }));
+
+        const collectionBooks = collectionsRes.data.books || [];
+
+        setBooks([...toReadBooks, ...collectionBooks]);
+      } catch (error) {
+        console.error("Error fetching books:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    return (
-      <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-        {isSubmitted ? (
-          <div className="p-3 bg-green-50 border border-green-200 rounded text-sm">
-            <p className="text-green-800 font-medium">Review submitted!</p>
-            <p className="text-green-700">
-              <strong>{rating} stars</strong> – {comment}
-            </p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div className="flex items-center gap-2">
-              <label className="text-sm font-medium">Rating:</label>
-              <select
-                value={rating}
-                onChange={(e) => setRating(Number(e.target.value))}
-                className="px-2 py-1 border rounded text-sm"
-              >
-                <option value={0}>Select</option>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <option key={n} value={n}>{n} stars</option>
-                ))}
-              </select>
-            </div>
+    fetchBooks();
+  }, [userId]);
 
-            <textarea
-              placeholder="Write your review..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              className="w-full p-2 border rounded resize-none text-sm"
-              rows={3}
-            />
+  // Handle image upload
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-            {error && <p className="text-red-600 text-xs">{error}</p>}
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload an image file (JPEG, PNG, GIF, or WebP)');
+      return;
+    }
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-3 py-1 bg-orange-500 text-white rounded text-sm hover:bg-orange-600 disabled:opacity-50"
-            >
-              {loading ? 'Saving...' : 'Submit Review'}
-            </button>
-          </form>
-        )}
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
 
-        {data && !isSubmitted && (
-          <div className="mt-3 p-3 bg-white rounded border text-sm">
-            <p>
-              <strong>{data.rating} stars</strong> – {data.comment}
-            </p>
-            <p className="text-xs text-gray-500">
-              {new Date(data.reviewedAt).toLocaleString()}
-            </p>
-          </div>
-        )}
-      </div>
-    );
+    try {
+      setUploadingImage(true);
+      const token = localStorage.getItem('token');
+
+      const formDataUpload = new FormData();
+      formDataUpload.append('avatar', file);
+
+      const response = await axios.post(
+        'http://localhost:5050/api/user/upload-avatar',
+        formDataUpload,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // Update the formData state with the new image URL
+      setFormData((prev) => ({
+        ...prev,
+        profileImageUrl: response.data.profileImageUrl,
+      }));
+
+      alert('Profile picture updated successfully!');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload profile picture. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
-  // --- Safe Stats ---
-  const booksReadCount = Array.isArray(collectionBooks)
-    ? collectionBooks.filter(book => book.status === 'completed').length
-    : 0;
+  const handleRemove = async (googleBookId, currentStatus) => {
+    try {
+      const token = localStorage.getItem("token");
 
-  const stats = [
-    { label: "Books Read", value: booksReadCount.toString(), icon: Book },
-    { label: "Reviews", value: "0", icon: Star },
-    { label: "Followers", value: "0", icon: Users },
-    { label: "Following", value: "0", icon: UserPlus },
-  ];
+      if (currentStatus === "want-to-read") {
+        await axios.delete(
+          `http://localhost:5050/api/to-read/${userId}/${googleBookId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        await axios.delete(
+          `http://localhost:5050/api/collections/${userId}/${googleBookId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
 
-  const imgSrc = imagePreview || tempData.profileImageUrl || userInfo.profileImageUrl;
+      setBooks((prev) =>
+        prev.filter((book) => book.googleBookId !== googleBookId)
+      );
 
-  const BookCard = ({ book }) => (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group">
-      {/* Clickable Cover */}
-      <div 
-        onClick={() => navigate(`/book/${book.googleBookId}`)}
-        className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-6 cursor-pointer"
-      >
-        {book.thumbnail ? (
-          <img src={book.thumbnail} alt={book.title} className="max-h-full max-w-full object-contain" />
-        ) : (
-          <span className="font-serif text-xl text-center text-gray-800 font-semibold leading-tight">
-            {book.title}
-          </span>
-        )}
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="rounded-full h-8 w-8 bg-white shadow-md flex items-center justify-center hover:bg-gray-50">
-            <Heart className="h-4 w-4 text-gray-600" />
-          </button>
-        </div>
-        <span className="absolute bottom-2 left-2 px-3 py-1 rounded-full text-xs font-medium bg-teal-600 text-white">
-          {activeTab === 'want-to-read' ? 'Want to Read' : book.status === 'currently-reading' ? 'Currently Reading' : 'Completed'}
-        </span>
-      </div>
+      window.dispatchEvent(new Event("notifications:refresh"));
 
-      <div className="p-4">
-        {/* Clickable Title */}
-        <h3 
-          onClick={() => navigate(`/book/${book.googleBookId}`)}
-          className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900 cursor-pointer hover:text-orange-600 transition-colors"
-        >
-          {book.title}
-        </h3>
-        <p className="text-sm text-gray-600 mb-2">{book.authors?.join(', ')}</p>
+      alert("Book removed");
+    } catch (error) {
+      console.error("Error removing book:", error);
+      alert("Failed to remove book");
+    }
+  };
 
-        {/* Buttons */}
-        <div className="mt-2 flex justify-between">
-          {activeTab === 'want-to-read' ? (
-            <>
-              <button
-                onClick={() => handleRemove(book.googleBookId)}
-                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
-              >
-                Remove
-              </button>
-              <div>
-                <button
-                  onClick={() => handleMoveToCollections(book.googleBookId, 'currently-reading')}
-                  className="text-xs px-2 py-1 bg-green-500 text-white rounded mr-1"
-                >
-                  Start
-                </button>
-                <button
-                  onClick={() => handleMoveToCollections(book.googleBookId, 'completed')}
-                  className="text-xs px-2 py-1 bg-blue-500 text-white rounded"
-                >
-                  Finish
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              <select
-                value={book.status}
-                onChange={(e) => handleUpdateStatus(book.googleBookId, e.target.value)}
-                className="text-xs px-2 py-1 bg-gray-100 text-gray-800 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              >
-                <option value="currently-reading">Currently Reading</option>
-                <option value="completed">Completed</option>
-              </select>
-              <button
-                onClick={() => handleRemove(book.googleBookId)}
-                className="text-xs px-2 py-1 bg-red-500 text-white rounded"
-              >
-                Remove
-              </button>
-            </>
-          )}
-        </div>
+  const handleStatusChange = async (googleBookId, currentStatus, newStatus) => {
+    if (currentStatus === newStatus) return;
 
-        {/* Categories */}
-        {Array.isArray(book.categories) && book.categories.length > 0 && (
-          <div className="mt-4 pt-3 border-t border-gray-100">
-            <div className="flex items-center gap-1.5 mb-2">
-              <Book className="h-3.5 w-3.5 text-gray-500" />
-              <span className="text-xs font-medium text-gray-600">Categories</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {book.categories.map((c, idx) => {
-                const label = typeof c === "string" ? c : c?.name ?? "";
-                if (!label) return null;
+    try {
+      const token = localStorage.getItem("token");
 
-                const key = toKey(label);
-                const alreadyJoined = joinedGroups.some(g => g.categoryKey === key);
-                const isJoining = joiningCategory === label;
+      if (currentStatus === "want-to-read") {
+        await axios.post(
+          `http://localhost:5050/api/to-read/${userId}/${googleBookId}/move`,
+          { status: newStatus },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      } else {
+        await axios.patch(
+          `http://localhost:5050/api/collections/${userId}/${googleBookId}`,
+          { status: newStatus },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
 
-                return (
-                  <button
-                    key={`${label}-${idx}`}
-                    onClick={() => {
-                      if (!alreadyJoined && !isJoining) handleJoinCategory(label);
-                    }}
-                    className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all duration-200 shadow-sm hover:shadow-md font-medium
-                      ${alreadyJoined
-                        ? 'border-green-200 bg-green-50 text-green-800'
-                        : 'border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 text-gray-800 hover:from-amber-100 hover:to-orange-100'}
-                    `}
-                    title={alreadyJoined ? `Joined ${label}` : `Join ${label}`}
-                    disabled={isJoining}
-                  >
-                    <Book className="h-3 w-3" />
-                    {alreadyJoined
-                      ? `Joined ${label}`
-                      : isJoining
-                        ? `Joining… ${label}`
-                        : label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
+      setBooks((prev) =>
+        prev.map((book) =>
+          book.googleBookId === googleBookId
+            ? { ...book, status: newStatus }
+            : book
+        )
+      );
 
-        {/* Review Form */}
-        {activeTab === 'completed' && <ReviewForm book={book} />}
-      </div>
-    </div>
-  );
+      window.dispatchEvent(new Event("notifications:refresh"));
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("Failed to update status");
+    }
+  };
+
+  const handleToggleFavorite = useCallback((googleBookId, e) => {
+    if (e) e.stopPropagation();
+    setSelectedBookId(googleBookId);
+  }, []);
+
+  const handleCategoryJoin = async (categoryKey) => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:5050/api/groups/${encodeURIComponent(
+          categoryKey
+        )}/join`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name: categoryKey }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to join group");
+      }
+
+      const data = await response.json();
+
+      if (data.alreadyMember) {
+        alert(`You are already a member of ${categoryKey}`);
+      } else {
+        alert(`Successfully joined ${categoryKey} group!`);
+      }
+
+      window.dispatchEvent(new Event("notifications:refresh"));
+    } catch (error) {
+      console.error("Error joining group:", error);
+      alert(error.message || "Failed to join group");
+    }
+  };
+
+  // Handle review submission
+  const handleSubmitReview = async (googleBookId) => {
+    const review = reviewData[googleBookId];
+    
+    if (!review || !review.rating) {
+      alert("Please select a rating");
+      return;
+    }
+
+    if (!review.comment || !review.comment.trim()) {
+      alert("Please write a review");
+      return;
+    }
+
+    try {
+      await createReview(userId, googleBookId, review.rating, review.comment.trim());
+      
+      setReviewData((prev) => ({
+        ...prev,
+        [googleBookId]: { 
+          rating: review.rating, 
+          comment: review.comment,
+          submitted: true
+        }
+      }));
+
+      alert("Review submitted successfully!");
+      window.dispatchEvent(new Event("notifications:refresh"));
+      
+      console.log("Review submitted for book:", googleBookId);
+      console.log("Updated reviewData:", { 
+        [googleBookId]: { 
+          rating: review.rating, 
+          comment: review.comment, 
+          submitted: true 
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      
+      if (error.includes && error.includes("already reviewed")) {
+        setReviewData((prev) => ({
+          ...prev,
+          [googleBookId]: { 
+            rating: review.rating, 
+            comment: review.comment,
+            submitted: true
+          }
+        }));
+        alert("You have already reviewed this book");
+      } else {
+        alert(error || "Failed to submit review");
+      }
+    }
+  };
+
+  const updateReviewData = useCallback((googleBookId, field, value) => {
+    setReviewData((prev) => ({
+      ...prev,
+      [googleBookId]: {
+        ...(prev[googleBookId] || { rating: 0, comment: "", submitted: false }),
+        [field]: value
+      }
+    }));
+  }, []);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("No authentication token found");
+        return;
+      }
+
+      const response = await axios.put(
+        "http://localhost:5050/api/user/profile",
+        {
+          username: formData.name,
+          bio: formData.bio,
+          location: formData.location,
+          profileImageUrl: formData.profileImageUrl,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        alert("Profile updated successfully!");
+        setIsEditing(false);
+
+        if (onSave) {
+          onSave(formData);
+        }
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Failed to update profile. Please try again.");
+    }
+  };
+
+  const filteredBooks = books.filter((book) => {
+    if (activeTab === "want-to-read") {
+      return book.status === "want-to-read";
+    } else if (activeTab === "currently-reading") {
+      return book.status === "currently-reading";
+    } else if (activeTab === "completed") {
+      return book.status === "completed";
+    }
+    return false;
+  });
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
-            <div className="relative">
-              <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg bg-orange-500 flex items-center justify-center">
-                {imgSrc ? (
-                  <img src={imgSrc} alt={userInfo.name} className="h-full w-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-4xl font-serif font-bold text-white">{getInitials(userInfo.name)}</span>
-                )}
-              </div>
-              {isEditing && (
-                <div className="mt-3">
-                  <input type="file" id="profileImage" accept="image/*" onChange={handleImageUpload} className="hidden" />
-                  <label htmlFor="profileImage" className="cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium">
-                    Change Photo
-                  </label>
-                </div>
-              )}
-            </div>
-
-            <div className="flex-1">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h1 className="font-serif text-3xl font-bold mb-2 text-gray-900">{userInfo.name}</h1>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <span className="flex items-center gap-1"><MapPin className="h-4 w-4" />{userInfo.location}</span>
-                    <span className="flex items-center gap-1"><Calendar className="h-4 w-4" />Joined {userInfo.joinDate}</span>
-                  </div>
-                </div>
-                {!isEditing && (
-                  <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
-                    <Settings className="h-4 w-4" />Edit Profile
-                  </button>
-                )}
-              </div>
-
-              {isEditing ? (
-                <textarea
-                  value={tempData.bio}
-                  onChange={(e) => handleInputChange("bio", e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg mb-4 text-gray-700 leading-relaxed resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                  rows="3"
-                  placeholder="Tell us about your reading preferences..."
+    <div className="max-w-6xl mx-auto">
+      {/* Profile Header Section */}
+      <div className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-8 mb-8 shadow-sm border border-orange-100">
+        <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
+          {/* Profile Image */}
+          <div className="relative">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-orange-400 to-amber-500 flex items-center justify-center text-white text-4xl font-bold shadow-lg overflow-hidden">
+              {formData.profileImageUrl ? (
+                <img 
+                  src={`http://localhost:5050${formData.profileImageUrl}`} 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <p className="text-gray-700 mb-6 max-w-2xl leading-relaxed">{userInfo.bio}</p>
+                formData.name ? formData.name.charAt(0).toUpperCase() : "U"
               )}
+            </div>
+            {isEditing && (
+              <label 
+                htmlFor="avatar-upload" 
+                className="absolute bottom-0 right-0 bg-orange-500 text-white rounded-full p-2 cursor-pointer hover:bg-orange-600 transition-colors shadow-lg"
+                title="Change profile picture"
+              >
+                {uploadingImage ? (
+                  <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></div>
+                ) : (
+                  <Camera className="h-5 w-5" />
+                )}
+                <input
+                  id="avatar-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={uploadingImage}
+                />
+              </label>
+            )}
+          </div>
 
-              {isEditing && (
-                <div className="flex gap-3 mb-6">
-                  <button onClick={handleSave} className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">
-                    Save Changes
+          {/* Profile Info */}
+          <div className="flex-1 space-y-4">
+            {isEditing ? (
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Name"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  placeholder="Location"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+                <textarea
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleInputChange}
+                  placeholder="Bio"
+                  rows="3"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSave}
+                    className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save
                   </button>
-                  <button onClick={handleCancel} className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700">
+                  <button
+                    onClick={() => setIsEditing(false)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
                     Cancel
                   </button>
                 </div>
-              )}
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow">
-                    <stat.icon className="h-5 w-5 mx-auto mb-2 text-orange-500" />
-                    <div className="text-2xl font-bold font-serif text-gray-900">{stat.value}</div>
-                    <div className="text-xs text-gray-600">{stat.label}</div>
-                  </div>
-                ))}
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
-          <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
-            <button onClick={() => setActiveTab("currently-reading")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "currently-reading" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Currently Reading</button>
-            <button onClick={() => setActiveTab("want-to-read")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "want-to-read" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Want to Read</button>
-            <button onClick={() => setActiveTab("completed")} className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === "completed" ? "bg-gray-100 text-gray-900" : "text-gray-600 hover:text-gray-900"}`}>Completed</button>
-          </div>
-        </div>
-
-        <div className="py-8">
-          {activeTab === 'want-to-read' ? (
-            <>
-              <button onClick={handleAddDemo} className="mb-6 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors font-medium">Add Demo Book</button>
-              {(!Array.isArray(wantToReadBooks) || wantToReadBooks.length === 0) ? (
-                <p className="text-center text-gray-500 py-12">No books yet. Go add some!</p>
-              ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {wantToReadBooks.map((book) => (
-                    <BookCard key={book.googleBookId} book={book} />
-                  ))}
+            ) : (
+              <>
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900">
+                      {formData.name || "Anonymous User"}
+                    </h1>
+                    {formData.location && (
+                      <p className="flex items-center gap-1 text-gray-600 mt-1">
+                        <MapPin className="h-4 w-4" />
+                        {formData.location}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Edit Profile
+                  </button>
                 </div>
-              )}
-            </>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {(!Array.isArray(collectionBooks) || collectionBooks.length === 0) ? (
-                <p className="text-center text-gray-500 py-12">No books yet in this collection.</p>
-              ) : (
-                collectionBooks
-                  .filter(book => book.status === activeTab)
-                  .map((book) => (
-                    <BookCard key={book.googleBookId} book={book} />
-                  ))
-              )}
-            </div>
-          )}
+
+                {formData.bio && (
+                  <p className="text-gray-700 leading-relaxed">
+                    {formData.bio}
+                  </p>
+                )}
+
+                <div className="flex gap-6 pt-2">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Book className="h-5 w-5 text-orange-500" />
+                    <span className="font-semibold text-gray-900">
+                      {books.length}
+                    </span>
+                    <span>Books</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Heart className="h-5 w-5 text-red-500" />
+                    <span className="font-semibold text-gray-900">
+                      {favorites.size}
+                    </span>
+                    <span>Favorites</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Books Section */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+        {/* Tabs */}
+        <div className="flex gap-2 mb-6 border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("want-to-read")}
+            className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+              activeTab === "want-to-read"
+                ? "border-orange-500 text-orange-600"
+                : "border-transparent text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Want to Read ({books.filter((b) => b.status === "want-to-read").length})
+          </button>
+          <button
+            onClick={() => setActiveTab("currently-reading")}
+            className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+              activeTab === "currently-reading"
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Currently Reading ({books.filter((b) => b.status === "currently-reading").length})
+          </button>
+          <button
+            onClick={() => setActiveTab("completed")}
+            className={`px-6 py-3 font-medium transition-colors border-b-2 ${
+              activeTab === "completed"
+                ? "border-green-500 text-green-600"
+                : "border-transparent text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Completed ({books.filter((b) => b.status === "completed").length})
+          </button>
+        </div>
+
+        {/* Books Grid */}
+        {loading ? (
+          <div className="text-center py-12 text-gray-500">Loading books...</div>
+        ) : filteredBooks.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            No books in this category yet
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredBooks.map((book) => (
+              <BookCard 
+                key={book.googleBookId} 
+                book={book}
+                reviewData={reviewData[book.googleBookId] || { rating: 0, comment: "", submitted: false }}
+                favorites={favorites}
+                onToggleFavorite={handleToggleFavorite}
+                onStatusChange={handleStatusChange}
+                onRemove={handleRemove}
+                onCategoryJoin={handleCategoryJoin}
+                onUpdateReview={updateReviewData}
+                onSubmitReview={handleSubmitReview}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Book Details Modal */}
+      {selectedBookId && (
+        <BookModal
+          googleBookId={selectedBookId}
+          onClose={() => setSelectedBookId(null)}
+        />
+      )}
     </div>
   );
 };
+
+// BookCard component
+const BookCard = React.memo(({ 
+  book, 
+  reviewData, 
+  favorites,
+  onToggleFavorite,
+  onStatusChange,
+  onRemove,
+  onCategoryJoin,
+  onUpdateReview,
+  onSubmitReview
+}) => {
+  const isCompleted = book.status === "completed";
+
+  console.log(`BookCard for ${book.title}:`, { 
+    googleBookId: book.googleBookId, 
+    reviewData,
+    submitted: reviewData.submitted 
+  });
+
+  return (
+    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all">
+      <div className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-4">
+        {book.thumbnail ? (
+          <img
+            src={book.thumbnail}
+            alt={book.title}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <span className="font-serif text-lg text-center text-gray-800 font-semibold leading-tight">
+            {book.title}
+          </span>
+        )}
+        <span
+          className={`absolute top-2 left-2 px-3 py-1 rounded-full text-xs font-medium ${
+            book.status === "completed"
+              ? "bg-teal-600 text-white"
+              : book.status === "currently-reading"
+              ? "bg-blue-600 text-white"
+              : "bg-teal-600 text-white"
+          }`}
+        >
+          {book.status === "want-to-read"
+            ? "Want to Read"
+            : book.status === "currently-reading"
+            ? "Reading"
+            : "Completed"}
+        </span>
+
+        <button
+          onClick={(e) => onToggleFavorite(book.googleBookId, e)}
+          className={`absolute top-2 right-2 p-2 rounded-full ${
+            favorites.has(book.googleBookId)
+              ? 'bg-red-100 text-red-600'
+              : 'bg-white/80 text-gray-400'
+          } hover:scale-110 transition-all`}
+        >
+          <Heart
+            className={`h-5 w-5 ${
+              favorites.has(book.googleBookId) ? 'fill-current' : ''
+            }`}
+          />
+        </button>
+      </div>
+
+      <div className="p-4">
+        <h3 className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900">
+          {book.title}
+        </h3>
+        <p className="text-sm text-gray-600 mb-3">
+          {(book.authors || []).join(", ")}
+        </p>
+
+        <div className="flex gap-2 mb-3">
+          {book.status === "want-to-read" && (
+            <>
+              <button
+                onClick={() => onStatusChange(book.googleBookId, "want-to-read", "currently-reading")}
+                className="flex-1 px-3 py-1.5 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Start
+              </button>
+              <button
+                onClick={() => onStatusChange(book.googleBookId, "want-to-read", "completed")}
+                className="flex-1 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Finish
+              </button>
+            </>
+          )}
+
+          {book.status === "currently-reading" && (
+            <select
+              value={book.status}
+              onChange={(e) => onStatusChange(book.googleBookId, book.status, e.target.value)}
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="currently-reading">Currently Reading</option>
+              <option value="completed">Completed</option>
+            </select>
+          )}
+
+          {book.status === "completed" && (
+            <select
+              value={book.status}
+              onChange={(e) => onStatusChange(book.googleBookId, book.status, e.target.value)}
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="completed">Completed</option>
+              <option value="currently-reading">Currently Reading</option>
+            </select>
+          )}
+
+          <button
+            onClick={() => onRemove(book.googleBookId, book.status)}
+            className="px-4 py-1.5 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Remove
+          </button>
+        </div>
+
+        {book.categories && book.categories.length > 0 && (
+          <div className="space-y-2 mb-3">
+            <div className="flex items-center gap-1 text-xs text-gray-600">
+              <Book className="h-3 w-3" />
+              <span>Categories</span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {book.categories.slice(0, 3).map((cat, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => onCategoryJoin(cat)}
+                  className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full hover:bg-yellow-200 transition-colors"
+                >
+                  <Book className="h-3 w-3" />
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Review Section for Completed Books */}
+        {isCompleted && (
+          <div className="mt-4 pt-4 border-t border-gray-200">
+            {reviewData && reviewData.submitted ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-green-600 font-semibold">✓ Review Submitted</span>
+                </div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-sm font-medium text-gray-700">Rating:</span>
+                  <div className="flex gap-0.5">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`h-4 w-4 ${
+                          star <= (reviewData.rating || 0)
+                            ? 'fill-amber-400 text-amber-400'
+                            : 'text-gray-300'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600">({reviewData.rating || 0}/5)</span>
+                </div>
+                {reviewData.comment && (
+                  <div className="text-sm text-gray-700">
+                    <span className="font-medium">Review:</span>
+                    <p className="mt-1 italic">"{reviewData.comment}"</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Rating:
+                  </label>
+                  <select
+                    value={reviewData?.rating || 0}
+                    onChange={(e) => onUpdateReview(book.googleBookId, 'rating', parseInt(e.target.value))}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  >
+                    <option value={0}>Select</option>
+                    <option value={1}>1 stars</option>
+                    <option value={2}>2 stars</option>
+                    <option value={3}>3 stars</option>
+                    <option value={4}>4 stars</option>
+                    <option value={5}>5 stars</option>
+                  </select>
+                </div>
+
+                <div className="mb-3">
+                  <textarea
+                    value={reviewData?.comment || ""}
+                    onChange={(e) => onUpdateReview(book.googleBookId, 'comment', e.target.value)}
+                    placeholder="Write your review..."
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                    rows={3}
+                  />
+                </div>
+
+                <button
+                  onClick={() => onSubmitReview(book.googleBookId)}
+                  className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+                >
+                  Submit Review
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
 
 export default ProfileForm;

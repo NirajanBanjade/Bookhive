@@ -1,5 +1,5 @@
 const getAuthHeaders = () => ({
-    'Authorization': `Bearer ${localStorage.getItem('jwt_token')}`,
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
     'Content-Type': 'application/json'
   });
   

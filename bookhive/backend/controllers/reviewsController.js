@@ -21,6 +21,10 @@ exports.createReview = async (req, res) => {
       return res.status(400).json({ error: 'Book must be in your collection to review' });
     }
 
+    // Get the book details from the collection
+    const book = collection.books.find(b => b.googleBookId === googleBookId);
+    const bookTitle = book?.title || 'this book';
+
     // Check for existing review
     const existingReview = await Review.findOne({ userId, googleBookId });
     if (existingReview) {
@@ -30,9 +34,10 @@ exports.createReview = async (req, res) => {
     const review = new Review({ userId, googleBookId, rating, comment });
     await review.save();
 
+    // Updated notification with book title instead of ID
     await Notification.create({
       userId,
-      message: `You added a ${rating}-star review for book ID ${googleBookId}.`,
+      message: `You added a ${rating}-star review for "${bookTitle}".`,
       type: 'success',
     });
 
@@ -73,9 +78,17 @@ exports.deleteReview = async (req, res) => {
       return res.status(404).json({ error: 'Review not found' });
     }
 
+    // Try to get book title from collection
+    const collection = await Collection.findOne({ 
+      userId: review.userId, 
+      'books.googleBookId': review.googleBookId 
+    });
+    const book = collection?.books.find(b => b.googleBookId === review.googleBookId);
+    const bookTitle = book?.title || 'a book';
+
     await Notification.create({
       userId: review.userId,
-      message: `Your review for book ID ${review.googleBookId} was deleted.`,
+      message: `Your review for "${bookTitle}" was deleted.`,
       type: 'info',
     });
 
