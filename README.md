@@ -120,19 +120,19 @@
   ◦ [KAN-24 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-24), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-24-design-auth-model-roles-and-password-policy/)
 
 - **Jira Task:** Nirajan - Implementation: signup/login/logout + password validator.
-  ◦ [KAN-25 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-25), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-25-implementation-signup-login-logout-password-validator/)
+  ◦ [KAN-25 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-25), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-25-implementation-signup-login-logout-password-validator/)
 
 - **Jira Task:** Nirajan - Implementation: email verification (single-use token 15 min).
-  ◦ [KAN-26 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-26)[Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-26-implementation-email-verification-single-use-token-30-60-min/)
+  ◦ [KAN-26 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-26)[Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-26-implementation-email-verification-single-use-token-30-60-min/)
 
 - **Jira Task:** Nirajan - Implementation: password reset (no reuse of old password) and start login/register page UI.
-  ◦ [KAN-27 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-27), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-27-implementation-password-reset-no-reuse-of-old-password/)
+  ◦ [KAN-27 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-27), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-27-implementation-password-reset-no-reuse-of-old-password/)
 
 - **Jira Task:** Nirajan - Wiring frontend and backend of Login/Register/Update section.
-  ◦ [KAN-28 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-28), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-28-wiring-frontend-and-backend-of-login-register-update-section/)
+  ◦ [KAN-28 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-28), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-28-wiring-frontend-and-backend-of-login-register-update-section/)
 
 - **Jira Task:** Nirajan - Implement JWT authentication for session storage and Userprofile API.
-  ◦ [KAN-52 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-52), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-52-implement-jwt-authentication-for-session-storage/)
+  ◦ [KAN-52 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-52), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-52-implement-jwt-authentication-for-session-storage/)
 
 
 ## Sprint 2 — Contributions
@@ -173,6 +173,23 @@
   ◦ [KAN-63 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-63), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-63-display-reviews-ratings)
 
 
+
+
+**Nirajan Banjade:** “Created the frontend - backend  integration for the group functionality. Created models, api, handlers, and tests for members access, group join and posting functionality.”
+
+- **Jira Task:** Nirajan – UX / Interaction Design — Book Detail and Group Recommendations
+  ◦ [KAN-55 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-55), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-55-ux-interaction-design-book-detail-and-group-recommendations)
+
+- **Jira Task:** Nirajan – Frontend – Group Feed Integration  
+  ◦ [KAN-56 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-56), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-56-frontend-group-feed-integration)
+
+- **Jira Task:** Nirajan – Backend API: Book Group Join/Leave & Post Routes 
+  ◦ [KAN-57 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-57), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-57-backend-api-book-group-join-leave-post-routes)
+
+- **Jira Task:** Nirajan – Mongoose Models & Slug Creation 
+  ◦ [KAN-58 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-58), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-58-mongoose-models-slug-creation)
+
+
 **Prashant Panta** "Implemented navbar sections for Home and Genre with routing and filtering. Created the trending books feature by building a backend endpoint that fetches from NYT Bestsellers API, added caching to reduce API calls, and built the frontend widget that displays top 5 books with loading and error handling. Fixed issues with genre book fetching from Google Books API."
 
 **Commit Note:**
@@ -199,9 +216,9 @@ For example, the genre section required defining 12 different genres with the sa
 
 ### Next Sprint(3) Goals
 - **Nirajan**
-  - **Route protection & nav cleanup:** Public landing page for everyone; after login, unlock protected routes (Profile, To-Read, Search, Groups) with JWT checks and hide nav items for unauthenticated users.
-  - **Book-based groups & discussions:** Create/join groups per book title and add discussion boards with posts and comments.
-
+  - **Route protection:"** Protect the routes and ensure UX order.(first landing page, then login page, then other features.)
+  - **Book-based groups & discussions:** Will work on reply-to-post, like to post features.
+  - **AI-integration search:** Look for ways to integrate AI (chatbot) into app.
 - **Prajwal**
   - **Updating Notification System:** Will try to get notifications for possibly any changes that are made in the site.
   - **Make website dynamic:** Some of the code is still hardcoded, so will make the site dymanic.
