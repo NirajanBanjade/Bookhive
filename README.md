@@ -153,6 +153,28 @@
 
 ## Sprint 2 — Contributions
 
+**Aevin Tweedie:** "implemented the Collections feature end-to-end, including backend models and endpoints for status and reviews, frontend integration for submitting and displaying reviews with average ratings, and refactored the To-Read integration."
+
+- **Jira Task:** Aevin – Add status and review support to Collections backend  
+  ◦ [KAN-59 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-59), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-59-add-status-and-review-support-to)
+
+- **Jira Task:** Aevin – Update backend model & endpoints Description  
+  ◦ [KAN-61 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-61), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-61-update-backend-model-endpoints-description)
+
+- **Jira Task:** Aevin – Integrate the Collections backend with the React frontend  
+  ◦ [KAN-60 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-60), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-60-integrate-the-collections-backend-with-the-react-frontend)
+
+- **Jira Task:** Aevin – Submit and validate reviews on the frontend  
+  ◦ [KAN-62 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-62), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-62-test-merge-of-55)
+
+- **Jira Task:** Aevin – Improve To-Read Integration & Refactor  
+  ◦ [KAN-9 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-9), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-9-improve-to-read-integration-refactor)
+
+- **Jira Task:** Aevin – Display reviews and average rating  
+  ◦ [KAN-63 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-63), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-63-display-reviews-ratings)
+
+## Sprint 2 — Contributions
+
 **Prashant Panta** "Implemented navbar sections for Home and Genre with routing and filtering. Created the trending books feature by building a backend endpoint that fetches from NYT Bestsellers API, added caching to reduce API calls, and built the frontend widget that displays top 5 books with loading and error handling. Fixed issues with genre book fetching from Google Books API."
 
 **Commit Note:**
