@@ -173,11 +173,6 @@
 - **Jira Task:** Aevin – Display reviews and average rating  
   ◦ [KAN-63 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-63), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-63-display-reviews-ratings)
 
-**Next Sprint (3) Goals:**
-* Aevin
-   * Refactor Collections codebase: Clean up and optimize Collections backend and frontend code, improve error handling, and add comprehensive inline documentation for maintainability.
-   * Enhance review display and validation: Improve review submission feedback, add edit/delete functionality for user reviews, and refine the average rating calculation display.
-
 ## Sprint 2 — Contributions
 
 **Prashant Panta** "Implemented navbar sections for Home and Genre with routing and filtering. Created the trending books feature by building a backend endpoint that fetches from NYT Bestsellers API, added caching to reduce API calls, and built the frontend widget that displays top 5 books with loading and error handling. Fixed issues with genre book fetching from Google Books API."
@@ -204,7 +199,7 @@ For example, the genre section required defining 12 different genres with the sa
   ◦ [KAN-84 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-84), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/bugfix/KAN-84-fix-the-fetching-error-in-genre-s)
 
 
-### Next Sprint Goals
+### Next Sprint (2) Goals
 - **Nirajan**
   - **Route protection & nav cleanup:** Public landing page for everyone; after login, unlock protected routes (Profile, To-Read, Search, Groups) with JWT checks and hide nav items for unauthenticated users.
   - **Book-based groups & discussions:** Create/join groups per book title and add discussion boards with posts and comments.
@@ -226,6 +221,12 @@ For example, the genre section required defining 12 different genres with the sa
   -**Fix functionalities and user Profile** Fix the logic of search bar(currently it takes us to the different page when we search), add editable sections to the user profile section lile add/remove photos and bio. 
   -**Add a different pop up section for trending page** Right now we can only see 5 trending books on trending now, create another pop up which will let us see more books 
   -**Friend's Interaction on Home Page** Right now the home page doesnt have friend's interaction, so try to add what your friends are doing (ALthough everyone must make some contributions to make this task happen)
+
+### Next Sprint (3) Goals
+
+- **Aevin**
+  - **Refactor Collections codebase:** Clean up and optimize Collections backend and frontend code, improve error handling, and add comprehensive inline documentation for maintainability.
+  - **Enhance review display and validation:** Improve review submission feedback, add edit/delete functionality for user reviews, and refine the average rating calculation display.
   
 ---
 ## Setup
