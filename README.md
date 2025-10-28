@@ -173,6 +173,11 @@
 - **Jira Task:** Aevin – Display reviews and average rating  
   ◦ [KAN-63 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-63), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-63-display-reviews-ratings)
 
+  **Next Sprint(3) Goals:**
+* Aevin
+   * Refactor Collections codebase: Clean up and optimize Collections backend and frontend code, improve error handling, and add comprehensive inline documentation for maintainability.
+   * Enhance review display and validation: Improve review submission feedback, add edit/delete functionality for user reviews, and refine the average rating calculation display.
+
 ## Sprint 2 — Contributions
 
 **Prashant Panta** "Implemented navbar sections for Home and Genre with routing and filtering. Created the trending books feature by building a backend endpoint that fetches from NYT Bestsellers API, added caching to reduce API calls, and built the frontend widget that displays top 5 books with loading and error handling. Fixed issues with genre book fetching from Google Books API."
