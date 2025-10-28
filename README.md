@@ -135,7 +135,7 @@
   ◦ [KAN-52 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-52), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-52-implement-jwt-authentication-for-session-storage/)
 
 
-  ## Sprint 2 — Contributions
+## Sprint 2 — Contributions
 
 **Prajwal Kunwar:** “implemented the backend notification system including the model, service logic, and hooks for To-Read events, and connected it with the frontend to fetch and display notifications.”
 
@@ -151,7 +151,6 @@
 - **Jira Task:** Prajwal – Implement API Integration and Fetch Logic  
   ◦ [KAN-73 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-73), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feat%2FKAN-73-frontend-notifications-integration)
 
-## Sprint 2 — Contributions
 
 **Aevin Tweedie:** "implemented the Collections feature end-to-end, including backend models and endpoints for status and reviews, frontend integration for submitting and displaying reviews with average ratings, and refactored the To-Read integration."
 
@@ -173,7 +172,6 @@
 - **Jira Task:** Aevin – Display reviews and average rating  
   ◦ [KAN-63 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-63), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-63-display-reviews-ratings)
 
-## Sprint 2 — Contributions
 
 **Prashant Panta** "Implemented navbar sections for Home and Genre with routing and filtering. Created the trending books feature by building a backend endpoint that fetches from NYT Bestsellers API, added caching to reduce API calls, and built the frontend widget that displays top 5 books with loading and error handling. Fixed issues with genre book fetching from Google Books API."
 
@@ -199,7 +197,7 @@ For example, the genre section required defining 12 different genres with the sa
   ◦ [KAN-84 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-84), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/bugfix/KAN-84-fix-the-fetching-error-in-genre-s)
 
 
-### Next Sprint (2) Goals
+### Next Sprint Goals
 - **Nirajan**
   - **Route protection & nav cleanup:** Public landing page for everyone; after login, unlock protected routes (Profile, To-Read, Search, Groups) with JWT checks and hide nav items for unauthenticated users.
   - **Book-based groups & discussions:** Create/join groups per book title and add discussion boards with posts and comments.
@@ -207,26 +205,21 @@ For example, the genre section required defining 12 different genres with the sa
   - **Prajwal**
   - **Updating Notification System:** Will try to get notifications for possibly any changes that are made in the site.
   - **Make website dynamic:** Some of the code is still hardcoded, so will make the site dymanic.
+  - **Improvement in UI:** The UI for our project can be made more appealing.
 
   - **Aevin**
-  - **Connect Collections to Frontend:** Allow users to add books they are currently reading or have finished, and view them in their collections with status indicators (Reading, Finished).  
-  - **Backend support for book ratings:** Store and retrieve user ratings for books.
+  - **Refactor Collections codebase:** Clean up and optimize Collections backend and frontend code, improve error handling, and add comprehensive inline documentation for maintainability.
+  - **Enhance review display and validation:** Improve review submission feedback, add edit/delete functionality for user reviews, and refine the average rating calculation display.
 
 - **Alan**  
   - **Recommendations** Give users a list of books related to or commonly included when adding the book they searched  
   - **Trending Books** Include a page (or on the search page before inputting a search) that displays trending books  
 
-  -**Prashant**
-  -**Home Page** Add a UI and home page to the existing UI and try to implement features like "Book You May Like", "Best of all time" etc
-  -**Fix functionalities and user Profile** Fix the logic of search bar(currently it takes us to the different page when we search), add editable sections to the user profile section lile add/remove photos and bio. 
-  -**Add a different pop up section for trending page** Right now we can only see 5 trending books on trending now, create another pop up which will let us see more books 
-  -**Friend's Interaction on Home Page** Right now the home page doesnt have friend's interaction, so try to add what your friends are doing (ALthough everyone must make some contributions to make this task happen)
-
-### Next Sprint (3) Goals
-
-- **Aevin**
-  - **Refactor Collections codebase:** Clean up and optimize Collections backend and frontend code, improve error handling, and add comprehensive inline documentation for maintainability.
-  - **Enhance review display and validation:** Improve review submission feedback, add edit/delete functionality for user reviews, and refine the average rating calculation display.
+  - **Prashant**
+  - **Home Page** Add a UI and home page to the existing UI and try to implement features like "Book You May Like", "Best of all time" etc
+  - **Fix functionalities and user Profile** Fix the logic of search bar(currently it takes us to the different page when we search), add editable sections to the user profile section lile add/remove photos and bio. 
+  - **Add a different pop up section for trending page** Right now we can only see 5 trending books on trending now, create another pop up which will let us see more books 
+  - **Friend's Interaction on Home Page** Right now the home page doesnt have friend's interaction, so try to add what your friends are doing (ALthough everyone must make some contributions to make this task happen)
   
 ---
 ## Setup
