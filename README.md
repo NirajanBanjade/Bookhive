@@ -135,6 +135,23 @@
   ◦ [KAN-52 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-52), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/src/KAN-52-implement-jwt-authentication-for-session-storage/)
 
 
+  ## Sprint 2 — Contributions
+
+**Prajwal Kunwar:** “implemented the backend notification system including the model, service logic, and hooks for To-Read events, and connected it with the frontend to fetch and display notifications.”
+
+- **Jira Task:** Prajwal – Create Notification Model and Schema  
+  ◦ [KAN-67 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-67), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-67-notification-model)
+
+- **Jira Task:** Prajwal – Implement Notification Service (Create Logic)  
+  ◦ [KAN-68 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-68), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-68-notification-service)
+
+- **Jira Task:** Prajwal – Add Notification Hooks for To-Read List  
+  ◦ [KAN-69 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-69), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feat/KAN-69-notification-hook-to-read)
+
+- **Jira Task:** Prajwal – Implement API Integration and Fetch Logic  
+  ◦ [KAN-73 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-73), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feat%2FKAN-73-frontend-notifications-integration)
+
+
 
 ### Next Sprint Goals
 - **Nirajan**
@@ -142,8 +159,8 @@
   - **Book-based groups & discussions:** Create/join groups per book title and add discussion boards with posts and comments.
 
   - **Prajwal**
-  - **Advanced search filters & refinement:** Add advanced filters such as Author, Genre, and Publish Year to the SearchPage. 
-  - **Enhanced pagination & UX improvements:** Improve the “Load More” functionality with smooth scrolling and loading indicators. 
+  - **Updating Notification System:** Will try to get notifications for possibly any changes that are made in the site.
+  - **Make website dynamic:** Some of the code is still hardcoded, so will make the site dymanic.
 
   - **Aevin**
   - **Connect Collections to Frontend:** Allow users to add books they are currently reading or have finished, and view them in their collections with status indicators (Reading, Finished).  
