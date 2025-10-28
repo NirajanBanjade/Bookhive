@@ -198,27 +198,27 @@ For example, the genre section required defining 12 different genres with the sa
 
 
 ### Next Sprint(3) Goals
-- **Nirajan**
+ **Nirajan**
   - **Route protection & nav cleanup:** Public landing page for everyone; after login, unlock protected routes (Profile, To-Read, Search, Groups) with JWT checks and hide nav items for unauthenticated users.
   - **Book-based groups & discussions:** Create/join groups per book title and add discussion boards with posts and comments.
 
-  - **Prajwal**
+ **Prajwal**
   - **Updating Notification System:** Will try to get notifications for possibly any changes that are made in the site.
   - **Make website dynamic:** Some of the code is still hardcoded, so will make the site dymanic.
   - **Improvement in UI:** The UI for our project can be made more appealing.
 
-- **Aevin**
+ **Aevin**
   - **Refactor user-related features:** Clean up Collections, Profile, and To-Read codebases - optimize backend endpoints, improve frontend component structure, and add better error handling and documentation.
 
   - **Enhance review display and validation:** Improve review submission feedback, add edit/delete functionality for user reviews, and refine the average rating calculation display.
   
   - **Integrate Collections with auth and recommendations:** Fix JWT/session issues with Nirajan's route protection and connect Collections data to Alan's recommendation system.
 
-- **Alan**  
+**Alan**  
   - **Recommendations** Give users a list of books related to or commonly included when adding the book they searched  
   - **Trending Books** Include a page (or on the search page before inputting a search) that displays trending books  
 
-  - **Prashant**
+**Prashant**
   - **Home Page** Add a UI and home page to the existing UI and try to implement features like "Book You May Like", "Best of all time" etc
   - **Fix functionalities and user Profile** Fix the logic of search bar(currently it takes us to the different page when we search), add editable sections to the user profile section lile add/remove photos and bio. 
   - **Add a different pop up section for trending page** Right now we can only see 5 trending books on trending now, create another pop up which will let us see more books 
