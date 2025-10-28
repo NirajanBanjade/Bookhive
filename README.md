@@ -151,6 +151,30 @@
 - **Jira Task:** Prajwal – Implement API Integration and Fetch Logic  
   ◦ [KAN-73 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-73), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/commits/branch/feat%2FKAN-73-frontend-notifications-integration)
 
+## Sprint 2 — Contributions
+
+**Prashant Panta** "Implemented navbar sections for Home and Genre with routing and filtering. Created the trending books feature by building a backend endpoint that fetches from NYT Bestsellers API, added caching to reduce API calls, and built the frontend widget that displays top 5 books with loading and error handling. Fixed issues with genre book fetching from Google Books API."
+
+**Commit Note:**
+Whole File Commits for UI Tasks
+For the navbar tasks (Home, Genre sections), I committed complete files rather than breaking them into many small commits because:
+
+Repetitive patterns: The navbar tasks followed the same structure - add link → set up route → create page component. Breaking each into separate commits would just create many similar-looking commits.
+For example, the genre section required defining 12 different genres with the same properties (id, name, subject, description, icon, color). This is basically configuration/data entry work - splitting it into multiple commits like "add Fiction genre," "add Fantasy genre," "add Mystery genre" wouldn't add value and would just clutter the commit history.
+
+ I tried to keep commits practical rather than breaking up repetitive tasks into many tiny commits that don't work independently.
+
+ - **Jira Task:** Prashant – Add “Home” Section to Navbar 
+  ◦ [KAN-75 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-75), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-75-add-%E2%80%9Chome%E2%80%9D-section-to-navbar)
+
+ - **Jira Task:** Prashant – Add “Genre” Section to Navbar 
+  ◦ [KAN-76 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-76), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-76-add-%E2%80%9Cgenre%E2%80%9D-section-to-navbar)
+
+- **Jira Task:** Prashant – Add “Trending” Section to Homepage
+  ◦ [KAN-77 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-77), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-77-add-%E2%80%9Ctrending%E2%80%9D-section-to-homepage)
+
+- **Jira Task:** Prashant – Fix the fetching error in genre section
+  ◦ [KAN-84 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-84), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/bugfix/KAN-84-fix-the-fetching-error-in-genre-s)
 
 
 ### Next Sprint Goals
@@ -173,6 +197,8 @@
   -**Prashant**
   -**Home Page** Add a UI and home page to the existing UI and try to implement features like "Book You May Like", "Best of all time" etc
   -**Fix functionalities and user Profile** Fix the logic of search bar(currently it takes us to the different page when we search), add editable sections to the user profile section lile add/remove photos and bio. 
+  -**Add a different pop up section for trending page** Right now we can only see 5 trending books on trending now, create another pop up which will let us see more books 
+  -**Friend's Interaction on Home Page** Right now the home page doesnt have friend's interaction, so try to add what your friends are doing (ALthough everyone must make some contributions to make this task happen)
   
 ---
 ## Setup
