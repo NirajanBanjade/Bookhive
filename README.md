@@ -197,7 +197,7 @@ For example, the genre section required defining 12 different genres with the sa
   ◦ [KAN-84 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-84), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/bugfix/KAN-84-fix-the-fetching-error-in-genre-s)
 
 
-### Next Sprint Goals
+### Next Sprint(3) Goals
 - **Nirajan**
   - **Route protection & nav cleanup:** Public landing page for everyone; after login, unlock protected routes (Profile, To-Read, Search, Groups) with JWT checks and hide nav items for unauthenticated users.
   - **Book-based groups & discussions:** Create/join groups per book title and add discussion boards with posts and comments.
@@ -207,9 +207,12 @@ For example, the genre section required defining 12 different genres with the sa
   - **Make website dynamic:** Some of the code is still hardcoded, so will make the site dymanic.
   - **Improvement in UI:** The UI for our project can be made more appealing.
 
-  - **Aevin**
-  - **Refactor Collections codebase:** Clean up and optimize Collections backend and frontend code, improve error handling, and add comprehensive inline documentation for maintainability.
+- **Aevin**
+  - **Refactor user-related features:** Clean up Collections, Profile, and To-Read codebases - optimize backend endpoints, improve frontend component structure, and add better error handling and documentation.
+
   - **Enhance review display and validation:** Improve review submission feedback, add edit/delete functionality for user reviews, and refine the average rating calculation display.
+  
+  - **Integrate Collections with auth and recommendations:** Fix JWT/session issues with Nirajan's route protection and connect Collections data to Alan's recommendation system.
 
 - **Alan**  
   - **Recommendations** Give users a list of books related to or commonly included when adding the book they searched  
