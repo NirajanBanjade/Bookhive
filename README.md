@@ -256,10 +256,11 @@ For example, the genre section required defining 12 different genres with the sa
   - **Make recommendations dynamic** Some fo the code for books recommendation are hard coded for userID. Will make the feature dynamic.
 
 - **Prashant**
-  - **Home Page** Add a UI and home page to the existing UI and try to implement features like "Book You May Like", "Best of all time" etc
-  - **Fix functionalities and user Profile** Fix the logic of search bar(currently it takes us to the different page when we search), add editable sections to the user profile section lile add/remove photos and bio. 
+  - **Section UI Formatting** I will implement the proper flex UI design in the books you might love section, right now it goes long down to the bottom.
+
   - **Add a different pop up section for trending page** Right now we can only see 5 trending books on trending now, create another pop up which will let us see more books 
-  - **Friend's Interaction on Home Page** Right now the home page doesnt have friend's interaction, so try to add what your friends are doing (ALthough everyone must make some contributions to make this task happen)
+
+  - **Friend's Interaction on Home Page** Right now the home page doesnt have friend's interaction, so try to add what your friends are doing (Athough everyone must make some contributions to make this task happen)
   
 ---
 ## Setup
