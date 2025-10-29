@@ -170,7 +170,25 @@
   ◦ [KAN-9 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-9), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-9-improve-to-read-integration-refactor)
 
 - **Jira Task:** Aevin – Display reviews and average rating  
-  ◦ [KAN-63 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-63), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-63-display-reviews-ratings)
+  ◦ [KAN-63 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-63), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-63-display-reviews-ratings)  
+
+
+**Alan Garcia:** "implemented the backend logic for building user's interest profile, fetching candidate books, and scoring and ranking the candidate books. Connected the book recommendations to the frontend on the home page."
+
+- **Jira Task:** Alan - Add API endpoints for recommending books
+  ◦ [KAN-82 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-82), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-82-add-api-endpoints)
+
+- **Jira Task:** Alan - Build User Interest Profile
+  ◦ [KAN-79 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-79), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-79-build-user-interest-profile)
+
+- **Jira Task:** Alan - Generate Candidate Books
+  ◦ [KAN-80 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-80), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-80-generate-candidate-books)
+
+- **Jira Task:** Alan - Add API endpoints for recommending books
+  ◦ [KAN-81 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-81), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-81-score-and-rank)
+
+- **Jira Task:** Alan - Add API endpoints for recommending books
+  ◦ [KAN-83 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-83), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-83-add-a-recommendation-section)
 
 
 
@@ -232,8 +250,10 @@ For example, the genre section required defining 12 different genres with the sa
   - **Integrate Collections with auth and recommendations:** Fix JWT/session issues with Nirajan's route protection and connect Collections data to Alan's recommendation system.
 
 - **Alan**  
-  - **Recommendations** Give users a list of books related to or commonly included when adding the book they searched  
-  - **Trending Books** Include a page (or on the search page before inputting a search) that displays trending books  
+  - **Improve on Book Recommendations** Modify or extend the recommendation feature so that it also includes as input books from the user's currently reading and finished collections.
+  - **Add recommended books** Include a button functionality to the recommended book cards so they can be added to the user's To-Read collection
+  - **Add a recommended books page** Include a page on the website where more recommended books can be listed instead of just the 9 shown on the home page.
+  - **Make recommendations dynamic** Some fo the code for books recommendation are hard coded for userID. Will make the feature dynamic.
 
 - **Prashant**
   - **Home Page** Add a UI and home page to the existing UI and try to implement features like "Book You May Like", "Best of all time" etc
