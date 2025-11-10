@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import BookModal from "../model/BookModal";
 import { createReview } from "../../services/reviewsService";
+import Logout from "../logout/Logout";
 
 const ProfileForm = ({ userData = null, onSave = null }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -487,26 +488,26 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
               </div>
             ) : (
               <>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900">
-                      {formData.name || "Anonymous User"}
-                    </h1>
-                    {formData.location && (
-                      <p className="flex items-center gap-1 text-gray-600 mt-1">
-                        <MapPin className="h-4 w-4" />
-                        {formData.location}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white border border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
-                  >
-                    <Settings className="h-4 w-4" />
-                    Edit Profile
-                  </button>
-                </div>
+<div className="flex items-start justify-between">
+  <div>
+    <h1 className="text-3xl font-bold text-gray-900">
+      {formData.name || "Anonymous User"}
+    </h1>
+    {formData.location && (
+      <p className="flex items-center gap-1 text-gray-600 mt-1">
+        <MapPin className="h-4 w-4" />
+        {formData.location}
+      </p>
+    )}
+  </div>
+  <button
+    onClick={() => setIsEditing(true)}
+    className="flex items-center gap-2 px-4 py-2 bg-white border border-orange-300 text-orange-600 rounded-lg hover:bg-orange-50 transition-colors"
+  >
+    <Settings className="h-4 w-4" />
+    Edit Profile
+  </button>
+</div>
 
                 {formData.bio && (
                   <p className="text-gray-700 leading-relaxed">
@@ -606,6 +607,10 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           onClose={() => setSelectedBookId(null)}
         />
       )}
+      <div className="flex justify-center mt-8 mb-4">
+      <Logout />
+    </div>
+
     </div>
   );
 };
