@@ -1,0 +1,145 @@
+.horizontal-scroll-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 20px 0;
+  margin: 0;
+}
+
+.horizontal-scroll-wrapper {
+  display: flex;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding: 20px 0;
+  gap: 0;
+  margin: 0;
+}
+
+/* Enhanced gradient fade with library theme */
+.horizontal-scroll-container::before,
+.horizontal-scroll-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* Trending section gradient (warmer, library-inspired) */
+.trending-section .horizontal-scroll-container::before {
+  left: 0;
+  background: linear-gradient(to right, 
+    #1c1310 0%, 
+    rgba(28, 19, 16, 0.9) 30%,
+    rgba(28, 19, 16, 0.6) 60%,
+    rgba(28, 19, 16, 0) 100%
+  );
+}
+
+.trending-section .horizontal-scroll-container::after {
+  right: 0;
+  background: linear-gradient(to left, 
+    #2a1f1a 0%, 
+    rgba(42, 31, 26, 0.9) 30%,
+    rgba(42, 31, 26, 0.6) 60%,
+    rgba(42, 31, 26, 0) 100%
+  );
+}
+
+/* Recommendations section gradient (purple library section) */
+.recommendations-section .horizontal-scroll-container::before {
+  left: 0;
+  background: linear-gradient(to right, 
+    #1a1625 0%, 
+    rgba(26, 22, 37, 0.9) 30%,
+    rgba(26, 22, 37, 0.6) 60%,
+    rgba(26, 22, 37, 0) 100%
+  );
+}
+
+.recommendations-section .horizontal-scroll-container::after {
+  right: 0;
+  background: linear-gradient(to left, 
+    #2d1b3d 0%, 
+    rgba(45, 27, 61, 0.9) 30%,
+    rgba(45, 27, 61, 0.6) 60%,
+    rgba(45, 27, 61, 0) 100%
+  );
+}
+
+/* Add subtle library shelf effect */
+.horizontal-scroll-container::before {
+  box-shadow: inset 0 -2px 4px rgba(139, 69, 19, 0.2);
+}
+
+.horizontal-scroll-container::after {
+  box-shadow: inset 0 -2px 4px rgba(139, 69, 19, 0.2);
+}
+
+/* Enhanced animation */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.horizontal-scroll-container {
+  animation: slideIn 0.8s ease-out;
+}
+
+/* Add a subtle glow effect on hover */
+.horizontal-scroll-container:hover::before,
+.horizontal-scroll-container:hover::after {
+  box-shadow: 
+    inset 0 -2px 4px rgba(139, 69, 19, 0.3),
+    0 0 20px rgba(255, 193, 7, 0.1);
+}
+
+/* Scrollbar styling for library theme */
+.horizontal-scroll-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.horizontal-scroll-wrapper::-webkit-scrollbar-track {
+  background: rgba(139, 69, 19, 0.1);
+  border-radius: 3px;
+}
+
+.horizontal-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #8B4513, #CD853F);
+  border-radius: 3px;
+}
+
+.horizontal-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #CD853F, #ffc107);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .horizontal-scroll-container::before,
+  .horizontal-scroll-container::after {
+    width: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .horizontal-scroll-container::before,
+  .horizontal-scroll-container::after {
+    width: 60px;
+  }
+  
+  .horizontal-scroll-container {
+    padding: 15px 0;
+  }
+  
+  .horizontal-scroll-wrapper {
+    padding: 15px 0;
+  }
+}
