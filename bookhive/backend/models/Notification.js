@@ -43,9 +43,21 @@ const notificationSchema = new Schema({
 
   // What happened
   eventType: {
-    type: String,
-    enum: ['TO_READ_ADDED', 'COMMENT', 'REPLY', 'MENTION'],
-  },
+  type: String,
+  enum: [
+    'TO_READ_ADDED', 
+    'COMMENT', 
+    'REPLY', 
+    'MENTION',
+    'REVIEW_CREATED',        
+    'REVIEW_DELETED',        
+    'COLLECTION_ADDED',      
+    'STATUS_CHANGED',        
+    'COLLECTION_REMOVED',    
+    'TO_READ_REMOVED',       
+    'BOOK_MOVED'             
+  ],
+},
 
   entityType: {
     type: String,

@@ -1,49 +1,24 @@
-const Review = require('../models/Review');
-const Collection = require('../models/Collection');
-const Notification = require('../models/Notification');
+// backend/controllers/reviewController.js
+const ReviewService = require('../services/ReviewService');
 
 // Create a review (only for books in Collection)
 exports.createReview = async (req, res) => {
   try {
     const { userId, googleBookId, rating, comment } = req.body;
-
-    if (!userId || !googleBookId || !rating) {
-      return res.status(400).json({ error: 'userId, googleBookId, and rating are required' });
-    }
-
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({ error: 'Rating must be between 1 and 5' });
-    }
-
-    // Check if book is in user's Collection
-    const collection = await Collection.findOne({ userId, 'books.googleBookId': googleBookId });
-    if (!collection) {
-      return res.status(400).json({ error: 'Book must be in your collection to review' });
-    }
-
-    // Get the book details from the collection
-    const book = collection.books.find(b => b.googleBookId === googleBookId);
-    const bookTitle = book?.title || 'this book';
-
-    // Check for existing review
-    const existingReview = await Review.findOne({ userId, googleBookId });
-    if (existingReview) {
-      return res.status(400).json({ error: 'You have already reviewed this book' });
-    }
-
-    const review = new Review({ userId, googleBookId, rating, comment });
-    await review.save();
-
-    // Updated notification with book title instead of ID
-    await Notification.create({
-      userId,
-      message: `You added a ${rating}-star review for "${bookTitle}".`,
-      type: 'success',
-    });
-
+    
+    const review = await ReviewService.createReview(userId, googleBookId, rating, comment);
+    
     res.status(201).json(review);
   } catch (err) {
     console.error('Error creating review:', err);
+    
+    if (err.message.includes('required') || 
+        err.message.includes('Rating must') ||
+        err.message.includes('collection') ||
+        err.message.includes('already reviewed')) {
+      return res.status(400).json({ error: err.message });
+    }
+    
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -52,18 +27,17 @@ exports.createReview = async (req, res) => {
 exports.listReviews = async (req, res) => {
   try {
     const { userId, googleBookId } = req.query;
-    const query = {};
-    if (userId) query.userId = userId;
-    if (googleBookId) query.googleBookId = googleBookId;
-
-    if (!userId && !googleBookId) {
-      return res.status(400).json({ error: 'userId or googleBookId is required' });
-    }
-
-    const reviews = await Review.find(query).sort({ reviewedAt: -1 }).limit(50);
+    
+    const reviews = await ReviewService.listReviews(userId, googleBookId);
+    
     res.status(200).json(reviews);
   } catch (err) {
     console.error('Error fetching reviews:', err);
+    
+    if (err.message.includes('required')) {
+      return res.status(400).json({ error: err.message });
+    }
+    
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -72,48 +46,36 @@ exports.listReviews = async (req, res) => {
 exports.deleteReview = async (req, res) => {
   try {
     const { id } = req.params;
-    const review = await Review.findByIdAndDelete(id);
+    
+    const result = await ReviewService.deleteReview(id);
 
-    if (!review) {
-      return res.status(404).json({ error: 'Review not found' });
-    }
-
-    // Try to get book title from collection
-    const collection = await Collection.findOne({ 
-      userId: review.userId, 
-      'books.googleBookId': review.googleBookId 
-    });
-    const book = collection?.books.find(b => b.googleBookId === review.googleBookId);
-    const bookTitle = book?.title || 'a book';
-
-    await Notification.create({
-      userId: review.userId,
-      message: `Your review for "${bookTitle}" was deleted.`,
-      type: 'info',
-    });
-
-    res.status(200).json({ message: 'Review deleted' });
+    res.status(200).json({ message: result.message });
   } catch (err) {
     console.error('Error deleting review:', err);
+    
+    if (err.message.includes('not found')) {
+      return res.status(404).json({ error: err.message });
+    }
+    
     res.status(500).json({ error: 'Server error' });
   }
 };
 
+// Get reviews by book
 exports.getReviewsByBook = async (req, res) => {
   try {
     const { googleBookId } = req.params;
 
-    if (!googleBookId) {
-      return res.status(400).json({ error: 'googleBookId is required' });
-    }
-
-    const reviews = await Review.find({ googleBookId })
-      .sort({ reviewedAt: -1 })
-      .limit(100);
+    const reviews = await ReviewService.getReviewsByBook(googleBookId);
 
     res.status(200).json({ reviews, count: reviews.length });
   } catch (err) {
     console.error('Error fetching reviews by book:', err);
+    
+    if (err.message.includes('required')) {
+      return res.status(400).json({ error: err.message });
+    }
+    
     res.status(500).json({ error: 'Server error' });
   }
 };

@@ -116,7 +116,86 @@ class NotificationService {
       metadata: { bookId, bookTitle },
     });
   }
+
+
+async createReviewNotification(userId, bookTitle, rating) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `You added a ${rating}-star review for "${bookTitle}".`,
+      type: 'success',
+      eventType: 'REVIEW_CREATED',
+      entityType: 'BOOK',
+      metadata: { bookTitle, rating },
+    });
+  }
+
+  async createReviewDeletedNotification(userId, bookTitle) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `Your review for "${bookTitle}" was deleted.`,
+      type: 'info',
+      eventType: 'REVIEW_DELETED',
+      entityType: 'BOOK',
+      metadata: { bookTitle },
+    });
+  }
+
+  async createBookAddedToCollectionNotification(userId, bookTitle) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `"${bookTitle}" was added to your collection.`,
+      type: 'success',
+      eventType: 'COLLECTION_ADDED',
+      entityType: 'BOOK',
+      metadata: { bookTitle },
+    });
+  }
+
+  async createStatusChangeNotification(userId, bookTitle, statusLabel) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `Book "${bookTitle}" marked as ${statusLabel}.`,
+      type: 'success',
+      eventType: 'STATUS_CHANGED',
+      entityType: 'BOOK',
+      metadata: { bookTitle, statusLabel },
+    });
+  }
+
+  async createBookRemovedFromCollectionNotification(userId, bookTitle) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `Book "${bookTitle}" was removed from your collection.`,
+      type: 'info',
+      eventType: 'COLLECTION_REMOVED',
+      entityType: 'BOOK',
+      metadata: { bookTitle },
+    });
+  }
+
+  async createBookRemovedFromToReadNotification(userId, bookTitle) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `Book "${bookTitle}" was removed from your to-read list.`,
+      type: 'info',
+      eventType: 'TO_READ_REMOVED',
+      entityType: 'BOOK',
+      metadata: { bookTitle },
+    });
+  }
+
+  async createBookMovedNotification(userId, bookTitle, statusLabel) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `Book "${bookTitle}" moved to ${statusLabel}.`,
+      type: 'success',
+      eventType: 'BOOK_MOVED',
+      entityType: 'BOOK',
+      metadata: { bookTitle, statusLabel },
+    });
+  }
 }
+
 
 module.exports = new NotificationService();
 module.exports.NotificationService = NotificationService; // for tests/DI
