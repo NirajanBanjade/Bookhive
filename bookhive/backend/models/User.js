@@ -18,13 +18,23 @@ const User = new mongoose.Schema(
         lowercase: true,
         trim: true,
       },
+      // Date of Birth for age verification
+      dateOfBirth: {
+        type: Date,
+        required: false,  // Changed to false to support existing users
+      },
+      // Calculated field to track if user is under 18
+      isMinor: {
+        type: Boolean,
+        default: false,
+      },
       // store ONLY a hash
       passwordHash: { type: String, 
         required: true, 
         select: false },
         role: {
             type:[String],
-            enum:['User','Admin'],  // Guest users are not authentic users. so haven't made any roles for them.
+            enum:['User','Admin'],
             default: ['User']
         },
         emailVerifiedAt: { type: Date, default: null }, 
@@ -32,30 +42,25 @@ const User = new mongoose.Schema(
         resetOtpExpiresAt: { type: Date, select: false },
         passwordHistory:    [{ type: String, select: false }],
     // === PROFILE FIELDS ADDED FOR USER PROFILE FEATURE === //
-    // Display name (can be different from username)
     name: {
       type: String,
       trim: true,
       maxlength: 50,
     },
-    // User biography/description for profile page
     bio: {
       type: String,
       maxlength: 500,
       default: "",
     },
-    // User location for profile page
-    location: {                    // ← ADD THESE 5 LINES
+    location: {
       type: String,
       maxlength: 100,
       default: "",
     },
-    // URL/path to user's profile picture
     profileImageUrl: {
       type: String,
       default: null,
     },
-    // Reading statistics for profile display
     booksRead: {
       type: Number,
       default: 0,
@@ -78,11 +83,10 @@ const User = new mongoose.Schema(
 User.methods.setPassword = async function (plain) {
 
     const rounds = parseInt(process.env.BCRYPT_SALT_ROUNDS || '12', 10);
-    // this.passwordHash = await bcrypt.hash(plain, rounds);
     const passwordHash=await bcrypt.hash(plain, rounds);
     this.passwordHistory = this.passwordHistory || [];
 
-    if (this.passwordHash) { // compares the newly set password with the current one..
+    if (this.passwordHash) {
       const sameAsCurrent = await bcrypt.compare(plain, this.passwordHash);
       if (sameAsCurrent) {
         throw new Error('New password must be different from the current password!');
@@ -93,7 +97,7 @@ User.methods.setPassword = async function (plain) {
         const match= await bcrypt.compare(plain, this.passwordHistory[pass]);
         if(match) throw new Error('New password must be different from last three passwords!');
     }
-    if (this.passwordHash) { // this if exist for update if not exist then during register wont be executed.
+    if (this.passwordHash) {
       this.passwordHistory.unshift(this.passwordHash);
       if (this.passwordHistory.length > 3) {
         this.passwordHistory = this.passwordHistory.slice(0, 3);
@@ -102,10 +106,26 @@ User.methods.setPassword = async function (plain) {
     this.passwordHash=passwordHash;
 
 };
+
 User.methods.verifyPassword = function (plain) {
   return bcrypt.compare(plain, this.passwordHash);
 };
 
-// email verified at: function still is not made. need to figure out to send tokens during registration.
+// Calculate if user is a minor (under 18 years old)
+User.methods.calculateIsMinor = function () {
+  if (!this.dateOfBirth) return false;
+  
+  const today = new Date();
+  const birthDate = new Date(this.dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  // Adjust age if birthday hasn't occurred yet this year
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  return age < 18;
+};
 
 module.exports = mongoose.model("User", User);
