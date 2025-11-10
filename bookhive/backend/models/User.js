@@ -18,6 +18,16 @@ const User = new mongoose.Schema(
         lowercase: true,
         trim: true,
       },
+      // Date of Birth for age verification
+      dateOfBirth: {
+        type: Date,
+        required: true,
+      },
+      // Calculated field to track if user is under 18
+      isMinor: {
+        type: Boolean,
+        default: false,
+      },
       // store ONLY a hash
       passwordHash: { type: String, 
         required: true, 
@@ -45,7 +55,7 @@ const User = new mongoose.Schema(
       default: "",
     },
     // User location for profile page
-    location: {                    // ← ADD THESE 5 LINES
+    location: {
       type: String,
       maxlength: 100,
       default: "",
@@ -102,10 +112,26 @@ User.methods.setPassword = async function (plain) {
     this.passwordHash=passwordHash;
 
 };
+
 User.methods.verifyPassword = function (plain) {
   return bcrypt.compare(plain, this.passwordHash);
 };
 
-// email verified at: function still is not made. need to figure out to send tokens during registration.
+// Calculate if user is a minor (under 18 years old)
+User.methods.calculateIsMinor = function () {
+  if (!this.dateOfBirth) return false;
+  
+  const today = new Date();
+  const birthDate = new Date(this.dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  
+  // Adjust age if birthday hasn't occurred yet this year
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  
+  return age < 18;
+};
 
 module.exports = mongoose.model("User", User);
