@@ -6,6 +6,7 @@ const Loginpage = () => {
   const [user, setuser] = useState("");
   const [email, setemail] = useState("");
   const [password, setpassword] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -27,6 +28,7 @@ const Loginpage = () => {
     setuser("");
     setemail("");
     setpassword("");
+    setDateOfBirth("");
     setIdentifier("");
     setConfirmPassword("");
     setResetCode("");
@@ -55,19 +57,21 @@ const Loginpage = () => {
           body: JSON.stringify({ name_email: identifier, password }),
         });
         const data = await handle(res);
-        localStorage.setItem("token", data.token); //FIXED: changed "jwt_token" to "token"
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("isMinor", data.isMinor);
+        localStorage.setItem("userId", data.userId);
         setSuccessMsg("Log in successful!!!");
       } else if (mode === "register") {
-        if (!user || !email || !password || !confirmPassword)
+        if (!user || !email || !password || !confirmPassword || !dateOfBirth)
           return alert("Please fill all fields.");
         if (password !== confirmPassword)
           return alert("Passwords do not match.");
-        console.log("Register", { username: user, email, password });
+        console.log("Register", { username: user, email, password, dateOfBirth });
 
         const res = await fetch(`${BASE_URL}/api/users/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: user, email, password }),
+          body: JSON.stringify({ username: user, email, password, dateOfBirth }),
         });
         const data = await handle(res);
         setSuccessMsg("Registered successfully. Please log in!!!");
@@ -153,6 +157,16 @@ const Loginpage = () => {
               <div className="inputGroup">
                 <label className="label">Email</label>
                 <input className="input" type="email" placeholder="Enter your email" value={email} onChange={(e) => setemail(e.target.value)} />
+              </div>
+              <div className="inputGroup">
+                <label className="label">Date of Birth</label>
+                <input 
+                  className="input" 
+                  type="date" 
+                  value={dateOfBirth} 
+                  onChange={(e) => setDateOfBirth(e.target.value)}
+                  max={new Date().toISOString().split('T')[0]}
+                />
               </div>
               <div className="inputGroup">
                 <label className="label">Password</label>
