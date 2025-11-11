@@ -98,3 +98,32 @@ export async function getBookById(googleBookId, { signal } = {}) {
 
   return await res.json();
 }
+
+export async function rebuildUserProfile({ userId, signal } = {}) {
+  if (!userId) throw new Error("userId is required");
+
+  const res = await fetch(`/api/recommendations/profile/rebuild`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ userId }),
+    signal,
+    credentials: "include", // if you're using cookies/session
+  });
+
+  let data;
+  try {
+    data = await res.json();
+  } catch {
+    data = null;
+  }
+
+  if (!res.ok) {
+    let errMsg = `Failed to rebuild profile: ${res.status}`;
+    if (data?.error) errMsg = data.error;
+    throw new Error(errMsg);
+  }
+
+  return data; // { ok: true, profile, warnings: [...] }
+}

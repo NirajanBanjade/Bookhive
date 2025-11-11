@@ -10,7 +10,32 @@ import {
   Calendar,
   Flame, // 🆕 Added Flame icon for trending
 } from "lucide-react";
-import { getTrendingBooks, getRecommendedForUser } from "../../api/books"; 
+import { getTrendingBooks, getRecommendedForUser, rebuildUserProfile } from "../../api/books"; 
+
+// Try to get the current user's id from a JWT stored in localStorage.
+function getCurrentUserIdFromToken() {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token){
+      console.log("No auth token found in localStorage");
+      return null;
+    }
+
+    console.log("Auth token found:", token);
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+
+    const payloadBase64 = parts[1];
+    const payloadJson = atob(payloadBase64);
+    const payload = JSON.parse(payloadJson);
+
+    // Support a few common shapes: { id: ... }, { _id: ... }, { userId: ... }
+    return payload.id || payload._id || payload.userId || null;
+  } catch (err) {
+    console.error("Failed to extract userId from token", err);
+    return null;
+  }
+};
 
 const HomePage = () => {
   // 🆕 NEW STATE - Trending books
@@ -22,8 +47,8 @@ const HomePage = () => {
   const [recsLoading, setRecsLoading] = useState(true);
   const [recsError, setRecsError] = useState(null);
 
-  // Likely get userId from auth/context; hardcode for now
-const userId = "user123"; // TODO: replace with real auth user id
+  // Get userId from token
+  const [ userId ] = useState(() => getCurrentUserIdFromToken());
 
   // 🆕 NEW EFFECT - Fetch trending books on mount
   useEffect(() => {
@@ -59,12 +84,28 @@ const userId = "user123"; // TODO: replace with real auth user id
 
     async function fetchRecs() {
       try {
+        console.log("Fetching recommendations for userId:", userId);
         setRecsLoading(true);
         const data = await getRecommendedForUser({
           userId,
           limit: 9,
           signal: controller.signal,
         });
+
+        // 2) If there's no profile yet, build it once and retry
+        if (data.reason === "no_profile") {
+          try {
+            await rebuildUserProfile({ userId, signal: controller.signal });
+            data = await getRecommendedForUser({
+              userId,
+              limit: 9,
+              signal: controller.signal,
+            });
+          } catch (innerErr) {
+            console.error("Failed to rebuild profile:", innerErr);
+          }
+        }
+
         setRecs(data.items || []);
         setRecsError(null);
       } catch (err) {

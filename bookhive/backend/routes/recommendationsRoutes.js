@@ -47,7 +47,7 @@ const scoring = new ScoringStrategy({
   weights: { authors: 0.5, categories: 0.3, keywords: 0.2, popularity: 0.1, ratingQuality: 0.08, recency: 0.04 }
 });
 const recommendationService = new RecommendationService({
-  candidateGenerator, profileRepo, featureExtractor, scoring
+  candidateGenerator, profileRepo, featureExtractor, scoring, builder
 });
 
 const controller = new RecommendationController({ builder, profileRepo, candidateGenerator, recommendationService });
