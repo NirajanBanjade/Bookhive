@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { GENRES, getGenreById } from "../constants/genre";
 import axios from "axios";
+import MatureContentWarning from "../components/model/MatureContentWarning";
 
 const GenreResultsPage = () => {
   const { genreId } = useParams();
@@ -13,9 +14,14 @@ const GenreResultsPage = () => {
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
-  const [userId, setUserId] = useState(null); 
+  const [userId, setUserId] = useState(null);
+  
+  // Mature content warning state
+  const [showWarning, setShowWarning] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [isMinor, setIsMinor] = useState(false);
 
-  // FIXED: Fetch current user ID
+  // FIXED: Fetch current user ID and check if minor
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -29,6 +35,10 @@ const GenreResultsPage = () => {
         if (response.ok) {
           const user = await response.json();
           setUserId(user._id || user.id);
+          
+          // Check if user is a minor
+          const minorStatus = localStorage.getItem('isMinor');
+          setIsMinor(minorStatus === 'true');
         }
       } catch (err) {
         console.error('Error fetching user:', err);
@@ -73,17 +83,51 @@ const GenreResultsPage = () => {
     };
 
     fetchGenreBooks();
-  }, [genre, page]);
+  }, [genre, page, genreId]);
 
-  // FIXED: Add book with proper authentication and notification refresh
+  // UPDATED: Check for mature content before adding
   const handleAddToRead = async (book) => {
     if (!userId) {
       alert('Please log in to add books to your reading list');
       return;
     }
 
+    // Check if book is mature and user is a minor
+    if (isMinor && book.maturityRating === 'MATURE') {
+      // Check if user has opted to skip warnings
+      if (localStorage.getItem('skipMatureWarnings') === 'true') {
+        await addBookToRead(book);
+        return;
+      }
+      
+      setSelectedBook(book);
+      setShowWarning(true);
+      return;
+    }
+
+    // If not mature or user is adult, add directly
+    await addBookToRead(book);
+  };
+
+  // Handle warning acceptance
+  const handleWarningAccept = async () => {
+    setShowWarning(false);
+    if (selectedBook) {
+      await addBookToRead(selectedBook);
+      setSelectedBook(null);
+    }
+  };
+
+  // Handle warning decline
+  const handleWarningDecline = () => {
+    setShowWarning(false);
+    setSelectedBook(null);
+  };
+
+  // Actual function to add book to To-Read
+  const addBookToRead = async (book) => {
     try {
-      const token = localStorage.getItem('token'); // FIXED: Get token
+      const token = localStorage.getItem('token');
       
       await axios.post(
         `http://localhost:5050/api/to-read/${userId}`, 
@@ -95,13 +139,13 @@ const GenreResultsPage = () => {
           categories: book.categories || []
         },
         {
-          headers: { 'Authorization': `Bearer ${token}` } // FIXED: Add auth header
+          headers: { 'Authorization': `Bearer ${token}` }
         }
       );
       
       alert(`Added "${book.title}" to your To-Read list!`);
       
-      // FIXED: Trigger notification refresh
+      // Trigger notification refresh
       window.dispatchEvent(new Event('notifications:refresh'));
       
     } catch (err) {
@@ -236,15 +280,23 @@ const GenreResultsPage = () => {
                     <h3 className="font-bold text-gray-900 mb-1 line-clamp-2 min-h-[3rem]">
                       {book.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-3 line-clamp-1">
+                    <p className="text-sm text-gray-600 mb-2 line-clamp-1">
                       {(book.authors || []).join(", ") || "Unknown Author"}
                     </p>
 
+                    {/* Show mature badge */}
+                    {book.maturityRating === 'MATURE' && (
+                      <span className="inline-block mb-2 px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded">
+                        Mature Content
+                      </span>
+                    )}
+
                     <button
                       onClick={() => handleAddToRead(book)}
-                      className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium"
+                      disabled={!userId}
+                      className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Add to To-Read
+                      {userId ? 'Add to To-Read' : 'Login to Add'}
                     </button>
                   </div>
                 </div>
@@ -276,6 +328,14 @@ const GenreResultsPage = () => {
           </>
         )}
       </div>
+
+      {/* Mature Content Warning Modal */}
+      <MatureContentWarning
+        isOpen={showWarning}
+        onClose={handleWarningDecline}
+        onAccept={handleWarningAccept}
+        bookTitle={selectedBook?.title || ''}
+      />
     </div>
   );
 };

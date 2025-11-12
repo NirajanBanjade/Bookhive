@@ -31,7 +31,7 @@ function mapToToReadBook(volume) {
     authors: Array.isArray(info.authors) ? info.authors : [],
     thumbnail,
     categories: Array.isArray(info.categories) ? info.categories : [],
-
+    maturityRating: info.maturityRating || 'NOT_MATURE', 
   };
 }
 
@@ -53,7 +53,7 @@ async function getVolume(volumeId, { fields, retries = 3, timeoutMs = 8000 } = {
       const retriable =
         [429, 502, 503, 504].includes(status) ||
         ["ECONNRESET", "ETIMEDOUT"].includes(err.code);
-      if (!retriable) throw err; // Non-retriable → exit early
+      if (!retriable) throw err; 
       await new Promise(r => setTimeout(r, 300 * 2 ** attempt)); // Exponential backoff
     }
   }

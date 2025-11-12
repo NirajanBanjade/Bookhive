@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { searchBooks } from "../api/books";
 import axios from "axios";
+import MatureContentWarning from "../components/model/MatureContentWarning";
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -21,7 +22,11 @@ export default function SearchPage() {
   // FIXED: Get real userId from logged-in user
   const [userId, setUserId] = useState(null);
 
-  // Fetch logged-in user ID
+  const [showWarning, setShowWarning] = useState(false);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [isMinor, setIsMinor] = useState(false);
+
+  // Fetch logged-in user ID and check if minor
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -33,6 +38,9 @@ export default function SearchPage() {
         });
         
         setUserId(response.data._id || response.data.id);
+        
+        const minorStatus = localStorage.getItem('isMinor');
+        setIsMinor(minorStatus === 'true');
       } catch (err) {
         console.error('Error fetching user:', err);
       }
@@ -110,13 +118,46 @@ export default function SearchPage() {
     setPage(target);
   };
 
-  // FIXED: Add to To-Read with notification refresh
   const handleAddToRead = async (book) => {
     if (!userId) {
       alert('Please login first');
       return;
     }
 
+    // Check if book is mature and user is a minor
+    if (isMinor && book.maturityRating === 'MATURE') {
+      // Check if user has opted to skip warnings
+      if (localStorage.getItem('skipMatureWarnings') === 'true') {
+        await addBookToRead(book);
+        return;
+      }
+      
+      setSelectedBook(book);
+      setShowWarning(true);
+      return;
+    }
+
+    // If not mature or user is adult, add directly
+    await addBookToRead(book);
+  };
+
+  // Handle warning acceptance
+  const handleWarningAccept = async () => {
+    setShowWarning(false);
+    if (selectedBook) {
+      await addBookToRead(selectedBook);
+      setSelectedBook(null);
+    }
+  };
+
+  // Handle warning decline
+  const handleWarningDecline = () => {
+    setShowWarning(false);
+    setSelectedBook(null);
+  };
+
+  // Actual function to add book to To-Read
+  const addBookToRead = async (book) => {
     try {
       await axios.post(`http://localhost:5050/api/to-read/${userId}`, book);
       
@@ -184,6 +225,12 @@ export default function SearchPage() {
                 <div className="text-sm text-gray-600">
                   {(b.authors || []).join(", ") || "Unknown author"}
                 </div>
+                {/* Show mature badge */}
+                {b.maturityRating === 'MATURE' && (
+                  <span className="inline-block mt-1 px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded">
+                    Mature Content
+                  </span>
+                )}
               </div>
             </div>
 
@@ -218,6 +265,14 @@ export default function SearchPage() {
           </button>
         </div>
       )}
+
+      {/* Mature Content Warning Modal */}
+      <MatureContentWarning
+        isOpen={showWarning}
+        onClose={handleWarningDecline}
+        onAccept={handleWarningAccept}
+        bookTitle={selectedBook?.title || ''}
+      />
     </div>
   );
 }
