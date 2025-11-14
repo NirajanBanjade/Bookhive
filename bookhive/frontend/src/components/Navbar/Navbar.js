@@ -20,6 +20,8 @@ const Navbar = () => {
     onMarkOne,
   } = useNotifications({ pollMs: 20000 });
 
+  const isLoggedIn = !!localStorage.getItem("token"); // simple auth check
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -75,55 +77,60 @@ const Navbar = () => {
 
           {/* Right Section */}
           <div className="flex items-center space-x-4">
-            {/* Add Book Button */}
-            <button className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              <span className="font-medium">Add Book</span>
-            </button>
 
-            {/* Notifications */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                aria-label="Notifications"
-                className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                onClick={() => setOpen((v) => !v)}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
+            {isLoggedIn && (
+              <>
+                {/* Add Book Button */}
+                <button className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  <span className="font-medium">Add Book</span>
+                </button>
 
-                {/* Badge */}
-                {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] leading-[18px] text-center rounded-full">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
+                {/* Notifications */}
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    aria-label="Notifications"
+                    className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                    onClick={() => setOpen((v) => !v)}
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
 
-              {/* Dropdown */}
-              <NotificationsDropdown
-                open={open}
-                loading={loading}
-                error={error}
-                items={items}
-                unreadCount={unreadCount}
-                onMarkAll={onMarkAll}
-                onMarkOne={onMarkOne}
-                onClose={() => setOpen(false)}
-              />
-            </div>
+                    {/* Badge */}
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 bg-red-500 text-white text-[10px] leading-[18px] text-center rounded-full">
+                        {unreadCount}
+                      </span>
+                    )}
+                  </button>
 
-            {/* User Profile */}
-            <Link to="/" className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </Link>
+                  {/* Dropdown */}
+                  <NotificationsDropdown
+                    open={open}
+                    loading={loading}
+                    error={error}
+                    items={items}
+                    unreadCount={unreadCount}
+                    onMarkAll={onMarkAll}
+                    onMarkOne={onMarkOne}
+                    onClose={() => setOpen(false)}
+                  />
+                </div>
+
+                {/* User Profile */}
+                <Link to="/" className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                  <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -132,13 +139,26 @@ const Navbar = () => {
       <div className="border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8 py-3">
-            <Link to="/" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Profile</Link>
+            {/*Always visible links*/}
             <Link to="/home" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Home</Link>
             <Link to="/search" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Search</Link>
-            <Link to="/genre" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Genre</Link>
-            <Link to="/to-read" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">To-Read</Link>
-            <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Login</Link>
-            <Link to="/my-groups" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Joined Groups</Link>
+
+            {/*Loggen-in only links*/}
+            {isLoggedIn && (
+              <>
+                <Link to="/" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Profile</Link>
+                <Link to="/genre" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Genre</Link>
+                <Link to="/to-read" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">To-Read</Link>
+                <Link to="/my-groups" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Joined Groups</Link>
+              </>
+            )}
+
+            {/*Show login/signup if not logged in*/}
+            {!isLoggedIn && (
+              <>
+                <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Login</Link>
+              </>
+            )}
           </div>
         </div>
       </div>
