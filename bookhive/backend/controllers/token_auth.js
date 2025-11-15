@@ -1,71 +1,79 @@
-const User = require('../models/User');
 const { issueResetCode } = require('../utils/token_util.js');
+const { sendMail } = require('../utils/mailEvents.js'); // ✅ Use mailEvents
+const { getUserByEmail } = require('../services/getUserByEmail.js'); // ✅ Use service
 
-const {sendMail} = require('../models/SendGrid.js');
 async function requestPasswordReset(req, res) {
-    try {
-        const user = await User.findOne({ email: req.body.email });
-        if (!user) {
-            return res.status(200).json({ ok: true });
-        }
-        // const otp_expires_time=user.resetOtpExpiresAt;
-        // if (otp_expires_time-new Date()){
-        //     return res.status(429).json({ error: 'Code was recently sent. Please try again later.' });
-        // }
-        const code = await issueResetCode(user);
-        //   console.log(code);
-        
-
-        await sendMail({
-            to: user.email,
-            subject: 'Your password reset code.',
-            text: `Your code is ${code}. It expires in 10 minutes.`,
-        });
-        return res.json({ ok: true });
-    } catch (err){
-        console.error('requestPasswordReset error:', err);
-        return res.status(500).json({ error: 'Internal server error!' });
+  try {
+    const user = await getUserByEmail(req.body.email);
+    
+    if (!user) {
+      // Return 200 to prevent email enumeration
+      return res.status(200).json({ ok: true });
     }
+
+    // Optional: Check if code was recently sent (uncomment if needed)
+    // if (user.resetOtpExpiresAt && user.resetOtpExpiresAt > new Date()) {
+    //   return res.status(429).json({ error: 'Code was recently sent. Please try again later.' });
+    // }
+
+    const code = await issueResetCode(user);
+    
+    // ✅ Clean email sending
+    await sendMail.passwordReset(user, code);
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error('requestPasswordReset error:', err);
+    return res.status(500).json({ error: 'Internal server error!' });
+  }
 }
 
 async function resetPasswordAfterCode(req, res) {
-    try {
+  try {
+    const { email, code, newPassword } = req.body;
 
-        const { email, code, newPassword } = req.body;
-        if ((typeof email !== 'string')  || (typeof code !== 'string') || (typeof newPassword !== 'string') ){
-            return res.status(400).json({ error: 'Invalid input types' });
-        }
-
-        const user = await User.findOne({ email }).select('+passwordHash +passwordHistory +resetOtpPlain +resetOtpExpiresAt');
-        if ((!user) || (user.resetOtpPlain !== code) || (user.resetOtpExpiresAt < new Date())) {
-            return res.status(400).json({
-                 error: 'Invalid or expired code!' 
-                });
-        }
-
-        await user.setPassword(newPassword); // its caling setpassword method in user model.
-        user.resetOtpPlain = undefined;   // after resetting, invalidate the token code. so that it cant be reused.
-        user.resetOtpExpiresAt = undefined; //
-        await user.save();
-
-        return res.status(200).json({
-            ok: true,
-            message: 'Password updated successfully. Please sign in again!',
-          });
-        
-
+    // Validate input types
+    if (typeof email !== 'string' || typeof code !== 'string' || typeof newPassword !== 'string') {
+      return res.status(400).json({ error: 'Invalid input types' });
     }
-    catch (err){
-        const msg = String(err?.message || '');
-        if (
-          msg === 'New password must be different from the current password!' ||
-          msg === 'New password must be different from last three passwords!'
-        ) {
-          return res.status(400).json({ error: msg }); // <-- 400 with your exact message
-        }
-        console.error('requestPasswordaftercode error:', err);
-        return res.status(500).json({ error: 'Internal server error' });
+
+    // ✅ Use service to get user with sensitive fields
+    const user = await getUserByEmail(
+      email, 
+      '+passwordHash +passwordHistory +resetOtpPlain +resetOtpExpiresAt'
+    );
+
+    // Validate code and expiration
+    if (!user || user.resetOtpPlain !== code || user.resetOtpExpiresAt < new Date()) {
+      return res.status(400).json({ error: 'Invalid or expired code!' });
     }
+
+    // Update password
+    await user.setPassword(newPassword);
+    
+    // Invalidate reset token
+    user.resetOtpPlain = undefined;
+    user.resetOtpExpiresAt = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      ok: true,
+      message: 'Password updated successfully. Please sign in again!',
+    });
+  } catch (err) {
+    const msg = String(err?.message || '');
+    
+    // Handle password validation errors
+    if (
+      msg === 'New password must be different from the current password!' ||
+      msg === 'New password must be different from last three passwords!'
+    ) {
+      return res.status(400).json({ error: msg });
+    }
+
+    console.error('resetPasswordAfterCode error:', err);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 }
 
 module.exports = { requestPasswordReset, resetPasswordAfterCode };
