@@ -20,14 +20,14 @@ const transporter = nodemailer.createTransport({
 });
 
 async function sendMail({ to, subject, text, html, replyTo }) {
-  if (process.env.NODE_ENV === "test") {
-    console.log("[mail] sendMail skipped in test env");
-    return {
-      skipped: true,
-      to,
-      subject,
-    };
-  }
+  // if (process.env.NODE_ENV === "test") {
+  //   console.log("[mail] sendMail skipped in test env");
+  //   return {
+  //     skipped: true,
+  //     to,
+  //     subject,
+  //   };
+  // }
 
   const info = await transporter.sendMail({
     from: `"Bookhive" <${GMAIL_USER}>`,

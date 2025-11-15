@@ -1,5 +1,6 @@
 const getUser = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { sendMail } = require('../utils/mailEvents'); 
 const emailValidator = (email)=>{
     if (typeof email !== 'string') return false;
     if(/\s/.test(email)) return false;
@@ -63,6 +64,12 @@ const registerUser = async (req, res) => {
         
         await newUser.setPassword(password);
         await newUser.save();
+        try {
+            await sendMail.welcome(newUser);
+          } catch (emailErr) {
+            console.error('Failed to send welcome email:', emailErr);
+            // Don't fail registration if email fails
+          }
     
         res.status(200).json({ message: 'User registered successfully!', userId: newUser._id });
     } catch (err) {
@@ -94,6 +101,16 @@ const loginUser= async (req, res) => {
             user.isMinor = user.calculateIsMinor();
             await user.save();
         }
+        try {
+            await sendMail.loginAlert(user, {
+              ip: req.ip || req.connection.remoteAddress,
+              userAgent: req.get('user-agent'),
+              timestamp: new Date()
+            });
+          } catch (emailErr) {
+            console.error('Failed to send login alert:', emailErr);
+            // Don't fail login if email fails
+          }
 
         const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
