@@ -1,6 +1,8 @@
 import React from 'react';
 import './Loginpage.css';
 import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+
 const Loginpage = () => {
   const [mode, setMode] = useState('login');
   const [user, setuser] = useState("");
@@ -15,6 +17,8 @@ const Loginpage = () => {
   const [resetCode, setResetCode] = useState("");
   const [newPw, setNewPw] = useState("");
   const [newPw2, setNewPw2] = useState("");
+  const navigate = useNavigate();
+
 
 
 
@@ -61,6 +65,8 @@ const Loginpage = () => {
         localStorage.setItem("isMinor", data.isMinor);
         localStorage.setItem("userId", data.userId);
         setSuccessMsg("Log in successful!!!");
+        navigate("/home");
+        
       } else if (mode === "register") {
         if (!user || !email || !password || !confirmPassword || !dateOfBirth)
           return alert("Please fill all fields.");

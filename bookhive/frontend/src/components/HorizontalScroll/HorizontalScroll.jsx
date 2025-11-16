@@ -32,9 +32,14 @@ const HorizontalScroll = ({ children, speed = 0.5, autoScroll = true }) => {
   }, [autoScroll, speed]);
 
   // Duplicate children for seamless infinite scroll
+  const childrenArray = React.Children.toArray(children);
   const duplicatedChildren = [
-    ...React.Children.toArray(children),
-    ...React.Children.toArray(children),
+    ...childrenArray,
+    ...childrenArray.map((child, index) =>
+      React.cloneElement(child, {
+        key: `${child.key}-duplicate-${index}`,
+      })
+    ),
   ];
 
   return (

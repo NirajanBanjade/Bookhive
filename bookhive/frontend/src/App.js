@@ -50,8 +50,11 @@ function App() {
             <Route path="/login" element={<Loginpage />} />
 
             {/* Main Pages */}
-            <Route path="/" element={<Profile />} />
+            {/* <Route path="/" element={<Profile />} /> */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/home" element={<HomePage />} />
+
             <Route path="/search" element={<SearchPage />} />
             <Route path="/to-read" element={<ToReadPage />} />
             <Route path="/my-groups" element={<JoinedGroups />} />

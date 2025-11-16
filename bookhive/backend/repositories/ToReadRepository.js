@@ -217,4 +217,4 @@ class ToReadRepository {
 module.exports = new ToReadRepository();
 
 // Also export class (old pattern - for backwards compatibility and testing)
-module.exports.ToReadRepository = ToReadRepository;
+// module.exports.ToReadRepository = ToReadRepository;

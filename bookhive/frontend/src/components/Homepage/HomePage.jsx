@@ -68,7 +68,12 @@ const HomePage = () => {
           limit: 15,
           signal: controller.signal,
         });
-        setTrendingBooks(data.trending || []);
+        // Add unique IDs to each book
+        const booksWithIds = (data.trending || []).map((book, idx) => ({
+          ...book,
+          _uniqueId: `${book.isbn || book.title || 'book'}-${idx}-${Date.now()}`
+        }));
+        setTrendingBooks(booksWithIds);
         setTrendingError(null);
       } catch (err) {
         if (err.name !== "AbortError") {
@@ -235,11 +240,11 @@ const HomePage = () => {
               <HorizontalScroll speed={0.5} autoScroll={true}>
                 {trendingBooks.map((book, index) => (
                   <BookCard
-                    key={book.isbn || index}
-                    book={book}
-                    showRank={true}
-                    rank={book.rank || index + 1}
-                  />
+  key={`trending-${index}`}
+  book={book}
+  showRank={true}
+  rank={book.rank || index + 1}
+/>
                 ))}
               </HorizontalScroll>
             )}
@@ -283,7 +288,8 @@ const HomePage = () => {
                   const v = item.volumeInfo || {};
                   return (
                     <BookCard
-                      key={item.id}
+                    key={`${item.id}-${Math.random()}`}
+
                       book={{
                         title: v.title,
                         authors: v.authors,

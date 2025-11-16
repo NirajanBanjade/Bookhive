@@ -1,6 +1,6 @@
 // frontend/src/components/Navbar/Navbar.js
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import useNotifications from "../../hooks/useNotifications";
 import NotificationsDropdown from "../notifications/NotificationsDropdown";
 
@@ -19,7 +19,7 @@ const Navbar = () => {
     onMarkAll,
     onMarkOne,
   } = useNotifications({ pollMs: 20000 });
-
+  const location = useLocation();
   const isLoggedIn = !!localStorage.getItem("token"); // simple auth check
 
   const handleSearch = (e) => {
@@ -97,7 +97,7 @@ const Navbar = () => {
                   >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
 
                     {/* Badge */}
@@ -122,7 +122,8 @@ const Navbar = () => {
                 </div>
 
                 {/* User Profile */}
-                <Link to="/" className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <Link to="/profile" className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition-colors">
+
                   <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center">
                     <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
@@ -140,13 +141,16 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8 py-3">
             {/*Always visible links*/}
-            <Link to="/home" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Home</Link>
-            <Link to="/search" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Search</Link>
+            <Link to="/home" className={`text-sm font-medium transition-colors ${location.pathname === '/home' ? 'text-orange-500' : 'text-gray-700 hover:text-primary'}`}>Home</Link>
+            <Link to="/search" className={`text-sm font-medium transition-colors ${location.pathname === '/search' ? 'text-orange-500' : 'text-gray-700 hover:text-primary'}`}>Search</Link>
 
             {/*Loggen-in only links*/}
             {isLoggedIn && (
               <>
-                <Link to="/" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Profile</Link>
+                <Link to="/profile" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+                  Profile
+                </Link>
+
                 <Link to="/genre" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Genre</Link>
                 <Link to="/to-read" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">To-Read</Link>
                 <Link to="/my-groups" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Joined Groups</Link>
@@ -156,7 +160,7 @@ const Navbar = () => {
             {/*Show login/signup if not logged in*/}
             {!isLoggedIn && (
               <>
-                <Link to="/login" className="text-sm font-medium text-gray-700 hover:text-primary transition-colors">Login</Link>
+                <Link to="/login" className={`text-sm font-medium transition-colors ${location.pathname === '/login' ? 'text-orange-500' : 'text-gray-700 hover:text-primary'}`}>Login</Link>
               </>
             )}
           </div>
