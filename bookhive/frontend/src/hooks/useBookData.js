@@ -72,7 +72,10 @@ export const useRecommendations = (limit = 12) => {
   const [userId] = useState(() => getCurrentUserIdFromToken());
 
   useEffect(() => {
+    console.log("🔍 useRecommendations: userId is", userId);
+
     if (!userId) {
+      console.log("❌ useRecommendations: No userId found, stopping");
       setLoading(false);
       return;
     }
@@ -84,35 +87,57 @@ export const useRecommendations = (limit = 12) => {
         setLoading(true);
         setError(null);
 
-        console.log("Fetching recommendations for userId:", userId);
+        console.log(
+          "🚀 useRecommendations: Fetching recommendations for userId:",
+          userId
+        );
         let response = await getRecommendedForUser({
           userId,
           limit,
           signal: controller.signal,
         });
 
+        console.log("📦 useRecommendations: API response:", response);
+
         // If there's no profile yet, build it once and retry
         if (response.reason === "no_profile") {
+          console.log(
+            "🏗️ useRecommendations: No profile found, building profile..."
+          );
           try {
             await rebuildUserProfile({ userId, signal: controller.signal });
+            console.log("✅ useRecommendations: Profile rebuilt, retrying...");
             response = await getRecommendedForUser({
               userId,
               limit: Math.min(limit, 9), // Reduce limit on retry
               signal: controller.signal,
             });
+            console.log("🔄 useRecommendations: Retry response:", response);
           } catch (innerErr) {
-            console.error("Failed to rebuild profile:", innerErr);
+            console.error(
+              "❌ useRecommendations: Failed to rebuild profile:",
+              innerErr
+            );
           }
         }
 
+        console.log("✨ useRecommendations: Final data:", response.items || []);
+        console.log(
+          "📊 useRecommendations: Data length:",
+          (response.items || []).length
+        );
         setData(response.items || []);
       } catch (err) {
         if (err.name !== "AbortError") {
-          console.error("Failed to fetch recommendations:", err);
+          console.error(
+            "💥 useRecommendations: Error fetching recommendations:",
+            err
+          );
           setError("Failed to load recommendations");
         }
       } finally {
         setLoading(false);
+        console.log("🏁 useRecommendations: Finished loading");
       }
     }
 
