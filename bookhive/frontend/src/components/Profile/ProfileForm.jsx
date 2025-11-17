@@ -34,7 +34,12 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     handleSave,
   } = useProfile();
 
-  const { favorites, handleToggleFavorite } = useFavorites(userId);
+  const { 
+    favorites, 
+    favoriteBooks, 
+    loading: favoritesLoading, 
+    toggleFavorite 
+  } = useFavorites(userId);
 
   const {
     books,
@@ -54,30 +59,70 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     }
   };
 
-  // Handle favorite toggle (opens modal)
-  const handleFavoriteClick = (googleBookId, e) => {
-    const bookId = handleToggleFavorite(googleBookId, e);
-    setSelectedBookId(bookId);
+  // Handle favorite toggle - actually add/remove from favorites
+  const handleFavoriteClick = async (googleBookId, e) => {
+    if (e) e.stopPropagation();
+    
+    // Find the book data (could be in books or favoriteBooks)
+    let book = books.find(b => b.googleBookId === googleBookId);
+    if (!book) {
+      book = favoriteBooks.find(b => b.googleBookId === googleBookId);
+    }
+    
+    if (!book) {
+      console.error('Book not found for favorite toggle:', googleBookId);
+      return;
+    }
+
+    try {
+      await toggleFavorite({
+        googleBookId: book.googleBookId,
+        title: book.title,
+        authors: book.authors || [],
+        thumbnail: book.thumbnail || null,
+        categories: book.categories || []
+      });
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('Failed to update favorites. Please try again.');
+    }
+  };
+
+  // Handle remove - different logic for Favorites tab vs status tabs
+  const handleRemoveBook = async (googleBookId, currentStatus) => {
+    if (activeTab === "favorites") {
+      // In Favorites tab, "Remove" means unfavorite
+      await handleFavoriteClick(googleBookId, null);
+    } else {
+      // In other tabs, use the normal remove logic
+      await handleRemove(googleBookId, currentStatus);
+    }
   };
 
   // Filter books based on active tab
-  const filteredBooks = books.filter((book) => {
-    if (activeTab === "want-to-read") {
-      return book.status === "want-to-read";
-    } else if (activeTab === "currently-reading") {
-      return book.status === "currently-reading";
-    } else if (activeTab === "completed") {
-      return book.status === "completed";
-    }
-    return false;
-  });
+  const filteredBooks = activeTab === "favorites" 
+    ? favoriteBooks  // Show favorite books from separate array
+    : books.filter((book) => {
+        if (activeTab === "want-to-read") {
+          return book.status === "want-to-read";
+        } else if (activeTab === "currently-reading") {
+          return book.status === "currently-reading";
+        } else if (activeTab === "completed") {
+          return book.status === "completed";
+        }
+        return false;
+      });
 
   // Calculate book counts for tabs
   const bookCounts = {
     wantToRead: books.filter((b) => b.status === "want-to-read").length,
     currentlyReading: books.filter((b) => b.status === "currently-reading").length,
     completed: books.filter((b) => b.status === "completed").length,
+    favorites: favoriteBooks.length,
   };
+
+  // Determine loading state based on active tab
+  const isLoading = activeTab === "favorites" ? favoritesLoading : loading;
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -105,7 +150,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
         />
 
         {/* Books Grid */}
-        <BooksGrid books={filteredBooks} loading={loading}>
+        <BooksGrid books={filteredBooks} loading={isLoading}>
           {filteredBooks.map((book) => (
             <BookCard
               key={book.googleBookId}
@@ -114,7 +159,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
               favorites={favorites}
               onToggleFavorite={handleFavoriteClick}
               onStatusChange={handleStatusChange}
-              onRemove={handleRemove}
+              onRemove={handleRemoveBook}
               onCategoryJoin={handleCategoryJoin}
               onUpdateReview={updateReviewData}
               onSubmitReview={handleSubmitReview}

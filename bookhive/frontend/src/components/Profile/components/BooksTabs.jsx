@@ -24,6 +24,12 @@ const BooksTabs = ({ activeTab, onTabChange, bookCounts }) => {
       count: bookCounts.completed,
       activeColor: "border-green-500 text-green-600",
     },
+    {
+      id: "favorites",
+      label: "Favorites",
+      count: bookCounts.favorites,
+      activeColor: "border-red-500 text-red-600",
+    },
   ];
 
   return (

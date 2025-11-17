@@ -1,5 +1,6 @@
 import React from "react";
 import { Heart, Book } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import ReviewSection from "./ReviewSection";
 
 /**
@@ -17,13 +18,13 @@ const BookCard = React.memo(({
   onUpdateReview,
   onSubmitReview,
 }) => {
+  const navigate = useNavigate();
   const isCompleted = book.status === "completed";
 
-  console.log(`BookCard for ${book.title}:`, {
-    googleBookId: book.googleBookId,
-    reviewData,
-    submitted: reviewData?.submitted,
-  });
+  // Navigate to book details page
+  const handleTitleClick = () => {
+    navigate(`/book/${book.googleBookId}`);
+  };
 
   return (
     <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all">
@@ -62,6 +63,7 @@ const BookCard = React.memo(({
               ? "bg-red-100 text-red-600"
               : "bg-white/80 text-gray-400"
           } hover:scale-110 transition-all`}
+          aria-label={favorites.has(book.googleBookId) ? "Remove from favorites" : "Add to favorites"}
         >
           <Heart
             className={`h-5 w-5 ${
@@ -72,7 +74,11 @@ const BookCard = React.memo(({
       </div>
 
       <div className="p-4">
-        <h3 className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900">
+        {/* Clickable book title */}
+        <h3 
+          onClick={handleTitleClick}
+          className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900 cursor-pointer hover:text-orange-600 transition-colors"
+        >
           {book.title}
         </h3>
         <p className="text-sm text-gray-600 mb-3">

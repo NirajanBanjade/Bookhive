@@ -73,6 +73,9 @@ app.use('/api/notifications', notificationRoutes);
 const reviewsRoutes = require('./routes/reviewsRoutes');
 app.use('/api/reviews', reviewsRoutes);
 
+const favoritesRoutes = require('./routes/favoritesRoutes');
+app.use('/api/favorites', favoritesRoutes);
+
 const recommendationsRoutes = require('./routes/recommendationsRoutes');
 app.use('/api/recommendations', recommendationsRoutes);
 
