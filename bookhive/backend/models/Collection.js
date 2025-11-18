@@ -14,7 +14,7 @@ const bookSchema = new mongoose.Schema({
   categories: [{ type: String }],
   status: { 
     type: String, 
-    enum: ['currently-reading', 'completed'], 
+    enum: ['currently-reading', 're-reading', 'completed'], 
     default: 'currently-reading'  // Default for new books
   },
   review: { type: reviewSchema, required: false }  // Optional

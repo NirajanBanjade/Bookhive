@@ -46,6 +46,8 @@ const BookCard = React.memo(({
               ? "bg-teal-600 text-white"
               : book.status === "currently-reading"
               ? "bg-blue-600 text-white"
+              : book.status === "re-reading"
+              ? "bg-purple-600 text-white"
               : "bg-teal-600 text-white"
           }`}
         >
@@ -53,6 +55,8 @@ const BookCard = React.memo(({
             ? "Want to Read"
             : book.status === "currently-reading"
             ? "Reading"
+            : book.status === "re-reading"
+            ? "Re-reading"
             : "Completed"}
         </span>
 
@@ -120,6 +124,21 @@ const BookCard = React.memo(({
               className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="currently-reading">Currently Reading</option>
+              <option value="re-reading">Re-reading</option>
+              <option value="completed">Completed</option>
+            </select>
+          )}
+
+          {book.status === "re-reading" && (
+            <select
+              value={book.status}
+              onChange={(e) =>
+                onStatusChange(book.googleBookId, book.status, e.target.value)
+              }
+              className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="re-reading">Re-reading</option>
+              <option value="currently-reading">Currently Reading</option>
               <option value="completed">Completed</option>
             </select>
           )}
@@ -133,6 +152,7 @@ const BookCard = React.memo(({
               className="flex-1 px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="completed">Completed</option>
+              <option value="re-reading">Re-reading</option>
               <option value="currently-reading">Currently Reading</option>
             </select>
           )}

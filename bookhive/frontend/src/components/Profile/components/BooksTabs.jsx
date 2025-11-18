@@ -19,6 +19,12 @@ const BooksTabs = ({ activeTab, onTabChange, bookCounts }) => {
       activeColor: "border-blue-500 text-blue-600",
     },
     {
+      id: "re-reading",
+      label: "Re-reading",
+      count: bookCounts.reReading,
+      activeColor: "border-purple-500 text-purple-600",
+    },
+    {
       id: "completed",
       label: "Completed",
       count: bookCounts.completed,

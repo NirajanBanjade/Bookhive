@@ -223,7 +223,7 @@ const Navbar = () => {
                   Genre
                 </Link>
 
-                <Link
+                {/* <Link
                   to="/to-read"
                   className={`text-sm font-medium transition-colors ${
                     location.pathname === "/to-read"
@@ -232,7 +232,7 @@ const Navbar = () => {
                   }`}
                 >
                   To-Read
-                </Link>
+                </Link> */}
 
                 <Link
                   to="/my-groups"

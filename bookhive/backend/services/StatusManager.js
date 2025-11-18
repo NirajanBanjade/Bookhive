@@ -17,14 +17,14 @@ class StatusManager {
         label: 'Completed',
         allowedTransitions: ['re-reading']
       },
+      're-reading': {
+        label: 'Re-reading',
+        allowedTransitions: ['currently-reading', 'completed']
+      },
       // Future statuses can be added here without modifying code:
       // 'paused': {
       //   label: 'Paused',
       //   allowedTransitions: ['currently-reading', 'completed', 'abandoned']
-      // },
-      // 're-reading': {
-      //   label: 'Re-reading',
-      //   allowedTransitions: ['completed']
       // },
       // 'abandoned': {
       //   label: 'Abandoned',

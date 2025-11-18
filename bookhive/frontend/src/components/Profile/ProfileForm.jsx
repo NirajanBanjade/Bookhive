@@ -107,6 +107,8 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
           return book.status === "want-to-read";
         } else if (activeTab === "currently-reading") {
           return book.status === "currently-reading";
+        } else if (activeTab === "re-reading") {
+          return book.status === "re-reading";
         } else if (activeTab === "completed") {
           return book.status === "completed";
         }
@@ -117,6 +119,7 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
   const bookCounts = {
     wantToRead: books.filter((b) => b.status === "want-to-read").length,
     currentlyReading: books.filter((b) => b.status === "currently-reading").length,
+    reReading: books.filter((b) => b.status === "re-reading").length,
     completed: books.filter((b) => b.status === "completed").length,
     favorites: favoriteBooks.length,
   };
