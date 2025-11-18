@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import React from "react";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Navbar from "./components/Navbar/Navbar";
 import Profile from "./components/Profile";
 import SearchPage from "./pages/searchPage";
@@ -49,23 +50,71 @@ function App() {
             {/* Authentication */}
             <Route path="/login" element={<Loginpage />} />
 
-            {/* Main Pages */}
-            {/* <Route path="/" element={<Profile />} /> */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/home" element={<HomePage />} />
+            {/* Main Pages (public)*/}
+              <Route path="/" element={<HomePage />} />
+              <Route path="/home" element={<HomePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              {/* Book Detail Page */}
+              <Route path="/book/:googleBookId" element={<BookDetails />} />
 
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/to-read" element={<ToReadPage />} />
-            <Route path="/my-groups" element={<JoinedGroups />} />
+            {/* Protected Routes (require login) */}
+              {/*Profile*/}
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                  } 
+              />
+              {/*To-Read List*/}
+              <Route
+                path="/to-read" 
+                element={
+                  <ProtectedRoute>
+                    <ToReadPage />
+                  </ProtectedRoute>
+                  } 
+              />
 
-            {/* Genre Routes */}
-            <Route path="/genre" element={<GenrePage />} />
-            <Route path="/genre/:genreId" element={<GenreResultsPage />} />
-            <Route path="/groups/:category" element={<GroupPage />} />
+              {/* Joined Groups */}
+              <Route
+                path="/my-groups" 
+                element={
+                  <ProtectedRoute>
+                    <JoinedGroups />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/groups/:category" 
+                element={
+                  <ProtectedRoute>
+                    <GroupPage />
+                  </ProtectedRoute>
+                } 
+              />
 
-            {/* Book Detail Page */}
-            <Route path="/book/:googleBookId" element={<BookDetails />} />
+              {/* Genre Routes */}
+              <Route 
+                path="/genre" 
+                element={
+                  <ProtectedRoute>
+                    <GenrePage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/genre/:genreId" 
+                element={
+                  <ProtectedRoute>
+                    <GenreResultsPage />
+                  </ProtectedRoute>
+                } 
+              />
+
+              {/* Book Detail Page */}
+              <Route path="/book/:googleBookId" element={<BookDetails />} />
 
             {/* TODO Phase 2: Add these routes when pages are ready */}
             {/* <Route path="/author/:authorName" element={<AuthorPage />} /> */}
