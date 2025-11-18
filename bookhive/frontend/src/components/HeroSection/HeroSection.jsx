@@ -46,9 +46,7 @@ const HeroSection = ({ onScrollToTrending }) => {
           </div>
           <div className="message-item">
             <span className="message-icon">🤝</span>
-            <span className="message-text">
-              Connect with readers worldwide
-            </span>
+            <span className="message-text">Connect with readers worldwide</span>
           </div>
         </div>
 
@@ -59,7 +57,6 @@ const HeroSection = ({ onScrollToTrending }) => {
       </div>
 
       <div className="scroll-indicator" onClick={onScrollToTrending}>
-        <span className="scroll-text">Enter the library</span>
         <ChevronDown className="scroll-arrow" />
       </div>
     </section>
