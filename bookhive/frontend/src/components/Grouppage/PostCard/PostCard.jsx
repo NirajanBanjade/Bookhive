@@ -1,18 +1,29 @@
-import React from 'react';
-import { Trash2, Link as LinkIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trash2, Link as LinkIcon, MessageCircle, Edit2, Check, X } from 'lucide-react';
+import './PostCard.css';
 
-const PostCard = ({ post, currentUserId, onDelete, formatDate }) => {
+const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewReplies }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editContent, setEditContent] = useState(post.content);
+  const [editLinkUrl, setEditLinkUrl] = useState(post.linkUrl || '');
+
   const isAuthor = post.userId?._id === currentUserId || post.userId === currentUserId;
-  
   const authorName = post.userId?.name || post.userId?.username || 'Unknown User';
-  console.log('POST DEBUG:', {
-    'post._id': post._id,
-    'post.userId': post.userId,
-    'post.userId._id': post.userId?._id,
-    'currentUserId': currentUserId,
-    'Match?': post.userId?._id === currentUserId
-  });
-  
+
+  const handleSaveEdit = async () => {
+    if (!editContent.trim()) {
+      alert('Content cannot be empty');
+      return;
+    }
+    await onEdit(post._id, { content: editContent, linkUrl: editLinkUrl });
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditContent(post.content);
+    setEditLinkUrl(post.linkUrl || '');
+    setIsEditing(false);
+  };
 
   return (
     <div className="post-card">
@@ -26,43 +37,98 @@ const PostCard = ({ post, currentUserId, onDelete, formatDate }) => {
             <p className="post-time">{formatDate(post.createdAt)}</p>
           </div>
         </div>
-
-        {isAuthor &&(
-          <button 
-            className="delete-post-button"
-            onClick={onDelete}
-            title="Delete post"
-          >
-            <Trash2 className="delete-icon" />
-          </button>
+        {isAuthor && (
+          <div className="post-actions">
+            {!isEditing ? (
+              <>
+                <button 
+                  className="edit-post-button"
+                  onClick={() => setIsEditing(true)}
+                  title="Edit post"
+                >
+                  <Edit2 className="edit-icon" />
+                </button>
+                <button 
+                  className="delete-post-button"
+                  onClick={onDelete}
+                  title="Delete post"
+                >
+                  <Trash2 className="delete-icon" />
+                </button>
+              </>
+            ) : (
+              <>
+                <button 
+                  className="save-edit-button"
+                  onClick={handleSaveEdit}
+                  title="Save changes"
+                >
+                  <Check className="check-icon" />
+                </button>
+                <button 
+                  className="cancel-edit-button"
+                  onClick={handleCancelEdit}
+                  title="Cancel"
+                >
+                  <X className="x-icon" />
+                </button>
+              </>
+            )}
+          </div>
         )}
       </div>
 
       <div className="post-content">
-        <p className="post-text">{post.content}</p>
-        
-        {post.linkUrl && (
-          <a 
-            href={post.linkUrl} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="post-link"
-          >
-            <LinkIcon className="link-icon" />
-            {post.linkUrl}
-          </a>
+        {isEditing ? (
+          <>
+            <textarea
+              className="edit-textarea"
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+              maxLength={3000}
+              rows={4}
+              autoFocus
+            />
+            <input
+              type="url"
+              className="edit-link-input"
+              placeholder="Link URL (optional)"
+              value={editLinkUrl}
+              onChange={(e) => setEditLinkUrl(e.target.value)}
+            />
+          </>
+        ) : (
+          <>
+            <p className="post-text">{post.content}</p>
+            {post.linkUrl && (
+              <a 
+                href={post.linkUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="post-link"
+              >
+                <LinkIcon className="link-icon" />
+                {post.linkUrl}
+              </a>
+            )}
+          </>
         )}
       </div>
 
       <div className="post-footer">
         <div className="post-stats">
           <span className="stat-item">
-            {post.commentsCount || 0} comments
-          </span>
-          <span className="stat-item">
-            {post.likesCount || 0} likes
+            {post.likesCount || 0} {post.likesCount === 1 ? 'like' : 'likes'}
           </span>
         </div>
+        <button 
+          className="reply-button"
+          onClick={onViewReplies}
+          title="View replies"
+        >
+          <MessageCircle className="reply-icon" />
+          <span>{post.commentsCount || 0}</span>
+        </button>
       </div>
     </div>
   );

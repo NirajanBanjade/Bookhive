@@ -14,14 +14,24 @@ router.delete('/groups/:category/leave', authenticateToken, groupMemberLeave);
 
 
 
+
+//---------------------Post replies-------------------------------------
+const { createPostReply, getPostReplies, deletePostReply } = require('../controllers/Group_controller/Reply_controller/group_reply_controller');
+router.post('/groups/:category/posts/:postId/replies', authenticateToken, createPostReply);
+router.get('/groups/:category/posts/:postId/replies', authenticateToken, getPostReplies);
+router.delete('/groups/:category/posts/:postId/replies/:replyId', authenticateToken, deletePostReply);
+
  // this section is strictly for the group posts. Post handlers will be in same routes.-------------------
 
 
 
-const { createGroupPost, deleteGroupPost } = require('../controllers/Group_controller/group_member_post');
+const { createGroupPost, deleteGroupPost, editGroupPost } = require('../controllers/Group_controller/group_member_post');
 
 router.post('/groups/:category/posts', authenticateToken, createGroupPost);
 router.delete('/groups/:category/posts/:postId', authenticateToken, deleteGroupPost);
+router.put('/groups/:category/posts/:postId', authenticateToken, editGroupPost);
+
+
 
 
 

@@ -620,3 +620,46 @@
           font-size: 0.95rem;
         }
       }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      .post-wrapper {
+        width: 100%;
+        display: flex;
+        margin-bottom: 1rem;
+      }
+      
+      /* Your posts → right side */
+      .my-post {
+        justify-content: flex-end;
+      }
+      
+      /* Other people's posts → left side */
+      .other-post {
+        justify-content: flex-start;
+      }
+      
+      /* Optional: color your posts differently */
+      .my-post .post-card {
+        background: #e9f5ff;
+        border-color: #c7dfff;
+      }
+      
+      .other-post .post-card {
+        background: #ffffff;
+      }
+      

@@ -1,0 +1,150 @@
+
+/* Updated Post Footer */
+.post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .post-stats {
+    display: flex;
+    gap: 1rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+  
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+  
+  /* Reply Button */
+  .reply-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .reply-button:hover {
+    background-color: #e5e7eb;
+    border-color: #d1d5db;
+    color: #111827;
+  }
+  
+  .reply-button:active {
+    transform: scale(0.98);
+  }
+  
+  .reply-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    .post-footer {
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+  
+    .reply-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .post-card {
+    width: 100%;              /* Full width of container */
+    max-width: 580px;         /* You can change this number */
+    min-height: 160px;        /* Forces a minimum height */
+    padding: 1rem;            /* Makes card larger */
+    border-radius: 12px;      /* Rounded shape */
+    background: white;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;    /* Space between cards */
+  }
+  
+  .post-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .edit-post-button,
+  .save-edit-button,
+  .cancel-edit-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+  
+  .edit-post-button:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  
+  .save-edit-button:hover {
+    background-color: rgba(34, 197, 94, 0.1);
+  }
+  
+  .cancel-edit-button:hover {
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  
+  .edit-icon {
+    width: 18px;
+    height: 18px;
+    color: #3b82f6;
+  }
+  
+  .check-icon {
+    width: 18px;
+    height: 18px;
+    color: #22c55e;
+  }
+  
+  .x-icon {
+    width: 18px;
+    height: 18px;
+    color: #ef4444;
+  }
+  
+  .edit-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+    margin-bottom: 8px;
+  }
+  
+  .edit-link-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  
+  .edit-textarea:focus,
+  .edit-link-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+  }

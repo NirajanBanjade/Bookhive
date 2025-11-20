@@ -10,7 +10,9 @@ import {
 } from 'lucide-react';
 import CreatePostModal from './CreatePostModal/CreatePostModal';
 import PostCard from './PostCard/PostCard';
+import ReplyModal from './Reply/ReplyModal';
 import { fetchGroupPosts, createGroupPost, deleteGroupPost } from '../../services/grouppostService';
+import { editGroupPost } from '../../services/grouppostService';
 
 const GroupPage = () => {
   const { category } = useParams();
@@ -21,6 +23,7 @@ const GroupPage = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   const decodeCategory = (cat) => {
     try { return decodeURIComponent(cat); } catch { return cat; }
@@ -48,7 +51,7 @@ const GroupPage = () => {
     (async () => {
       try {
         const res = await fetch('/api/user/me', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` } // FIXED: was 'jwt_token'
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         if (res.ok) {
           const userData = await res.json();
@@ -77,6 +80,26 @@ const GroupPage = () => {
       alert('Failed to delete post');
     }
   };
+  const handleReplyCountChange = (postId, newCount) => {
+    setPosts(prevPosts =>
+      prevPosts.map(post =>
+        post._id === postId
+          ? { ...post, commentsCount: newCount }
+          : post
+      )
+    );
+  };
+  const handleEditPost = async (postId, updatedData) => {
+    try {
+      const result = await editGroupPost(category, postId, updatedData);
+      setPosts((prev) =>
+        prev.map((p) => p._id === postId ? result.post : p)
+      );
+    } catch (err) {
+      console.error('Error editing post:', err);
+      alert('Failed to edit post');
+    }
+  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -85,14 +108,14 @@ const GroupPage = () => {
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
-  
+
     if (diffMins < 1) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
+
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
       day: 'numeric',
       year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
     });
@@ -151,16 +174,29 @@ const GroupPage = () => {
           </div>
         ) : (
           <div className="posts-list">
-            {posts.map((post) => (
-              <PostCard
-                key={post._id}
-                post={post}
-                currentUserId={currentUserId}
-                onDelete={() => handleDeletePost(post._id)}
-                formatDate={formatDate}
-              />
-            ))}
+            {posts.map((post) => {
+              const isMyPost =
+                post.userId?._id === currentUserId ||
+                post.userId === currentUserId;
+
+              return (
+                <div
+                  key={post._id}
+                  className={`post-wrapper ${isMyPost ? "my-post" : "other-post"}`}
+                >
+                  <PostCard
+                    post={post}
+                    currentUserId={currentUserId}
+                    onDelete={() => handleDeletePost(post._id)}
+                    onEdit={handleEditPost}
+                    onViewReplies={() => setSelectedPost(post)}
+                    formatDate={formatDate}
+                  />
+                </div>
+              );
+            })}
           </div>
+
         )}
       </div>
 
@@ -170,6 +206,18 @@ const GroupPage = () => {
           category={category}
           onClose={() => setShowCreateModal(false)}
           onPostCreated={handlePostCreated}
+        />
+      )}
+
+      {/* Reply Modal */}
+      {selectedPost && (
+        <ReplyModal
+          post={selectedPost}
+          category={category}
+          currentUserId={currentUserId}
+          onClose={() => setSelectedPost(null)}
+          formatDate={formatDate}
+          onReplyCountChange={handleReplyCountChange}
         />
       )}
     </div>

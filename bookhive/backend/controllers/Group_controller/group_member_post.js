@@ -78,4 +78,41 @@ const deleteGroupPost=async (req,res)=>{
     }
 }
 
-module.exports= { createGroupPost, deleteGroupPost };
+const editGroupPost = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const categoryKey = toKey(req.params.category);
+    const { postId } = req.params;
+    const { content, linkUrl } = req.body || {};
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: 'content required' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(postId)) {
+      return res.status(400).json({ message: 'Invalid postId' });
+    }
+
+    const group = await BookGroup.findOne({ categoryKey });
+    if (!group) return res.status(404).json({ message: 'Group not found' });
+
+    const post = await Post.findOneAndUpdate(
+      { _id: postId, groupId: group._id, userId }, // Only author can edit
+      { 
+        content: content.trim(), 
+        linkUrl: linkUrl?.trim() || undefined 
+      },
+      { new: true }
+    ).populate('userId', 'name username email');
+
+    if (!post) {
+      return res.status(403).json({ message: 'Forbidden: Only the author can edit this post' });
+    }
+
+    return res.status(200).json({ updated: true, post });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = { createGroupPost, deleteGroupPost, editGroupPost };

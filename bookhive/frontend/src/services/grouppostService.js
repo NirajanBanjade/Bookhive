@@ -62,3 +62,16 @@ const getAuthHeaders = () => ({
       throw err;
     }
   };
+
+  export const editGroupPost = async (category, postId, postData) => {
+    const response = await fetch(`/api/groups/${encodeURIComponent(category)}/posts/${postId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('token')}`
+      },
+      body: JSON.stringify(postData)
+    });
+    if (!response.ok) throw await response.json();
+    return response.json();
+  };
