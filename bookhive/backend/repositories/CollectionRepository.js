@@ -27,6 +27,18 @@ class CollectionRepository {
   }
 
   /**
+   * Get books by status for a user
+   * @param {string} userId 
+   * @param {string} status 
+   * @returns {Promise<Array>} List of books with given status
+   */
+  async getBooksByStatus(userId, status) {
+    const collection = await this.findByUserId(userId);
+    if (!collection) return [];
+    return (collection?.books ?? []).filter((b) => b.status === status);
+  }
+
+  /**
    * Create a new collection
    * @param {Object} data 
    * @returns {Promise<Object>}

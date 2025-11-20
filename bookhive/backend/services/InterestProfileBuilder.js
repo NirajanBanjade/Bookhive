@@ -10,8 +10,9 @@ class InterestProfileBuilder {
    * @param {Object} [deps.options]
    * @param {number} [deps.options.maxKeywords] - cap keyword features
    */
-  constructor({ toReadRepo, profileRepo, booksServiceGetVolume, tokenizer, options = {} }) {
+  constructor({ toReadRepo, collectionRepo, profileRepo, booksServiceGetVolume, tokenizer, options = {} }) {
     this.toReadRepo = toReadRepo;
+    this.collectionRepo = collectionRepo;
     this.profileRepo = profileRepo;
     this.getVolume = booksServiceGetVolume;
     this.tokenizer = tokenizer;
@@ -21,9 +22,10 @@ class InterestProfileBuilder {
   async buildForUser(userId) {
     // 1) Gather local saved books
     const toRead = await this.toReadRepo.getBooksForUser(userId);
+    const currentlyReading = await this.collectionRepo.getBooksByStatus(userId, 'currently-reading');
 
     // TODO: integrate other sources similarly (currentlyReadingRepo, finishedRepo, etc.)
-    const books = toRead; // merge later if we add more lists
+    const books = [...toRead, ...currentlyReading]; // merge later if we add more lists
 
     // 2) Build term maps
     const authorCounts = {};
@@ -79,7 +81,7 @@ class InterestProfileBuilder {
       keywords,
       sourceCounts: {
         toRead: toRead.length,
-        // fill in others when added
+        currentlyReading: currentlyReading.length
       }
     });
 

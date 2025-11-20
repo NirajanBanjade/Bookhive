@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 
-// const { ToReadRepository } = require("../repositories/ToReadRepository");
 const { UserInterestProfileRepository } = require("../repositories/UserInterestRepository");
 const { ExistingBooksRepository } = require("../repositories/ExistingBooksRepository");
 const { getVolume } = require("../services/googleBooks");
@@ -18,11 +17,12 @@ const { CandidateGenerator } = require("../services/candidates/CandidateGenerato
 
 // Dependency wiring (DIP)
 const toReadRepo = require('../repositories/ToReadRepository');
+const collectionRepo = require('../repositories/CollectionRepository');
 const profileRepo = new UserInterestProfileRepository({});
 const existingRepo = new ExistingBooksRepository({});
 const booksService = new GoogleBooksAdapter({});
 const tokenizer = new Tokenizer({});
-const builder = new InterestProfileBuilder({ toReadRepo, profileRepo, booksServiceGetVolume: getVolume, tokenizer });
+const builder = new InterestProfileBuilder({ toReadRepo, collectionRepo, profileRepo, booksServiceGetVolume: getVolume, tokenizer });
 
 // Candidate Sources
 const authorSource = new AuthorSource({ booksService, perAuthor: 5, topAuthors: 5 });

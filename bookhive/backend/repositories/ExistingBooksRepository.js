@@ -1,8 +1,13 @@
 const ToRead = require("../models/ToRead");
+const Collection = require("../models/Collection");
 
 class ExistingBooksRepository {
-  constructor({ toReadModel = ToRead } = {}) {
+  constructor({ 
+    toReadModel = ToRead,
+    collectionModel = Collection
+  } = {}) {
     this.ToRead = toReadModel;
+    this.Collection = collectionModel;
   }
 
   async getAllSavedGoogleIds(userId) {
@@ -12,6 +17,13 @@ class ExistingBooksRepository {
       if (b.googleBookId) ids.add(b.googleBookId);
     }
     // TODO: add currentlyReading / finished models later
+    const col = await this.Collection.findOne({ userId }, { books: 1, _id: 0 });
+    for (const b of (col?.books ?? [])) {
+      if (b.googleBookId && b.status === "currently-reading"){ 
+        ids.add(b.googleBookId);
+      }
+    }
+    
     return ids;
   }
 }
