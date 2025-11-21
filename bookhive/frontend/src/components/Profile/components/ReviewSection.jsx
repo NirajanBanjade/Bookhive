@@ -9,6 +9,16 @@ import { Star, ChevronDown, ChevronUp } from "lucide-react";
 const ReviewSection = ({ book, reviewData, onUpdateReview, onSubmitReview }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const isSubmitted = reviewData && reviewData.submitted;
+const ReviewSection = ({
+  book,
+  reviewData,
+  onUpdateReview,
+  onSubmitReview,
+}) => {
+  const [rating, setRating] = useState(reviewData?.rating || 0);
+  const [comment, setComment] = useState(reviewData?.comment || "");
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Force collapse form if review becomes submitted
   useEffect(() => {
@@ -19,6 +29,41 @@ const ReviewSection = ({ book, reviewData, onUpdateReview, onSubmitReview }) => 
 
   // If review already submitted, show badge (no button, no form)
   if (isSubmitted) {
+  const handleRatingClick = (starRating) => {
+    setRating(starRating);
+    if (onUpdateReview) {
+      onUpdateReview(book.googleBookId, { rating: starRating, comment });
+    }
+  };
+
+  const handleCommentChange = (e) => {
+    const newComment = e.target.value;
+    setComment(newComment);
+    if (onUpdateReview) {
+      onUpdateReview(book.googleBookId, { rating, comment: newComment });
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (rating === 0) {
+      alert("Please select a rating before submitting your review.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      if (onSubmitReview) {
+        await onSubmitReview(book.googleBookId, { rating, comment });
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // If review is already submitted, show read-only view
+  if (reviewData?.submitted) {
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-3">
         <div className="flex items-center gap-2">
@@ -27,18 +72,28 @@ const ReviewSection = ({ book, reviewData, onUpdateReview, onSubmitReview }) => 
             {[1, 2, 3, 4, 5].map((star) => (
               <Star
                 key={star}
-                className={`h-3 w-3 ${
-                  star <= (reviewData.rating || 0)
+                className={`h-4 w-4 ${
+                  star <= reviewData.rating
                     ? "fill-amber-400 text-amber-400"
-                    : "text-gray-300"
+                    : "text-gray-600"
                 }`}
               />
             ))}
           </div>
-          <span className="text-xs text-gray-600">
-            ({reviewData.rating}/5)
+          <span className="text-amber-400 text-sm font-medium">
+            {reviewData.rating}/5
           </span>
         </div>
+
+        {/* Display submitted comment */}
+        {reviewData.comment && (
+          <div>
+            <span className="text-gray-300 text-sm">Review:</span>
+            <p className="text-gray-200 text-sm mt-1 leading-relaxed">
+              {reviewData.comment}
+            </p>
+          </div>
+        )}
       </div>
     );
   }
@@ -62,37 +117,39 @@ const ReviewSection = ({ book, reviewData, onUpdateReview, onSubmitReview }) => 
 
   // If expanded, show the review form
   return (
-    <div className="border border-orange-200 rounded-lg p-4 bg-orange-50">
-      {/* Collapse button */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-sm font-semibold text-gray-700">Write Your Review</span>
-        <button
-          onClick={() => setIsExpanded(false)}
-          className="text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          <ChevronUp className="h-5 w-5" />
-        </button>
-      </div>
+    <div className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+      <h4 className="text-amber-400 font-semibold mb-3 text-sm">
+        Rate & Review
+      </h4>
 
-      {/* Rating dropdown */}
-      <div className="mb-3">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Rating:
-        </label>
-        <select
-          value={reviewData?.rating || 0}
-          onChange={(e) =>
-            onUpdateReview(book.googleBookId, "rating", parseInt(e.target.value))
-          }
-          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white"
-        >
-          <option value={0}>Select</option>
-          <option value={1}>1 star</option>
-          <option value={2}>2 stars</option>
-          <option value={3}>3 stars</option>
-          <option value={4}>4 stars</option>
-          <option value={5}>5 stars</option>
-        </select>
+      {/* Star Rating */}
+      <div className="mb-4">
+        <label className="block text-gray-300 text-sm mb-2">Rating:</label>
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <button
+              key={star}
+              type="button"
+              onClick={() => handleRatingClick(star)}
+              onMouseEnter={() => setHoveredRating(star)}
+              onMouseLeave={() => setHoveredRating(0)}
+              className="focus:outline-none hover:scale-110 transition-transform"
+            >
+              <Star
+                className={`h-6 w-6 transition-colors ${
+                  star <= (hoveredRating || rating)
+                    ? "fill-amber-400 text-amber-400 hover:fill-amber-300 hover:text-amber-300"
+                    : "text-gray-600 hover:text-gray-500"
+                }`}
+              />
+            </button>
+          ))}
+          {rating > 0 && (
+            <span className="ml-2 text-amber-400 text-sm font-medium">
+              {rating}/5 stars
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Comment textarea */}
@@ -118,15 +175,26 @@ const ReviewSection = ({ book, reviewData, onUpdateReview, onSubmitReview }) => 
         </div>
       </div>
 
-      {/* Submit button */}
+      {/* Submit Button */}
       <button
-        onClick={() => {
-          onSubmitReview(book.googleBookId);
-          setIsExpanded(false); // Close form after submit attempt
-        }}
-        className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
+        onClick={handleSubmit}
+        disabled={isSubmitting || rating === 0}
+        className={`w-full py-2 px-4 rounded-lg font-medium text-sm transition-colors ${
+          rating === 0
+            ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+            : isSubmitting
+            ? "bg-amber-300 text-white cursor-wait"
+            : "bg-amber-700 text-white hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+        }`}
       >
-        Submit Review
+        {isSubmitting ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+            Submitting...
+          </div>
+        ) : (
+          "Submit Review"
+        )}
       </button>
     </div>
   );
