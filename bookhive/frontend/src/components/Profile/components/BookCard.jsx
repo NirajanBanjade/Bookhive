@@ -118,50 +118,80 @@ const BookCard = React.memo(
               </>
             )}
             {book.status === "currently-reading" && (
-              <select
-                value={book.status}
-                onChange={(e) =>
-                  onStatusChange(book.googleBookId, book.status, e.target.value)
-                }
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-700 text-gray-200"
-              >
-                <option value="currently-reading">Currently Reading</option>
-                <option value="re-reading">Re-reading</option>
-                <option value="completed">Completed</option>
-              </select>
+              <div className="flex gap-2 w-full">
+                <select
+                  value={book.status}
+                  onChange={(e) =>
+                    onStatusChange(
+                      book.googleBookId,
+                      book.status,
+                      e.target.value
+                    )
+                  }
+                  className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-700 text-gray-200"
+                >
+                  <option value="currently-reading">Currently Reading</option>
+                  <option value="re-reading">Re-reading</option>
+                  <option value="completed">Completed</option>
+                </select>
+                <button
+                  onClick={() => onRemove(book.googleBookId, book.status)}
+                  className="px-3 py-1.5 text-sm bg-gray-700 text-red-400 border border-red-500/50 rounded-lg hover:bg-gray-600 hover:border-red-400 transition-colors font-medium flex-shrink-0"
+                >
+                  Remove
+                </button>
+              </div>
             )}
             {book.status === "re-reading" && (
-              <select
-                value={book.status}
-                onChange={(e) =>
-                  onStatusChange(book.googleBookId, book.status, e.target.value)
-                }
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-700 text-gray-200"
-              >
-                <option value="re-reading">Re-reading</option>
-                <option value="currently-reading">Currently Reading</option>
-                <option value="completed">Completed</option>
-              </select>
+              <div className="flex gap-2 w-full">
+                <select
+                  value={book.status}
+                  onChange={(e) =>
+                    onStatusChange(
+                      book.googleBookId,
+                      book.status,
+                      e.target.value
+                    )
+                  }
+                  className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-700 text-gray-200"
+                >
+                  <option value="re-reading">Re-reading</option>
+                  <option value="currently-reading">Currently Reading</option>
+                  <option value="completed">Completed</option>
+                </select>
+                <button
+                  onClick={() => onRemove(book.googleBookId, book.status)}
+                  className="px-3 py-1.5 text-sm bg-gray-700 text-red-400 border border-red-500/50 rounded-lg hover:bg-gray-600 hover:border-red-400 transition-colors font-medium flex-shrink-0"
+                >
+                  Remove
+                </button>
+              </div>
             )}
             {book.status === "completed" && (
-              <select
-                value={book.status}
-                onChange={(e) =>
-                  onStatusChange(book.googleBookId, book.status, e.target.value)
-                }
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-700 text-gray-200"
-              >
-                <option value="completed">Completed</option>
-                <option value="re-reading">Re-reading</option>
-                <option value="currently-reading">Currently Reading</option>
-              </select>
+              <div className="flex gap-2 w-full">
+                <select
+                  value={book.status}
+                  onChange={(e) =>
+                    onStatusChange(
+                      book.googleBookId,
+                      book.status,
+                      e.target.value
+                    )
+                  }
+                  className="flex-1 min-w-0 px-3 py-1.5 text-sm border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-gray-700 text-gray-200"
+                >
+                  <option value="completed">Completed</option>
+                  <option value="re-reading">Re-reading</option>
+                  <option value="currently-reading">Currently Reading</option>
+                </select>
+                <button
+                  onClick={() => onRemove(book.googleBookId, book.status)}
+                  className="px-3 py-1.5 text-sm bg-gray-700 text-red-400 border border-red-500/50 rounded-lg hover:bg-gray-600 hover:border-red-400 transition-colors font-medium flex-shrink-0"
+                >
+                  Remove
+                </button>
+              </div>
             )}
-            <button
-              onClick={() => onRemove(book.googleBookId, book.status)}
-              className="px-3 py-1.5 text-sm bg-gray-700 text-red-400 border border-red-500/50 rounded-lg hover:bg-gray-600 hover:border-red-400 transition-colors font-medium flex-shrink-0"
-            >
-              Remove
-            </button>
           </div>
           {book.categories && book.categories.length > 0 && (
             <div className="space-y-2 mb-3">
