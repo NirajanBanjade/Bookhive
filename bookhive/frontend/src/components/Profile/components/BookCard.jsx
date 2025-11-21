@@ -88,9 +88,11 @@ const BookCard = React.memo(
           <p className="text-sm text-gray-400 mb-3">
             {(book.authors || []).join(", ")}
           </p>
-          <div className="flex gap-2 mb-3">
+
+          {/* Button Controls - ALL statuses have Remove button */}
+          <div className="mb-3">
             {book.status === "want-to-read" && (
-              <>
+              <div className="flex gap-2">
                 <button
                   onClick={() =>
                     onStatusChange(
@@ -115,8 +117,15 @@ const BookCard = React.memo(
                 >
                   Finish
                 </button>
-              </>
+                <button
+                  onClick={() => onRemove(book.googleBookId, book.status)}
+                  className="px-3 py-1.5 text-sm bg-gray-700 text-red-400 border border-red-500/50 rounded-lg hover:bg-gray-600 hover:border-red-400 transition-colors font-medium flex-shrink-0"
+                >
+                  Remove
+                </button>
+              </div>
             )}
+
             {book.status === "currently-reading" && (
               <div className="flex gap-2 w-full">
                 <select
@@ -142,6 +151,7 @@ const BookCard = React.memo(
                 </button>
               </div>
             )}
+
             {book.status === "re-reading" && (
               <div className="flex gap-2 w-full">
                 <select
@@ -167,6 +177,7 @@ const BookCard = React.memo(
                 </button>
               </div>
             )}
+
             {book.status === "completed" && (
               <div className="flex gap-2 w-full">
                 <select
@@ -193,6 +204,7 @@ const BookCard = React.memo(
               </div>
             )}
           </div>
+
           {book.categories && book.categories.length > 0 && (
             <div className="space-y-2 mb-3">
               <div className="flex items-center gap-1 text-xs text-gray-400">
