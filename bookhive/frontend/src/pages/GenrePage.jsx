@@ -4,32 +4,26 @@ import { GENRES } from "../constants/genre";
 
 /**
  * GenrePage - Browse all book genres
- *
- * Displays a grid of genre cards. Each card shows:
- * - Genre icon and name
- * - Brief description
- * - Visual styling (colors from constants)
- *
- * Clicking a card will navigate to filtered results (implemented in Commit 7)
- *
- * TODO for team:
- * - Add genre/:subject route and results page (next commits)
- * - Add loading skeleton if genres come from API later
- * - Consider adding genre popularity/book count
- * - Add search/filter for genres when list grows
- *
- * @component
  */
 const GenrePage = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#fafaf9" }}>
-      {/* Page Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-3 font-serif">
+      {/* Page Header - No white background */}
+      <div
+        className="border-b border-gray-200"
+        style={{ backgroundColor: "#fafaf9" }}
+      >
+        <div className="max-w-7xl mx-auto px-6 py-16">
+          <h1
+            className="text-5xl font-bold text-gray-900 mb-4"
+            style={{ fontFamily: "'Playfair Display', 'Georgia', serif" }}
+          >
             Explore by Genre
           </h1>
-          <p className="text-lg text-gray-600">
+          <p
+            className="text-xl text-gray-600"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
             Discover your next favorite book by browsing our collection of
             genres
           </p>
@@ -37,57 +31,88 @@ const GenrePage = () => {
       </div>
 
       {/* Genre Grid */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {GENRES.map((genre) => (
-            <Link key={genre.id} to={`/genre/${genre.id}`} className="group">
-              <div
-                className={`bg-gradient-to-br ${genre.color} rounded-xl p-6 border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full`}
+      <div className="max-w-7xl mx-auto px-6 py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {GENRES.map((genre) => {
+            const IconComponent = genre.icon;
+
+            return (
+              <Link
+                key={genre.id}
+                to={`/genre/${genre.id}`}
+                className="group block"
               >
-                {/* Icon */}
-                <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">
-                  {genre.icon}
-                </div>
-
-                {/* Genre Name */}
-                <h3 className={`text-xl font-bold mb-2 ${genre.textColor}`}>
-                  {genre.name}
-                </h3>
-
-                {/* Description */}
-                <p className="text-sm text-gray-600 leading-relaxed">
-                  {genre.description}
-                </p>
-
-                {/* Arrow indicator */}
-                <div className="mt-4 flex items-center gap-2 text-sm font-medium text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span>Explore</span>
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
+                <div
+                  className="relative rounded-2xl p-8 shadow-md hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 h-full"
+                  style={{
+                    backgroundColor: genre.bgColor,
+                    minHeight: "240px",
+                  }}
+                >
+                  {/* Icon - Animated on hover */}
+                  <div className="mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300">
+                    <IconComponent
+                      size={56}
+                      strokeWidth={1.5}
+                      color={genre.titleColor}
                     />
-                  </svg>
+                  </div>
+
+                  {/* Genre Name */}
+                  <h3
+                    className="text-2xl font-bold mb-3"
+                    style={{
+                      color: genre.titleColor,
+                      fontFamily: "'Poppins', 'Arial', sans-serif",
+                    }}
+                  >
+                    {genre.name}
+                  </h3>
+
+                  {/* Description */}
+                  <p
+                    className="text-sm leading-relaxed"
+                    style={{
+                      color: genre.descColor,
+                      fontFamily: "'Inter', sans-serif",
+                    }}
+                  >
+                    {genre.description}
+                  </p>
+
+                  {/* Hover arrow indicator */}
+                  <div className="absolute bottom-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      style={{ color: genre.titleColor }}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2.5}
+                        d="M13 7l5 5m0 0l-5 5m5-5H6"
+                      />
+                    </svg>
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
 
         {/* Footer Info */}
-        <div className="mt-12 text-center">
-          <p className="text-gray-600 text-sm">
+        <div className="mt-16 text-center">
+          <p
+            className="text-gray-600 text-base"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
             Can't find what you're looking for? Try using the{" "}
             <Link
               to="/search"
-              className="text-primary hover:underline font-medium"
+              className="text-orange-500 hover:text-orange-600 font-semibold hover:underline transition-colors"
             >
               search feature
             </Link>{" "}
