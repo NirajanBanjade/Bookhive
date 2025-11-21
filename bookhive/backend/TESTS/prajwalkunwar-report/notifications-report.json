@@ -1,0 +1,427 @@
+{
+  "stats": {
+    "suites": 3,
+    "tests": 9,
+    "passes": 9,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-11-21T02:32:00.984Z",
+    "end": "2025-11-21T02:32:09.816Z",
+    "duration": 8832,
+    "testsRegistered": 9,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "ddc560fe-aa63-4bb3-b6a6-94d7fededa0f",
+      "title": "",
+      "fullFile": "",
+      "file": "",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "4a26fd66-d9e7-427c-be15-641bdc5ab148",
+          "title": "Notification API (Full Integration)",
+          "fullFile": "C:\\5th semester\\Software Eng\\swe_project\\bookhive\\backend\\TESTS\\notification.routes.test.js",
+          "file": "\\TESTS\\notification.routes.test.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"Notification API (Full Integration)\"",
+              "fullTitle": "Notification API (Full Integration) \"before all\" hook in \"Notification API (Full Integration)\"",
+              "timedOut": false,
+              "duration": 1884,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Ensure DB connection (skip if app.js already connected — harmless if double)\nif (mongoose.connection.readyState === 0) {\n  await mongoose.connect(process.env.MONGO_URI, {\n    dbName: process.env.MONGO_DB_NAME || \"Bookhive\",\n  });\n}\n// Clean possible leftovers\nawait User.deleteMany({ email: \"testuser@example.com\" });\nawait Notification.deleteMany({});\n//  Create a user that matches your schema requirements\nconst passwordHash = await bcrypt.hash(\"Test@12345\", 10);\nconst user = await User.create({\n  username: \"TestUser\",\n  email: \"testuser@example.com\",\n  passwordHash, // IMPORTANT: your schema likely requires this field\n  // add any other required fields here if your User schema needs them\n});\nuserId = user._id.toString();\n// Sign a real JWT using your real secret\ntoken = \"Bearer \" + jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: \"1h\" });\n// Seed a couple notifications for this user\nawait Notification.create([\n  { userId, message: \"Welcome to BookHive!\", type: \"info\" },\n  { userId, message: \"You added a book to your To-Read list.\", type: \"success\" },\n]);",
+              "err": {},
+              "uuid": "541b7c38-f159-43b3-8b5c-f1572adaab57",
+              "parentUUID": "4a26fd66-d9e7-427c-be15-641bdc5ab148",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"Notification API (Full Integration)\"",
+              "fullTitle": "Notification API (Full Integration) \"after all\" hook in \"Notification API (Full Integration)\"",
+              "timedOut": false,
+              "duration": 134,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Cleanup artifacts created by the test\nawait Notification.deleteMany({ userId });\nawait User.deleteOne({ _id: userId });\nif (mongoose.connection.readyState !== 0) {\n  await mongoose.connection.close();\n}",
+              "err": {},
+              "uuid": "9db762e0-8d5f-4183-ac6a-770c27d36883",
+              "parentUUID": "4a26fd66-d9e7-427c-be15-641bdc5ab148",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "lists notifications for the authenticated user",
+              "fullTitle": "Notification API (Full Integration) lists notifications for the authenticated user",
+              "timedOut": false,
+              "duration": 120,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const res = await request(app).get(baseUrl).set(\"Authorization\", token);\nif (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);\nif (!Array.isArray(res.body.items)) throw new Error(\"Response missing items array\");",
+              "err": {},
+              "uuid": "98b2a6ec-87fa-43e2-9669-4f15327e7845",
+              "parentUUID": "4a26fd66-d9e7-427c-be15-641bdc5ab148",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "marks a single notification as read",
+              "fullTitle": "Notification API (Full Integration) marks a single notification as read",
+              "timedOut": false,
+              "duration": 194,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const all = await Notification.find({ userId });\nconst target = all[0];\nconst res = await request(app)\n  .patch(`${baseUrl}/${target._id}/read`)\n  .set(\"Authorization\", token);\nif (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);\nconst updated = await Notification.findById(target._id);\nif (!updated.read) throw new Error(\"Notification not marked as read\");",
+              "err": {},
+              "uuid": "9eabaebc-2eb2-46b0-b81f-94ddead6fac0",
+              "parentUUID": "4a26fd66-d9e7-427c-be15-641bdc5ab148",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "marks all notifications as read",
+              "fullTitle": "Notification API (Full Integration) marks all notifications as read",
+              "timedOut": false,
+              "duration": 149,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const res = await request(app)\n  .patch(`${baseUrl}/read-all`)\n  .set(\"Authorization\", token);\nif (res.status !== 200) throw new Error(`Expected 200, got ${res.status}`);\nconst unread = await Notification.find({ userId, read: false });\nif (unread.length !== 0) throw new Error(\"Some notifications remain unread\");",
+              "err": {},
+              "uuid": "aa765e50-0d43-4f98-a42f-3c6256f7db03",
+              "parentUUID": "4a26fd66-d9e7-427c-be15-641bdc5ab148",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "98b2a6ec-87fa-43e2-9669-4f15327e7845",
+            "9eabaebc-2eb2-46b0-b81f-94ddead6fac0",
+            "aa765e50-0d43-4f98-a42f-3c6256f7db03"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 463,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 15000
+        },
+        {
+          "uuid": "b5a0bdf3-e26c-4298-9c5f-f21cffca678b",
+          "title": "Book Operations API (Full Integration)",
+          "fullFile": "C:\\5th semester\\Software Eng\\swe_project\\bookhive\\backend\\TESTS\\book.operations.test.js",
+          "file": "\\TESTS\\book.operations.test.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"Book Operations API (Full Integration)\"",
+              "fullTitle": "Book Operations API (Full Integration) \"before all\" hook in \"Book Operations API (Full Integration)\"",
+              "timedOut": false,
+              "duration": 1484,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Ensure DB connection\nif (mongoose.connection.readyState === 0) {\n  await mongoose.connect(process.env.MONGO_URI, {\n    dbName: process.env.MONGO_DB_NAME || \"Bookhive\",\n  });\n}\n// Create a test user\nconst user = await User.create({\n  username: \"BookTestUser\",\n  email: \"booktest@example.com\",\n  passwordHash: \"hashedpassword123\",\n});\nuserId = user._id.toString();\ntestBookId = \"testGoogleBook123\";\n// Clean any existing ToRead data for this user\nawait ToRead.deleteMany({ userId });",
+              "err": {},
+              "uuid": "6988a1c0-1d2d-4a8d-a028-e67046f14869",
+              "parentUUID": "b5a0bdf3-e26c-4298-9c5f-f21cffca678b",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"Book Operations API (Full Integration)\"",
+              "fullTitle": "Book Operations API (Full Integration) \"after all\" hook in \"Book Operations API (Full Integration)\"",
+              "timedOut": false,
+              "duration": 122,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Cleanup\nawait ToRead.deleteMany({ userId });\nawait User.deleteOne({ _id: userId });\nif (mongoose.connection.readyState !== 0) {\n  await mongoose.connection.close();\n}",
+              "err": {},
+              "uuid": "b0a3fe63-5998-4cfe-9c35-439f22bb4747",
+              "parentUUID": "b5a0bdf3-e26c-4298-9c5f-f21cffca678b",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "adds a book to the reading list",
+              "fullTitle": "Book Operations API (Full Integration) adds a book to the reading list",
+              "timedOut": false,
+              "duration": 456,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const bookData = {\n  googleBookId: testBookId,\n  title: \"Test Book Title\",\n  authors: [\"Test Author\"],\n  thumbnail: \"https://example.com/thumbnail.jpg\",\n  categories: [\"Fiction\", \"Adventure\"],\n};\nconst res = await request(app)\n  .post(`${baseUrl}/${userId}`)\n  .send(bookData);\nif (res.status !== 201 && res.status !== 200) {\n  throw new Error(`Expected 201 or 200, got ${res.status}`);\n}\n// Verify book was added to database\nconst toReadList = await ToRead.findOne({ userId });\nif (!toReadList) throw new Error(\"ToRead list not created\");\n\nconst addedBook = toReadList.books.find(b => b.googleBookId === testBookId);\nif (!addedBook) throw new Error(\"Book not found in ToRead list\");\nif (addedBook.title !== \"Test Book Title\") throw new Error(\"Book title mismatch\");",
+              "err": {},
+              "uuid": "d246f1d6-e204-4b5f-945e-c387c16efd94",
+              "parentUUID": "b5a0bdf3-e26c-4298-9c5f-f21cffca678b",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "removes a book from the reading list",
+              "fullTitle": "Book Operations API (Full Integration) removes a book from the reading list",
+              "timedOut": false,
+              "duration": 360,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// First ensure the book exists\nawait ToRead.findOneAndUpdate(\n  { userId },\n  {\n    $addToSet: {\n      books: {\n        googleBookId: testBookId,\n        title: \"Test Book Title\",\n        authors: [\"Test Author\"],\n      },\n    },\n  },\n  { upsert: true }\n);\nconst res = await request(app)\n  .delete(`${baseUrl}/${userId}/${testBookId}`);\nif (res.status !== 200) {\n  throw new Error(`Expected 200, got ${res.status}`);\n}\n// Verify book was removed from database\nconst toReadList = await ToRead.findOne({ userId });\nconst removedBook = toReadList?.books.find(b => b.googleBookId === testBookId);\nif (removedBook) throw new Error(\"Book still exists in ToRead list\");",
+              "err": {},
+              "uuid": "0590d455-b51f-4a59-85e4-a13182a7a7fa",
+              "parentUUID": "b5a0bdf3-e26c-4298-9c5f-f21cffca678b",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "moves a book to collections with status update",
+              "fullTitle": "Book Operations API (Full Integration) moves a book to collections with status update",
+              "timedOut": false,
+              "duration": 564,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const moveBookId = \"moveTestBook456\";\n// Add a book first\nawait ToRead.findOneAndUpdate(\n  { userId },\n  {\n    $addToSet: {\n      books: {\n        googleBookId: moveBookId,\n        title: \"Book to Move\",\n        authors: [\"Move Author\"],\n      },\n    },\n  },\n  { upsert: true }\n);\nconst res = await request(app)\n  .post(`${baseUrl}/${userId}/${moveBookId}/move`)\n  .send({ status: \"currently-reading\" });\nif (res.status !== 200) {\n  throw new Error(`Expected 200, got ${res.status}`);\n}\n// Verify book was removed from ToRead after moving\nconst toReadList = await ToRead.findOne({ userId });\nconst movedBook = toReadList?.books.find(b => b.googleBookId === moveBookId);\nif (movedBook) throw new Error(\"Book still in ToRead after moving to collections\");",
+              "err": {},
+              "uuid": "705a0428-dc23-494e-9713-062605130459",
+              "parentUUID": "b5a0bdf3-e26c-4298-9c5f-f21cffca678b",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "d246f1d6-e204-4b5f-945e-c387c16efd94",
+            "0590d455-b51f-4a59-85e4-a13182a7a7fa",
+            "705a0428-dc23-494e-9713-062605130459"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 1380,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 15000
+        },
+        {
+          "uuid": "03407065-1c42-49a6-8121-3eab263f409e",
+          "title": "Review Operations API (Full Integration)",
+          "fullFile": "C:\\5th semester\\Software Eng\\swe_project\\bookhive\\backend\\TESTS\\review.operations.test.js",
+          "file": "\\TESTS\\review.operations.test.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"Review Operations API (Full Integration)\"",
+              "fullTitle": "Review Operations API (Full Integration) \"before all\" hook in \"Review Operations API (Full Integration)\"",
+              "timedOut": false,
+              "duration": 2182,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Ensure DB connection\nif (mongoose.connection.readyState === 0) {\n  await mongoose.connect(process.env.MONGO_URI, {\n    dbName: process.env.MONGO_DB_NAME || \"Bookhive\",\n  });\n}\n// Create a test user\nconst user = await User.create({\n  username: \"ReviewTestUser\",\n  email: \"reviewtest@example.com\",\n  passwordHash: \"hashedpassword123\",\n});\nuserId = user._id.toString();\ntestBookId = \"reviewTestBook123\";\n// Clean any existing data for this user\nawait Review.deleteMany({ userId });\nawait Collection.deleteMany({ userId });\n// Add book to collection (required for creating reviews)\nawait Collection.create({\n  userId,\n  books: [\n    {\n      googleBookId: testBookId,\n      title: \"Test Review Book\",\n      authors: [\"Test Author\"],\n      status: \"completed\",\n    },\n  ],\n});",
+              "err": {},
+              "uuid": "c726ec0e-f147-479d-980b-537f36a2630d",
+              "parentUUID": "03407065-1c42-49a6-8121-3eab263f409e",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"Review Operations API (Full Integration)\"",
+              "fullTitle": "Review Operations API (Full Integration) \"after all\" hook in \"Review Operations API (Full Integration)\"",
+              "timedOut": false,
+              "duration": 191,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Cleanup\nawait Review.deleteMany({});\nawait Collection.deleteMany({ userId });\nawait User.deleteOne({ _id: userId });\nif (mongoose.connection.readyState !== 0) {\n  await mongoose.connection.close();\n}",
+              "err": {},
+              "uuid": "13e99086-025e-46b5-96f3-f1c2c67c96a2",
+              "parentUUID": "03407065-1c42-49a6-8121-3eab263f409e",
+              "isHook": true,
+              "skipped": false
+            },
+            {
+              "title": "\"after each\" hook in \"Review Operations API (Full Integration)\"",
+              "fullTitle": "Review Operations API (Full Integration) \"after each\" hook in \"Review Operations API (Full Integration)\"",
+              "timedOut": false,
+              "duration": 58,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "await Review.deleteMany({});",
+              "err": {},
+              "uuid": "d2927df8-5fb4-427c-9672-be98fce045b2",
+              "parentUUID": "03407065-1c42-49a6-8121-3eab263f409e",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "submits a new review for a book",
+              "fullTitle": "Review Operations API (Full Integration) submits a new review for a book",
+              "timedOut": false,
+              "duration": 348,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const reviewData = {\n  userId,\n  googleBookId: testBookId,\n  rating: 5,\n  comment: \"This is an excellent test book!\",\n};\nconst res = await request(app)\n  .post(baseUrl)\n  .send(reviewData);\nif (res.status !== 201) {\n  throw new Error(`Expected 201, got ${res.status}`);\n}\n// Verify review was created in database\nconst review = await Review.findOne({ userId, googleBookId: testBookId });\nif (!review) throw new Error(\"Review not found in database\");\nif (review.rating !== 5) throw new Error(\"Review rating mismatch\");\nif (review.comment !== \"This is an excellent test book!\") {\n  throw new Error(\"Review comment mismatch\");\n}",
+              "err": {},
+              "uuid": "99ddcb6d-4bf0-469a-ae68-21da22c55d7b",
+              "parentUUID": "03407065-1c42-49a6-8121-3eab263f409e",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "prevents duplicate review submission for the same book",
+              "fullTitle": "Review Operations API (Full Integration) prevents duplicate review submission for the same book",
+              "timedOut": false,
+              "duration": 259,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// First, create a review\nawait Review.create({\n  userId,\n  googleBookId: testBookId,\n  rating: 4,\n  comment: \"First review\",\n});\n// Try to create a duplicate review\nconst duplicateReviewData = {\n  userId,\n  googleBookId: testBookId,\n  rating: 5,\n  comment: \"Attempting duplicate review\",\n};\nconst res = await request(app)\n  .post(baseUrl)\n  .send(duplicateReviewData);\nif (res.status !== 400) {\n  throw new Error(`Expected 400 for duplicate review, got ${res.status}`);\n}\n// Verify only one review exists\nconst reviewCount = await Review.countDocuments({ userId, googleBookId: testBookId });\nif (reviewCount !== 1) {\n  throw new Error(`Expected 1 review, found ${reviewCount}`);\n}",
+              "err": {},
+              "uuid": "e44f98c8-e6a4-46f7-b8fc-c722300fd252",
+              "parentUUID": "03407065-1c42-49a6-8121-3eab263f409e",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "retrieves all reviews for a specific book",
+              "fullTitle": "Review Operations API (Full Integration) retrieves all reviews for a specific book",
+              "timedOut": false,
+              "duration": 188,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const anotherBookId = \"anotherTestBook456\";\n// Add another book to collection\nawait Collection.findOneAndUpdate(\n  { userId },\n  {\n    $addToSet: {\n      books: {\n        googleBookId: anotherBookId,\n        title: \"Another Test Book\",\n        authors: [\"Another Author\"],\n        status: \"completed\",\n      },\n    },\n  }\n);\n// Create multiple reviews for the book\nawait Review.create([\n  {\n    userId,\n    googleBookId: anotherBookId,\n    rating: 4,\n    comment: \"Good book\",\n  },\n  {\n    userId: new mongoose.Types.ObjectId().toString(),\n    googleBookId: anotherBookId,\n    rating: 5,\n    comment: \"Excellent book from another user\",\n  },\n]);\nconst res = await request(app)\n  .get(`${baseUrl}/${anotherBookId}`);\nif (res.status !== 200) {\n  throw new Error(`Expected 200, got ${res.status}`);\n}\nif (!res.body.reviews || !Array.isArray(res.body.reviews)) {\n  throw new Error(\"Response missing reviews array\");\n}\nif (res.body.reviews.length !== 2) {\n  throw new Error(`Expected 2 reviews, got ${res.body.reviews.length}`);\n}\nif (res.body.count !== 2) {\n  throw new Error(`Expected count of 2, got ${res.body.count}`);\n}",
+              "err": {},
+              "uuid": "bbc94967-56c5-4727-81c8-9b7557bca6a9",
+              "parentUUID": "03407065-1c42-49a6-8121-3eab263f409e",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "99ddcb6d-4bf0-469a-ae68-21da22c55d7b",
+            "e44f98c8-e6a4-46f7-b8fc-c722300fd252",
+            "bbc94967-56c5-4727-81c8-9b7557bca6a9"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 795,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 15000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 15000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "11.7.4"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "notifications-report",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.4"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "TESTS/prajwalkunwar-report",
+        "reportFilename": "notifications-report"
+      },
+      "version": "6.3.2"
+    }
+  }
+}
