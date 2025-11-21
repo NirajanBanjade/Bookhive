@@ -21,7 +21,7 @@ export const useReviews = (userId, authorName) => {
 
       try {
         const existingReviews = await getReviewsByUser(userId);
-        
+
         // Build reviewData object from existing reviews
         const existingReviewData = {};
         existingReviews.forEach((review) => {
@@ -43,20 +43,22 @@ export const useReviews = (userId, authorName) => {
     fetchExistingReviews();
   }, [userId]);
 
-  // Update review data for a specific book
-  const updateReviewData = useCallback((googleBookId, field, value) => {
+  // FIXED: Update review data - now accepts object { rating, comment }
+  // to match new ReviewSection component API
+  const updateReviewData = useCallback((googleBookId, updates) => {
     setReviewData((prev) => ({
       ...prev,
       [googleBookId]: {
         ...(prev[googleBookId] || { rating: 0, comment: "", submitted: false }),
-        [field]: value,
+        ...updates,
       },
     }));
   }, []);
 
-  // Submit a review for a book
-  const handleSubmitReview = async (googleBookId) => {
-    const review = reviewData[googleBookId];
+  // FIXED: Submit review - now accepts reviewDetails parameter from ReviewSection
+  const handleSubmitReview = async (googleBookId, reviewDetails) => {
+    // Get review from parameter or fallback to state
+    const review = reviewDetails || reviewData[googleBookId];
 
     if (!review || !review.rating) {
       alert("Please select a rating");
@@ -74,8 +76,15 @@ export const useReviews = (userId, authorName) => {
     }
 
     try {
-      await createReview(userId, googleBookId, review.rating, review.comment.trim(), authorName);
+      await createReview(
+        userId,
+        googleBookId,
+        review.rating,
+        review.comment.trim(),
+        authorName
+      );
 
+      // Mark as submitted in local state
       setReviewData((prev) => ({
         ...prev,
         [googleBookId]: {
@@ -87,12 +96,16 @@ export const useReviews = (userId, authorName) => {
 
       alert("Review submitted successfully!");
       window.dispatchEvent(new Event("notifications:refresh"));
-
       console.log("Review submitted for book:", googleBookId);
     } catch (error) {
       console.error("Error submitting review:", error);
 
-      if (error.includes && error.includes("already reviewed")) {
+      // Check if already reviewed
+      if (
+        error &&
+        typeof error === "string" &&
+        error.includes("already reviewed")
+      ) {
         setReviewData((prev) => ({
           ...prev,
           [googleBookId]: {

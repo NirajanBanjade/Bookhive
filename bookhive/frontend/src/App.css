@@ -1,38 +1,162 @@
-.App {
-  text-align: center;
+/* Reset & Base Styles for Library Experience */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background: #0d1117;
+  color: #f5f5dc;
+  line-height: 1.6;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+/* Root Container - Full Width */
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  background: #0d1117;
 }
 
-.App-link {
-  color: #61dafb;
+/* Main App Container */
+.App {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  min-height: 100vh;
+  background: #0d1117;
+  text-align: left; /* Changed from center for better library feel */
+  overflow-x: hidden;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Typography Scale */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  color: #f5f5dc;
+  line-height: 1.3;
+  margin: 0;
+}
+
+p {
+  color: #d4c5a9;
+  margin: 0;
+}
+
+/* Link Styles */
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.2s ease;
+}
+
+a:hover {
+  color: #ffc107;
+}
+
+/* Button Reset */
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+/* Input Styles */
+input, textarea {
+  font-family: inherit;
+  border: none;
+  outline: none;
+}
+
+/* Remove default list styles */
+ul, ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection Color */
+::selection {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+::-moz-selection {
+  background: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1a1414;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8B4513;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #CD853F;
+}
+
+/* Focus Styles for Accessibility */
+*:focus {
+  outline: 2px solid rgba(255, 193, 7, 0.5);
+  outline-offset: 2px;
+}
+
+/* Utility Classes */
+.full-width {
+  width: 100vw !important;
+  margin-left: calc(-50vw + 50%) !important;
+}
+
+.no-scroll {
+  overflow: hidden;
+}
+
+/* Remove any default margins from common containers */
+.container,
+.max-w-7xl,
+.mx-auto {
+  margin: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+
+/* Ensure images don't break layout */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Performance optimizations */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Hide horizontal overflow globally */
+body {
+  overflow-x: hidden;
 }

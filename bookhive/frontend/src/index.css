@@ -2,6 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Only fix the white space without breaking layout */
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -9,6 +24,8 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  background: #0d1117;
 }
 
 code {
