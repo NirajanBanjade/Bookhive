@@ -156,7 +156,7 @@ const ProfileView = ({ userData = null }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Profile Header */}
-      <div className="bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 border-b border-gray-700">
+      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row gap-6 items-start">
             {/* Avatar */}
@@ -179,7 +179,7 @@ const ProfileView = ({ userData = null }) => {
                   <h1 className="font-serif text-3xl font-bold mb-2 text-white">
                     {user.name}
                   </h1>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-5000">
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-400">
                     <span className="flex items-center gap-1">
                       <MapPin className="h-4 w-4 text-amber-400" />
                       {user.location}
@@ -191,7 +191,7 @@ const ProfileView = ({ userData = null }) => {
                   </div>
                 </div>
               </div>
-              <p className="text-gray-400 mb-6 max-w-2xl leading-relaxed">
+              <p className="text-gray-300 mb-6 max-w-2xl leading-relaxed">
                 {user.bio}
               </p>
               {/* Stats Grid */}
@@ -199,7 +199,7 @@ const ProfileView = ({ userData = null }) => {
                 {stats.map((stat) => (
                   <div
                     key={stat.label}
-                    className="bg-gray-600 rounded-xl p-4 shadow-lg border border-gray-500 text-center hover:shadow-2xl hover:border-amber-500/30 transition-all"
+                    className="bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-700 text-center hover:shadow-2xl hover:border-amber-500/30 transition-all"
                   >
                     <stat.icon className="h-5 w-5 mx-auto mb-2 text-amber-500" />
                     <div className="text-2xl font-bold font-serif text-white">
@@ -214,8 +214,8 @@ const ProfileView = ({ userData = null }) => {
         </div>
       </div>
       {/* Bookshelves - Dark themed container */}
-      <div className="bg-gradient-to-br from-gray-600 via-gray-600 to-gray-700 min-h-screen">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+        <div className="max-w-7xl mx-auto px-6 py-8 bg-transparent">
           {/* Tabs */}
           <div className="mb-8">
             <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
@@ -253,8 +253,8 @@ const ProfileView = ({ userData = null }) => {
               </div>
             </div>
           </div>
-          {/* Tab Content with lighter background */}
-          <div className="bg-gray-100 rounded-lg p-6 border border-gray-500">
+          {/* Tab Content with dark background - NO WHITE ANYWHERE */}
+          <div className="bg-gray-900 rounded-lg p-6 border border-gray-700 shadow-lg">
             {activeTab === "currently-reading" && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {currentlyReading.map((book) => (
