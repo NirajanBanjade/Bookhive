@@ -8,10 +8,8 @@ import {
   UserPlus,
   Heart,
 } from "lucide-react";
-
 const ProfileView = ({ userData = null }) => {
   const [activeTab, setActiveTab] = useState("currently-reading");
-
   // Default user data
   const defaultUser = {
     name: "Jane Doe",
@@ -21,9 +19,7 @@ const ProfileView = ({ userData = null }) => {
     location: "San Francisco, CA",
     joinDate: "March 2024",
   };
-
   const user = userData || defaultUser;
-
   // Get initials for avatar
   const getInitials = (name) => {
     return name
@@ -33,7 +29,6 @@ const ProfileView = ({ userData = null }) => {
       .toUpperCase()
       .slice(0, 2);
   };
-
   // Mock stats (set to 0 as requested)
   const stats = [
     { label: "Books Read", value: "0", icon: Book },
@@ -41,7 +36,6 @@ const ProfileView = ({ userData = null }) => {
     { label: "Followers", value: "0", icon: Users },
     { label: "Following", value: "0", icon: UserPlus },
   ];
-
   // Mock book data - replace with actual API data later
   const currentlyReading = [
     {
@@ -59,7 +53,6 @@ const ProfileView = ({ userData = null }) => {
       progress: 34,
     },
   ];
-
   const wantToRead = [
     {
       id: 3,
@@ -74,7 +67,6 @@ const ProfileView = ({ userData = null }) => {
       genre: "Mystery",
     },
   ];
-
   const completed = [
     {
       id: 5,
@@ -91,24 +83,23 @@ const ProfileView = ({ userData = null }) => {
       rating: 4.5,
     },
   ];
-
   const BookCard = ({ book, status }) => (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100 hover:shadow-lg transition-all group cursor-pointer">
-      <div className="aspect-[2/3] bg-gradient-to-br from-amber-50 to-orange-100 relative overflow-hidden flex items-center justify-center p-6">
-        <span className="font-serif text-xl text-center text-gray-800 font-semibold leading-tight">
+    <div className="bg-gray-800 rounded-xl overflow-hidden shadow-lg border border-gray-700 hover:shadow-2xl hover:border-amber-500/50 transition-all group cursor-pointer">
+      <div className="aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-600 relative overflow-hidden flex items-center justify-center p-6">
+        <span className="font-serif text-xl text-center text-white font-semibold leading-tight">
           {book.title}
         </span>
         <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button className="rounded-full h-8 w-8 bg-white shadow-md flex items-center justify-center hover:bg-gray-50">
-            <Heart className="h-4 w-4 text-gray-600" />
+          <button className="rounded-full h-8 w-8 bg-gray-700 shadow-md flex items-center justify-center hover:bg-gray-600 border border-amber-500/30">
+            <Heart className="h-4 w-4 text-amber-400" />
           </button>
         </div>
         {status && (
           <span
             className={`absolute bottom-2 left-2 px-3 py-1 rounded-full text-xs font-medium ${
               status === "completed"
-                ? "bg-orange-500 text-white"
-                : "bg-teal-600 text-white"
+                ? "bg-emerald-600 text-white"
+                : "bg-amber-600 text-white"
             }`}
           >
             {status === "want-to-read"
@@ -120,12 +111,12 @@ const ProfileView = ({ userData = null }) => {
         )}
       </div>
       <div className="p-4">
-        <h3 className="font-serif font-semibold line-clamp-2 mb-1 text-gray-900">
+        <h3 className="font-serif font-semibold line-clamp-2 mb-1 text-white">
           {book.title}
         </h3>
-        <p className="text-sm text-gray-600 mb-2">{book.author}</p>
+        <p className="text-sm text-gray-400 mb-2">{book.author}</p>
         {book.genre && (
-          <span className="inline-block px-3 py-1 border border-gray-200 text-gray-700 text-xs rounded-full">
+          <span className="inline-block px-3 py-1 border border-amber-500/30 text-amber-400 text-xs rounded-full bg-amber-500/10">
             {book.genre}
           </span>
         )}
@@ -136,25 +127,25 @@ const ProfileView = ({ userData = null }) => {
                 key={i}
                 className={`h-3 w-3 ${
                   i < book.rating
-                    ? "fill-orange-400 text-orange-400"
-                    : "text-gray-300"
+                    ? "fill-amber-400 text-amber-400"
+                    : "text-gray-600"
                 }`}
               />
             ))}
-            <span className="text-xs text-gray-600 ml-1">
+            <span className="text-xs text-gray-400 ml-1">
               {book.rating.toFixed(1)}
             </span>
           </div>
         )}
         {book.progress !== undefined && (
           <div className="mt-3">
-            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-orange-400 to-orange-500 transition-all"
+                className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all"
                 style={{ width: `${book.progress}%` }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-400 mt-1">
               {book.progress}% complete
             </p>
           </div>
@@ -162,15 +153,14 @@ const ProfileView = ({ userData = null }) => {
       </div>
     </div>
   );
-
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Profile Header */}
-      <div className="bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 border-b border-gray-200">
+      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row gap-6 items-start">
             {/* Avatar */}
-            <div className="h-32 w-32 rounded-full border-4 border-white shadow-lg bg-orange-500 flex items-center justify-center">
+            <div className="h-32 w-32 rounded-full border-4 border-amber-500 shadow-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center ring-4 ring-amber-500/20">
               {user.profileImageUrl ? (
                 <img
                   src={user.profileImageUrl}
@@ -183,42 +173,39 @@ const ProfileView = ({ userData = null }) => {
                 </span>
               )}
             </div>
-
             <div className="flex-1">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="font-serif text-3xl font-bold mb-2 text-gray-900">
+                  <h1 className="font-serif text-3xl font-bold mb-2 text-white">
                     {user.name}
                   </h1>
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                  <div className="flex flex-wrap gap-4 text-sm text-gray-400">
                     <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
+                      <MapPin className="h-4 w-4 text-amber-400" />
                       {user.location}
                     </span>
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-4 w-4 text-amber-400" />
                       Joined {user.joinDate}
                     </span>
                   </div>
                 </div>
               </div>
-
-              <p className="text-gray-700 mb-6 max-w-2xl leading-relaxed">
+              <p className="text-gray-300 mb-6 max-w-2xl leading-relaxed">
                 {user.bio}
               </p>
-
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {stats.map((stat) => (
                   <div
                     key={stat.label}
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center hover:shadow-md transition-shadow"
+                    className="bg-gray-800 rounded-xl p-4 shadow-lg border border-gray-700 text-center hover:shadow-2xl hover:border-amber-500/30 transition-all"
                   >
-                    <stat.icon className="h-5 w-5 mx-auto mb-2 text-orange-500" />
-                    <div className="text-2xl font-bold font-serif text-gray-900">
+                    <stat.icon className="h-5 w-5 mx-auto mb-2 text-amber-500" />
+                    <div className="text-2xl font-bold font-serif text-white">
                       {stat.value}
                     </div>
-                    <div className="text-xs text-gray-600">{stat.label}</div>
+                    <div className="text-xs text-gray-400">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -226,72 +213,73 @@ const ProfileView = ({ userData = null }) => {
           </div>
         </div>
       </div>
-
-      {/* Bookshelves */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Tabs */}
-        <div className="mb-8">
-          <div className="inline-flex rounded-lg border border-gray-200 p-1 bg-white">
-            <button
-              onClick={() => setActiveTab("currently-reading")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "currently-reading"
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Currently Reading
-            </button>
-            <button
-              onClick={() => setActiveTab("want-to-read")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "want-to-read"
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Want to Read
-            </button>
-            <button
-              onClick={() => setActiveTab("completed")}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                activeTab === "completed"
-                  ? "bg-gray-100 text-gray-900"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              Completed
-            </button>
+      {/* Bookshelves - Dark themed container */}
+      <div className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 min-h-screen">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          {/* Tabs */}
+          <div className="mb-8">
+            <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+              <div className="flex">
+                <button
+                  onClick={() => setActiveTab("currently-reading")}
+                  className={`flex-1 px-4 py-3 font-semibold transition-all duration-200 border-b-3 ${
+                    activeTab === "currently-reading"
+                      ? "border-amber-500 text-amber-400 bg-gray-700"
+                      : "border-transparent text-gray-400 bg-gray-800 hover:text-amber-300 hover:bg-gray-750"
+                  }`}
+                >
+                  Currently Reading
+                </button>
+                <button
+                  onClick={() => setActiveTab("want-to-read")}
+                  className={`flex-1 px-4 py-3 font-semibold transition-all duration-200 border-b-3 ${
+                    activeTab === "want-to-read"
+                      ? "border-orange-500 text-orange-400 bg-gray-700"
+                      : "border-transparent text-gray-400 bg-gray-800 hover:text-orange-300 hover:bg-gray-750"
+                  }`}
+                >
+                  Want to Read
+                </button>
+                <button
+                  onClick={() => setActiveTab("completed")}
+                  className={`flex-1 px-4 py-3 font-semibold transition-all duration-200 border-b-3 ${
+                    activeTab === "completed"
+                      ? "border-emerald-500 text-emerald-400 bg-gray-700"
+                      : "border-transparent text-gray-400 bg-gray-800 hover:text-emerald-300 hover:bg-gray-750"
+                  }`}
+                >
+                  Completed
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* Tab Content with dark background */}
+          <div className="bg-gray-900/50 rounded-lg p-6 border border-gray-700">
+            {activeTab === "currently-reading" && (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {currentlyReading.map((book) => (
+                  <BookCard key={book.id} book={book} status="reading" />
+                ))}
+              </div>
+            )}
+            {activeTab === "want-to-read" && (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {wantToRead.map((book) => (
+                  <BookCard key={book.id} book={book} status="want-to-read" />
+                ))}
+              </div>
+            )}
+            {activeTab === "completed" && (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {completed.map((book) => (
+                  <BookCard key={book.id} book={book} status="completed" />
+                ))}
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Tab Content */}
-        {activeTab === "currently-reading" && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {currentlyReading.map((book) => (
-              <BookCard key={book.id} book={book} status="reading" />
-            ))}
-          </div>
-        )}
-
-        {activeTab === "want-to-read" && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {wantToRead.map((book) => (
-              <BookCard key={book.id} book={book} status="want-to-read" />
-            ))}
-          </div>
-        )}
-
-        {activeTab === "completed" && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {completed.map((book) => (
-              <BookCard key={book.id} book={book} status="completed" />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
 };
-
 export default ProfileView;
