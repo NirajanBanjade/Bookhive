@@ -1,137 +1,288 @@
+/* Library-Inspired Login Page */
 .loginContainer {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: #f5f5f5;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(145deg, #1a1414 0%, #2a1f19 50%, #1a1414 100%);
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+  position: relative;
+  overflow: hidden;
 }
 
+
+/* Library Card Aesthetic */
 .loginBox {
-    background: #fff;
-    padding: 24px;
-    border-radius: 8px;
-    width: 100%;
-    max-width: 350px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
-    padding:50px;
+  background: linear-gradient(145deg, #f5f5dc 0%, #faf0e6 100%);
+  border: 2px solid #8B4513;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  position: relative;
+  backdrop-filter: blur(10px);
 }
 
+/* Library Card Corner Details */
+.loginBox::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 1px solid rgba(139, 69, 19, 0.3);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+/* Book Spine Border Effect */
+.loginBox::after {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 20px;
+  bottom: 20px;
+  width: 4px;
+  background: linear-gradient(180deg, #8B4513 0%, #CD853F 50%, #8B4513 100%);
+  border-radius: 2px;
+}
+
+/* Logo Section */
 .logoSection {
-    text-align: center;
-    margin-bottom: 16px;
+  text-align: center;
+  margin-bottom: 24px;
+  position: relative;
 }
 
 .logoH1 {
-    font-size: 24px;
-    margin: 0 0 6px;
-    color: #333;
+  font-size: 32px;
+  margin: 0 0 8px;
+  color: #2c1810;
+  font-family: 'Merriweather', 'Georgia', serif;
+  font-weight: 700; /* Changed from 800 to work better with Merriweather */
+  background: linear-gradient(135deg, #8B4513 0%, #CD853F 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.3px; /* Slightly adjusted for Merriweather */
 }
 
 .logoP {
-    margin: 0;
-    color: #666;
-    font-size: 14px;
+  margin: 0;
+  color: #5a3a1a;
+  font-size: 16px;
+  font-weight: 500;
+  opacity: 0.8;
 }
 
+/* Form Section */
 .formSection {
-    margin-top: 12px;
+  margin-top: 20px;
 }
 
 .inputGroup {
-    margin-bottom: 14px;
+  margin-bottom: 18px;
+  position: relative;
 }
 
 .label {
-    display: block;
-    margin-bottom: 6px;
-    color: #333;
-    font-weight: 500;
-    font-size: 14px;
+  display: block;
+  margin-bottom: 8px;
+  color: #2c1810;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  font-family: 'Open Sans', sans-serif;
 }
 
 .input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid rgba(139, 69, 19, 0.2);
+  border-radius: 8px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #2c1810;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  font-family: 'Open Sans', sans-serif;
 }
 
+.input::placeholder {
+  color: rgba(92, 58, 26, 0.6);
+  font-style: italic;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #CD853F;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(205, 133, 63, 0.2);
+  transform: translateY(-1px);
+}
+
+.input:disabled {
+  background: rgba(139, 69, 19, 0.1);
+  color: rgba(92, 58, 26, 0.6);
+  cursor: not-allowed;
+}
+
+/* Submit Button */
 .submitBtn {
-    width: 100%;
-    padding: 12px;
-    background: #333;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
+  width: 100%;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #8B4513 0%, #CD853F 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600; /* Adjusted for Open Sans */
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(139, 69, 19, 0.3);
+  font-family: 'Open Sans', sans-serif;
 }
 
+.submitBtn:hover {
+  background: linear-gradient(135deg, #CD853F 0%, #DEB887 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
+}
+
+.submitBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(139, 69, 19, 0.3);
+}
+
+/* Toggle Mode Section */
 .toggleMode {
-    text-align: center;
-    margin-top: 16px;
-    border-top: 1px solid #eee;
-    padding-top: 12px;
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(139, 69, 19, 0.2);
+  position: relative;
 }
 
 .toggleP {
-    color: #666;
-    font-size: 14px;
-    margin: 0;
+  color: #5a3a1a;
+  font-size: 14px;
+  margin: 0;
+  font-weight: 500;
 }
 
-.toggleBtn {
-    background: none;
-    border: none;
-    text-decoration: underline;
-    cursor: pointer;
-    color: #333;
-    font-weight: 600;
-    margin-left: 6px;
+.toggleBtn, .forgotBtn {
+  background: none;
+  border: none;
+  text-decoration: none;
+  cursor: pointer;
+  color: #8B4513;
+  font-weight: 700;
+  margin-left: 6px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
 }
+
+.toggleBtn:hover, .forgotBtn:hover {
+  color: #CD853F;
+  border-bottom-color: #CD853F;
+}
+
+/* Error and Success Messages */
 .formError {
-    color: #b00020;          /* red text */
-    background: #fdecea;     /* soft red bg */
-    border: 1px solid #f5c2c7;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    font-size: 0.95rem;
-  }
-  .formSuccess {
-    color: #188653;           
-    background: #d1e7dd;      
-    border: 1px solid #badbcc;
-    padding: 8px 12px;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    font-size: 0.95rem;
-  }
-  .forgotRow {
-    margin-top: 12px;
-    display: flex;
-    justify-content: flex-end;
+  color: #721c24;
+  background: linear-gradient(135deg, #f8d7da 0%, #f1aeb5 100%);
+  border: 1px solid #d32f2f;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-left: 4px solid #d32f2f;
+}
+
+.formSuccess {
+  color: #0f5132;
+  background: linear-gradient(135deg, #d1e7dd 0%, #a3cfbb 100%);
+  border: 1px solid #198754;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border-left: 4px solid #198754;
+}
+
+/* Forgot Password Section */
+.forgotRow {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fpTitle {
+  margin: 0 0 24px 0;
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  color: #2c1810;
+  font-family: 'Merriweather', serif;
+}
+.fpActions {
+  margin-top: 16px;
+}
+
+/* Mobile Responsive */
+@media (max-width: 480px) {
+  .loginContainer {
+    padding: 16px;
   }
   
-  .forgotBtn {
-    background: none;
-    border: none;
-    font-size: 12px;
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 4px 6px;
+  .loginBox {
+    padding: 24px;
+    max-width: none;
   }
   
-  .forgotBtn:hover {
-    opacity: 0.8;
+  .logoH1 {
+    font-size: 26px;
   }
   
-  .fpTitle {
-    margin: 0 0 20px 0;
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
+  .input {
+    padding: 10px 12px;
   }
   
+  .submitBtn {
+    padding: 12px 16px;
+  }
+}
+
+/* Subtle Library Animations */
+.loginBox {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Input Focus Effects */
+.inputGroup {
+  position: relative;
+}
+
+.inputGroup:focus-within .label {
+  color: #CD853F;
+  transform: translateY(-2px);
+}
