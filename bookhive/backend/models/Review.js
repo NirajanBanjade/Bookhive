@@ -5,6 +5,7 @@ const reviewSchema = new mongoose.Schema({
   googleBookId: { type: String, required: true, index: true },
   rating: { type: Number, required: true, min: 1, max: 5 },
   comment: { type: String, maxlength: 500 },
+  authorName: { type: String, required: true }, // NEW FIELD
   reviewedAt: { type: Date, default: Date.now },
 });
 

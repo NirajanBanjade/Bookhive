@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Book as BookIcon, Star, User } from 'lucide-react';
+import { Book as BookIcon, Star, User, Edit2, Trash2, X, Check } from 'lucide-react';
 import { getBookById } from '../api/books';
-import { getReviewsByBook, calculateAverageRating } from '../services/reviewsService';
+import { getReviewsByBook, calculateAverageRating, updateReview, deleteReview } from '../services/reviewsService';
 
 const BookDetails = () => {
   const { googleBookId } = useParams();
@@ -11,6 +11,14 @@ const BookDetails = () => {
   const [loading, setLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [error, setError] = useState(null);
+  
+  // Edit mode state
+  const [editingReviewId, setEditingReviewId] = useState(null);
+  const [editRating, setEditRating] = useState(0);
+  const [editComment, setEditComment] = useState('');
+
+  // Get current user ID from localStorage
+  const currentUserId = localStorage.getItem('userId');
 
   // Fetch book details from YOUR backend
   useEffect(() => {
@@ -61,7 +69,75 @@ const BookDetails = () => {
   // Calculate average rating
   const averageRating = calculateAverageRating(reviews);
 
-  // Star Rating Component
+  // Start editing a review
+  const handleStartEdit = (review) => {
+    setEditingReviewId(review._id);
+    setEditRating(review.rating);
+    setEditComment(review.comment);
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingReviewId(null);
+    setEditRating(0);
+    setEditComment('');
+  };
+
+  // Save edited review
+  const handleSaveEdit = async (reviewId) => {
+    if (!editRating || editRating < 1 || editRating > 5) {
+      alert('Please select a rating between 1 and 5');
+      return;
+    }
+
+    if (!editComment.trim()) {
+      alert('Please write a review comment');
+      return;
+    }
+
+    try {
+      const updatedReview = await updateReview(reviewId, currentUserId, editRating, editComment.trim());
+      
+      // Update local state
+      setReviews(prevReviews =>
+        prevReviews.map(review =>
+          review._id === reviewId ? { ...review, rating: editRating, comment: editComment.trim() } : review
+        )
+      );
+
+      // Exit edit mode
+      handleCancelEdit();
+      
+      alert('Review updated successfully!');
+    } catch (error) {
+      console.error('Error updating review:', error);
+      alert(error || 'Failed to update review');
+    }
+  };
+
+  // Delete a review
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm('Are you sure you want to delete this review?')) {
+      return;
+    }
+
+    try {
+      await deleteReview(reviewId, currentUserId);
+      
+      // Remove from local state
+      setReviews(prevReviews => prevReviews.filter(review => review._id !== reviewId));
+      
+      alert('Review deleted successfully!');
+      
+      // Trigger notification refresh
+      window.dispatchEvent(new Event('notifications:refresh'));
+    } catch (error) {
+      console.error('Error deleting review:', error);
+      alert(error || 'Failed to delete review');
+    }
+  };
+
+  // Star Rating Component (for display)
   const StarRating = ({ rating, size = 'default' }) => {
     const sizeClasses = {
       small: 'h-3 w-3',
@@ -80,6 +156,34 @@ const BookDetails = () => {
                 : 'text-gray-300'
             }`}
           />
+        ))}
+      </div>
+    );
+  };
+
+  // Interactive Star Rating Component (for editing)
+  const InteractiveStarRating = ({ rating, onRatingChange }) => {
+    const [hoverRating, setHoverRating] = useState(0);
+    
+    return (
+      <div className="flex items-center gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => onRatingChange(star)}
+            onMouseEnter={() => setHoverRating(star)}
+            onMouseLeave={() => setHoverRating(0)}
+            className="focus:outline-none"
+          >
+            <Star
+              className={`h-6 w-6 transition-colors ${
+                star <= (hoverRating || rating)
+                  ? 'fill-amber-400 text-amber-400'
+                  : 'text-gray-300 hover:text-amber-200'
+              }`}
+            />
+          </button>
         ))}
       </div>
     );
@@ -232,35 +336,127 @@ const BookDetails = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {reviews.map((review) => (
-              <div 
-                key={review._id} 
-                className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-              >
-                {/* Review Header */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
-                      <User className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">
-                        {review.authorName || review.user?.name || 'Anonymous'}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {formatDate(review.reviewedAt)}
-                      </p>
-                    </div>
-                  </div>
-                  <StarRating rating={review.rating} size="small" />
-                </div>
+            {reviews.map((review) => {
+              const isOwner = review.userId === currentUserId;
+              const isEditing = editingReviewId === review._id;
 
-                {/* Review Content */}
-                <p className="text-gray-700 leading-relaxed">
-                  {review.comment}
-                </p>
-              </div>
-            ))}
+              return (
+                <div 
+                  key={review._id} 
+                  className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+                >
+                  {isEditing ? (
+                    // EDIT MODE
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
+                            <User className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {review.authorName || review.user?.name || 'Anonymous'}
+                            </p>
+                            <p className="text-sm text-gray-500">Editing review</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Edit Rating */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Rating
+                        </label>
+                        <InteractiveStarRating 
+                          rating={editRating} 
+                          onRatingChange={setEditRating}
+                        />
+                      </div>
+
+                      {/* Edit Comment */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Review
+                        </label>
+                        <textarea
+                          value={editComment}
+                          onChange={(e) => setEditComment(e.target.value)}
+                          rows={4}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"
+                          placeholder="Share your thoughts about this book..."
+                        />
+                      </div>
+
+                      {/* Edit Actions */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleSaveEdit(review._id)}
+                          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                        >
+                          <Check className="h-4 w-4" />
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    // VIEW MODE
+                    <>
+                      {/* Review Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center">
+                            <User className="h-5 w-5 text-white" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">
+                              {review.authorName || review.user?.name || 'Anonymous'}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {formatDate(review.reviewedAt)}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <StarRating rating={review.rating} size="small" />
+                          {isOwner && (
+                            <div className="flex gap-1 ml-2">
+                              <button
+                                onClick={() => handleStartEdit(review)}
+                                className="p-2 text-gray-500 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+                                title="Edit review"
+                                aria-label="Edit review"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteReview(review._id)}
+                                className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete review"
+                                aria-label="Delete review"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Review Content */}
+                      <p className="text-gray-700 leading-relaxed">
+                        {review.comment}
+                      </p>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

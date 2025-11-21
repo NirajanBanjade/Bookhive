@@ -49,8 +49,8 @@ const ProfileForm = ({ userData = null, onSave = null }) => {
     handleCategoryJoin,
   } = useBooks(userId);
 
-  const { reviewData, updateReviewData, handleSubmitReview } = useReviews(userId);
-
+  const { reviewData, updateReviewData, handleSubmitReview } = useReviews(userId, formData.name);
+  
   // Handle save with edit mode toggle
   const handleSaveProfile = async () => {
     const success = await handleSave(onSave);

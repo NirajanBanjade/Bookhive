@@ -14,9 +14,9 @@ class ReviewService {
   /**
    * Validate required fields for review creation
    */
-  validateRequiredFields(userId, googleBookId, rating) {
-    if (!userId || !googleBookId || !rating) {
-      throw new Error('userId, googleBookId, and rating are required');
+  validateRequiredFields(userId, googleBookId, rating, authorName) {
+    if (!userId || !googleBookId || !rating || !authorName) {
+      throw new Error('userId, googleBookId, rating, and authorName are required');
     }
   }
 
@@ -57,6 +57,24 @@ class ReviewService {
     }
   }
 
+  /**
+   * Validate ownership of review
+   * @throws {Error} if user doesn't own the review
+   */
+  async validateOwnership(reviewId, userId) {
+    const review = await ReviewRepo.findById(reviewId);
+    
+    if (!review) {
+      throw new Error('Review not found');
+    }
+    
+    if (review.userId.toString() !== userId.toString()) {
+      throw new Error('You can only edit or delete your own reviews');
+    }
+    
+    return review;
+  }
+
 // ============= BUSINESS METHODS =============
 
   /**
@@ -65,11 +83,12 @@ class ReviewService {
    * @param {string} googleBookId 
    * @param {number} rating 
    * @param {string} comment 
+   * @param {string} authorName 
    * @returns {Promise<Object>} Created review
    */
-  async createReview(userId, googleBookId, rating, comment) {
+  async createReview(userId, googleBookId, rating, comment, authorName) {
     // Validation
-    this.validateRequiredFields(userId, googleBookId, rating);
+    this.validateRequiredFields(userId, googleBookId, rating, authorName);
     this.validateRating(rating);
     
     // Business rules
@@ -81,13 +100,50 @@ class ReviewService {
       userId, 
       googleBookId, 
       rating, 
-      comment 
+      comment,
+      authorName
     });
     
     // Notify user
     await NotificationService.createReviewNotification(userId, bookTitle, rating);
     
     return review;
+  }
+
+  /**
+   * Update an existing review
+   * @param {string} reviewId 
+   * @param {string} userId - For ownership verification
+   * @param {number} rating - New rating
+   * @param {string} comment - New comment
+   * @returns {Promise<Object>} Updated review
+   */
+  async updateReview(reviewId, userId, rating, comment) {
+    // Validate ownership first
+    await this.validateOwnership(reviewId, userId);
+    
+    // Validate new rating if provided
+    if (rating !== undefined) {
+      this.validateRating(rating);
+    }
+    
+    // Build update object
+    const updateData = {};
+    if (rating !== undefined) updateData.rating = rating;
+    if (comment !== undefined) updateData.comment = comment;
+    
+    if (Object.keys(updateData).length === 0) {
+      throw new Error('No fields to update');
+    }
+    
+    // Update review via repository
+    const updatedReview = await ReviewRepo.updateById(reviewId, updateData);
+    
+    if (!updatedReview) {
+      throw new Error('Failed to update review');
+    }
+    
+    return updatedReview;
   }
 
   /**
@@ -128,12 +184,8 @@ class ReviewService {
    * @returns {Promise<Object>} Deletion result
    */
   async deleteReview(reviewId, userId) {
-    // Get review first to extract book info
-    const review = await ReviewRepo.findById(reviewId);
-
-    if (!review) {
-      throw new Error('Review not found');
-    }
+    // Validate ownership first
+    const review = await this.validateOwnership(reviewId, userId);
 
     // Get book title for notification
     const collection = await Collection.findOne({ 

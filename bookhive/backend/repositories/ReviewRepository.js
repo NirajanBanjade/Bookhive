@@ -65,6 +65,20 @@ class ReviewRepository {
   }
 
   /**
+   * Update a review by ID
+   */
+  async updateById(id, updateData) {
+    const _id = this.#oid(id);
+    if (!_id) return null;
+    
+    return this.Review.findByIdAndUpdate(
+      _id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).lean();
+  }
+
+  /**
    * Delete a review by ID
    */
   async deleteById(id) {

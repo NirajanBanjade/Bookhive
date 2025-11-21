@@ -1,12 +1,17 @@
-// backend/controllers/reviewController.js
+// backend/controllers/reviewsController.js
 const ReviewService = require('../services/ReviewService');
 
 // Create a review (only for books in Collection)
 exports.createReview = async (req, res) => {
   try {
-    const { userId, googleBookId, rating, comment } = req.body;
+    const { userId, googleBookId, rating, comment, authorName } = req.body;
     
-    const review = await ReviewService.createReview(userId, googleBookId, rating, comment);
+    // Validate authorName
+    if (!authorName) {
+      return res.status(400).json({ error: 'authorName is required' });
+    }
+    
+    const review = await ReviewService.createReview(userId, googleBookId, rating, comment, authorName);
     
     res.status(201).json(review);
   } catch (err) {
@@ -16,6 +21,36 @@ exports.createReview = async (req, res) => {
         err.message.includes('Rating must') ||
         err.message.includes('collection') ||
         err.message.includes('already reviewed')) {
+      return res.status(400).json({ error: err.message });
+    }
+    
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// Update a review (ownership validated in service)
+exports.updateReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId, rating, comment } = req.body;
+    
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+    
+    const updatedReview = await ReviewService.updateReview(id, userId, rating, comment);
+    
+    res.status(200).json(updatedReview);
+  } catch (err) {
+    console.error('Error updating review:', err);
+    
+    if (err.message.includes('not found')) {
+      return res.status(404).json({ error: err.message });
+    }
+    
+    if (err.message.includes('only edit') || 
+        err.message.includes('Rating must') ||
+        err.message.includes('No fields')) {
       return res.status(400).json({ error: err.message });
     }
     
@@ -42,12 +77,17 @@ exports.listReviews = async (req, res) => {
   }
 };
 
-// Delete a review
+// Delete a review (ownership validated in service)
 exports.deleteReview = async (req, res) => {
   try {
     const { id } = req.params;
+    const { userId } = req.body;
     
-    const result = await ReviewService.deleteReview(id);
+    if (!userId) {
+      return res.status(400).json({ error: 'userId is required' });
+    }
+
+    const result = await ReviewService.deleteReview(id, userId);
 
     res.status(200).json({ message: result.message });
   } catch (err) {
@@ -55,6 +95,10 @@ exports.deleteReview = async (req, res) => {
     
     if (err.message.includes('not found')) {
       return res.status(404).json({ error: err.message });
+    }
+    
+    if (err.message.includes('only edit')) {
+      return res.status(400).json({ error: err.message });
     }
     
     res.status(500).json({ error: 'Server error' });
