@@ -23,9 +23,10 @@ class InterestProfileBuilder {
     // 1) Gather local saved books
     const toRead = await this.toReadRepo.getBooksForUser(userId);
     const currentlyReading = await this.collectionRepo.getBooksByStatus(userId, 'currently-reading');
+    const finishedReading = await this.collectionRepo.getBooksByStatus(userId, 'completed');
 
     // TODO: integrate other sources similarly (currentlyReadingRepo, finishedRepo, etc.)
-    const books = [...toRead, ...currentlyReading]; // merge later if we add more lists
+    const books = [...toRead, ...currentlyReading, ...finishedReading]; // merge later if we add more lists
 
     // 2) Build term maps
     const authorCounts = {};
@@ -81,7 +82,8 @@ class InterestProfileBuilder {
       keywords,
       sourceCounts: {
         toRead: toRead.length,
-        currentlyReading: currentlyReading.length
+        currentlyReading: currentlyReading.length,
+        finished: finishedReading.length
       }
     });
 
@@ -91,7 +93,7 @@ class InterestProfileBuilder {
   async _ensureVolume(book) {
     // Always fetch to avoid stale data; add caching later.
     if (!book?.googleBookId) return null;
-    return this.getVolume(book.googleBookId);//this.booksService(book.googleBookId);
+    return this.getVolume(book.googleBookId);
   }
 
   _normalize(counts) {

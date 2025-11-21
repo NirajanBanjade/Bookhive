@@ -22,6 +22,9 @@ class ExistingBooksRepository {
       if (b.googleBookId && b.status === "currently-reading"){ 
         ids.add(b.googleBookId);
       }
+      if (b.googleBookId && b.status === "completed"){ 
+        ids.add(b.googleBookId);
+      }
     }
     
     return ids;
