@@ -6,7 +6,6 @@
  *
  * @module constants/genres
  */
-
 import {
   BookOpen,
   Sparkles,
