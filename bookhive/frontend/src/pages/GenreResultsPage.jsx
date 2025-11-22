@@ -159,21 +159,36 @@ const GenreResultsPage = () => {
 
   if (!genre) {
     return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#fafaf9" }}
-      >
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div
+          className="text-center p-12 rounded-2xl border"
+          style={{
+            backgroundColor: "rgba(31, 41, 55, 0.6)",
+            borderColor: "rgba(255,255,255,0.1)",
+            backdropFilter: "blur(10px)",
+            boxShadow: "0 10px 25px rgba(0, 0, 0, 0.4)",
+          }}
+        >
           <div className="text-6xl mb-4">📚</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2
+            className="text-2xl font-bold mb-2 text-white"
+            style={{
+              fontFamily: "'Poppins', sans-serif",
+            }}
+          >
             Genre Not Found
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p
+            className="mb-6 text-gray-400"
+            style={{
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
             The genre you're looking for doesn't exist.
           </p>
           <Link
             to="/genre"
-            className="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+            className="inline-block px-6 py-3 rounded-lg font-medium transition-all bg-amber-500 text-white hover:bg-amber-600"
           >
             Browse All Genres
           </Link>
@@ -186,16 +201,23 @@ const GenreResultsPage = () => {
   const IconComponent = genre.icon;
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#fafaf9" }}>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Genre Header */}
       <div
-        className="border-b border-gray-200"
-        style={{ backgroundColor: genre.bgColor }}
+        className="border-b"
+        style={{
+          backgroundColor: genre.bgColor,
+          borderColor: "rgba(0,0,0,0.2)",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+        }}
       >
         <div className="max-w-7xl mx-auto px-6 py-12">
           <Link
             to="/genre"
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900 mb-4"
+            className="inline-flex items-center gap-2 text-sm font-medium mb-6 transition-colors text-gray-700 hover:text-gray-900"
+            style={{
+              fontFamily: "'Inter', sans-serif",
+            }}
           >
             <svg
               className="w-4 h-4"
@@ -213,40 +235,42 @@ const GenreResultsPage = () => {
             Back to Genres
           </Link>
 
-          <div className="flex items-start justify-between">
-            <div className="flex items-start gap-4">
-              {/* Icon with background */}
-              <div
-                className="p-4 rounded-xl"
-                style={{ backgroundColor: "rgba(255,255,255,0.5)" }}
-              >
-                <IconComponent
-                  size={64}
-                  strokeWidth={1.5}
-                  color={genre.titleColor}
-                />
-              </div>
+          <div className="flex items-start gap-6">
+            {/* Icon with background */}
+            <div
+              className="p-5 rounded-2xl border"
+              style={{
+                backgroundColor: "rgba(255,255,255,0.3)",
+                borderColor: "rgba(255,255,255,0.2)",
+                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              <IconComponent
+                size={64}
+                strokeWidth={2}
+                color={genre.titleColor}
+              />
+            </div>
 
-              <div className="flex-1">
-                <h1
-                  className="text-4xl font-bold mb-2 font-serif"
-                  style={{
-                    color: genre.titleColor,
-                    fontFamily: "'Poppins', 'Arial', sans-serif",
-                  }}
-                >
-                  {genre.name}
-                </h1>
-                <p
-                  className="text-lg"
-                  style={{
-                    color: genre.descColor,
-                    fontFamily: "'Inter', sans-serif",
-                  }}
-                >
-                  {genre.description}
-                </p>
-              </div>
+            <div className="flex-1">
+              <h1
+                className="text-5xl font-bold mb-3"
+                style={{
+                  color: genre.titleColor,
+                  fontFamily: "'Poppins', 'Arial', sans-serif",
+                }}
+              >
+                {genre.name}
+              </h1>
+              <p
+                className="text-lg"
+                style={{
+                  color: genre.descColor,
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                {genre.description}
+              </p>
             </div>
           </div>
         </div>
@@ -255,18 +279,45 @@ const GenreResultsPage = () => {
       {/* Results Section */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         {loading && page === 1 && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-primary"></div>
-            <p className="mt-4 text-gray-600">Loading {genre.name} books...</p>
+          <div className="text-center py-20">
+            <div
+              className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-t-transparent"
+              style={{
+                borderColor: `${genre.titleColor}33`,
+                borderTopColor: genre.titleColor,
+              }}
+            ></div>
+            <p
+              className="mt-6 text-gray-400"
+              style={{
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              Loading {genre.name} books...
+            </p>
           </div>
         )}
 
         {error && !loading && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
-            <p className="text-red-600 font-medium">Error: {error}</p>
+          <div
+            className="rounded-2xl p-8 text-center border"
+            style={{
+              backgroundColor: "rgba(127, 29, 29, 0.3)",
+              borderColor: "rgba(248, 113, 113, 0.5)",
+              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            <p
+              className="font-medium mb-4 text-red-400"
+              style={{
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              Error: {error}
+            </p>
             <button
               onClick={() => setPage(1)}
-              className="mt-4 px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="px-6 py-2 rounded-lg font-medium transition-colors bg-red-600 text-white hover:bg-red-700"
             >
               Try Again
             </button>
@@ -274,24 +325,35 @@ const GenreResultsPage = () => {
         )}
 
         {!loading && !error && books.length === 0 && (
-          <div className="text-center py-12">
-            <div className="mb-4">
+          <div className="text-center py-20">
+            <div className="mb-6">
               <IconComponent
-                size={64}
+                size={80}
                 strokeWidth={1.5}
                 color={genre.titleColor}
                 className="mx-auto"
               />
             </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            <h3
+              className="text-3xl font-bold mb-3 text-white"
+              style={{
+                fontFamily: "'Poppins', sans-serif",
+              }}
+            >
               No Books Found
             </h3>
-            <p className="text-gray-600 mb-6">
+            <p
+              className="mb-8 text-gray-400"
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "1.125rem",
+              }}
+            >
               We couldn't find any books in this genre. Try another one!
             </p>
             <Link
               to="/genre"
-              className="inline-block px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors"
+              className="inline-block px-6 py-3 rounded-lg font-medium transition-all bg-amber-500 text-white hover:bg-amber-600"
             >
               Browse Other Genres
             </Link>
@@ -300,8 +362,13 @@ const GenreResultsPage = () => {
 
         {books.length > 0 && (
           <>
-            <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">
+            <div className="mb-8 flex items-center justify-between">
+              <h2
+                className="text-2xl font-bold text-white"
+                style={{
+                  fontFamily: "'Poppins', sans-serif",
+                }}
+              >
                 {books.length} {books.length === 1 ? "Book" : "Books"}
               </h2>
             </div>
@@ -310,9 +377,27 @@ const GenreResultsPage = () => {
               {books.map((book) => (
                 <div
                   key={book.googleBookId}
-                  className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
+                  className="rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-2 group"
+                  style={{
+                    backgroundColor: "rgba(31, 41, 55, 0.6)",
+                    borderColor: "rgba(255,255,255,0.1)",
+                    backdropFilter: "blur(10px)",
+                    boxShadow:
+                      "0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 20px rgba(0, 0, 0, 0.15)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow =
+                      "0 10px 25px rgba(0, 0, 0, 0.4), 0 20px 40px rgba(0, 0, 0, 0.2)";
+                    e.currentTarget.style.borderColor =
+                      "rgba(251, 191, 36, 0.5)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow =
+                      "0 4px 6px rgba(0, 0, 0, 0.3), 0 10px 20px rgba(0, 0, 0, 0.15)";
+                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                  }}
                 >
-                  <div className="aspect-[2/3] bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+                  <div className="aspect-[2/3] bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center p-4">
                     {book.thumbnail ? (
                       <img
                         src={book.thumbnail}
@@ -321,14 +406,19 @@ const GenreResultsPage = () => {
                       />
                     ) : (
                       <div className="text-center p-6">
-                        <div className="mb-2 flex justify-center">
+                        <div className="mb-3 flex justify-center">
                           <IconComponent
                             size={48}
                             strokeWidth={1.5}
                             color={genre.titleColor}
                           />
                         </div>
-                        <p className="text-sm font-semibold text-gray-600 line-clamp-3">
+                        <p
+                          className="text-sm font-semibold line-clamp-3 text-gray-400"
+                          style={{
+                            fontFamily: "'Inter', sans-serif",
+                          }}
+                        >
                           {book.title}
                         </p>
                       </div>
@@ -336,16 +426,33 @@ const GenreResultsPage = () => {
                   </div>
 
                   <div className="p-4">
-                    <h3 className="font-bold text-gray-900 mb-1 line-clamp-2 min-h-[3rem]">
+                    <h3
+                      className="font-bold mb-1 line-clamp-2 min-h-[3rem] text-white group-hover:text-amber-400 transition-colors"
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                      }}
+                    >
                       {book.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-1">
+                    <p
+                      className="text-sm mb-3 line-clamp-1 text-gray-400"
+                      style={{
+                        fontFamily: "'Inter', sans-serif",
+                      }}
+                    >
                       {(book.authors || []).join(", ") || "Unknown Author"}
                     </p>
 
                     {/* Show mature badge */}
                     {book.maturityRating === "MATURE" && (
-                      <span className="inline-block mb-2 px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded">
+                      <span
+                        className="inline-block mb-3 px-2 py-1 text-xs font-semibold rounded border"
+                        style={{
+                          backgroundColor: "rgba(127, 29, 29, 0.3)",
+                          color: "#f87171",
+                          borderColor: "rgba(248, 113, 113, 0.5)",
+                        }}
+                      >
                         Mature Content
                       </span>
                     )}
@@ -353,7 +460,11 @@ const GenreResultsPage = () => {
                     <button
                       onClick={() => handleAddToRead(book)}
                       disabled={!userId}
-                      className="w-full px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                      className={`w-full px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        userId
+                          ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white hover:from-amber-600 hover:to-orange-700 hover:shadow-lg"
+                          : "bg-gray-700 text-gray-500 cursor-not-allowed"
+                      }`}
                     >
                       {userId ? "Add to To-Read" : "Login to Add"}
                     </button>
@@ -367,15 +478,27 @@ const GenreResultsPage = () => {
                 <button
                   onClick={onLoadMore}
                   disabled={loading}
-                  className={`px-8 py-3 rounded-lg font-medium transition-all ${
+                  className={`px-8 py-3 rounded-lg font-medium transition-all border ${
                     loading
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                      : "bg-white border-2 border-gray-300 text-gray-700 hover:border-primary hover:text-primary hover:shadow-md"
+                      ? "bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed"
+                      : "bg-gray-800 border-gray-600 text-gray-200 hover:bg-gray-700 hover:border-amber-500 hover:text-amber-400 hover:shadow-lg"
                   }`}
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    boxShadow: loading
+                      ? "none"
+                      : "0 4px 6px rgba(0, 0, 0, 0.2)",
+                  }}
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                      <div
+                        className="w-4 h-4 border-2 border-t-transparent rounded-full animate-spin"
+                        style={{
+                          borderColor: "#6b7280",
+                          borderTopColor: "transparent",
+                        }}
+                      ></div>
                       Loading More...
                     </span>
                   ) : (
