@@ -12,8 +12,12 @@
     "test:auth": "cross-env NODE_ENV=test mocha TESTS/registration.test.js TESTS/login.test.js TESTS/passwordReset.test.js --timeout 10000",
     "test:notifications": "cross-env NODE_ENV=test mocha TESTS/notification.routes.test.js --timeout 10000",
     "test:notifications-all": "cross-env NODE_ENV=test mocha TESTS/notification.routes.test.js TESTS/book.operations.test.js TESTS/review.operations.test.js --timeout 15000 --exit",
+    "test:existing-books-repo": "cross-env NODE_ENV=test mocha TESTS/existingBooksRepository.test.js --timeout 10000",
+    "test:interest-profile-builder": "cross-env NODE_ENV=test mocha TESTS/interestProfileBuilder.test.js --timeout 10000",
+    "test:recommendations": "cross-env NODE_ENV=test mocha TESTS/existingBooksRepository.test.js TESTS/interestProfileBuilder.test.js TESTS/recommendationService.test.js --timeout 10000",
     "report:auth": "cross-env NODE_ENV=test mocha TESTS/registration.test.js TESTS/login.test.js TESTS/passwordReset.test.js --reporter mochawesome --reporter-options reportDir=TESTS/nirajanbanjade-report,reportFilename=auth-report --timeout 10000",
-    "report:notifications": "cross-env NODE_ENV=test mocha TESTS/notification.routes.test.js TESTS/book.operations.test.js TESTS/review.operations.test.js --reporter mochawesome --reporter-options reportDir=TESTS/prajwalkunwar-report,reportFilename=notifications-report --timeout 15000 --exit"
+    "report:notifications": "cross-env NODE_ENV=test mocha TESTS/notification.routes.test.js TESTS/book.operations.test.js TESTS/review.operations.test.js --reporter mochawesome --reporter-options reportDir=TESTS/prajwalkunwar-report,reportFilename=notifications-report --timeout 15000 --exit",
+    "report:recommendations": "cross-env NODE_ENV=test mocha TESTS/existingBooksRepository.test.js TESTS/interestProfileBuilder.test.js TESTS/recommendationService.test.js --reporter mochawesome --reporter-options reportDir=TESTS/alangarcia-report,reportFilename=alan-report --timeout 15000 --exit"
   },
   "keywords": [],
   "author": "",
