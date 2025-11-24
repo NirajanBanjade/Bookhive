@@ -1,14 +1,32 @@
 import React, { useState } from 'react';
-import { Trash2, Link as LinkIcon, MessageCircle, Edit2, Check, X } from 'lucide-react';
+import { Trash2, Link as LinkIcon, MessageCircle, Edit2, Check, X, Heart } from 'lucide-react';
 import './PostCard.css';
 
-const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewReplies }) => {
+const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewReplies, onLike }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
   const [editLinkUrl, setEditLinkUrl] = useState(post.linkUrl || '');
+  const [isLiked, setIsLiked] = useState(post.isLikedByUser || false);
+  const [likesCount, setLikesCount] = useState(post.likesCount || 0);
 
   const isAuthor = post.userId?._id === currentUserId || post.userId === currentUserId;
   const authorName = post.userId?.name || post.userId?.username || 'Unknown User';
+
+  const handleLike = async () => {
+    const newLikedState = !isLiked;
+    const newCount = newLikedState ? likesCount + 1 : likesCount - 1;
+    
+    setIsLiked(newLikedState);
+    setLikesCount(newCount);
+    
+    try {
+      await onLike(post._id, newLikedState);
+    } catch (err) {
+      // Revert on error
+      setIsLiked(!newLikedState);
+      setLikesCount(likesCount);
+    }
+  };
 
   const handleSaveEdit = async () => {
     if (!editContent.trim()) {
@@ -116,19 +134,25 @@ const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewRep
       </div>
 
       <div className="post-footer">
-        <div className="post-stats">
-          <span className="stat-item">
-            {post.likesCount || 0} {post.likesCount === 1 ? 'like' : 'likes'}
-          </span>
+        <div className="post-interactions">
+          <button 
+            className={`like-button ${isLiked ? 'liked' : ''}`}
+            onClick={handleLike}
+            title={isLiked ? 'Unlike' : 'Like'}
+          >
+            <Heart className={`heart-icon ${isLiked ? 'filled' : ''}`} />
+            <span className="interaction-count">{likesCount}</span>
+          </button>
+          
+          <button 
+            className="reply-button"
+            onClick={onViewReplies}
+            title="View replies"
+          >
+            <MessageCircle className="reply-icon" />
+            <span className="interaction-count">{post.commentsCount || 0}</span>
+          </button>
         </div>
-        <button 
-          className="reply-button"
-          onClick={onViewReplies}
-          title="View replies"
-        >
-          <MessageCircle className="reply-icon" />
-          <span>{post.commentsCount || 0}</span>
-        </button>
       </div>
     </div>
   );
