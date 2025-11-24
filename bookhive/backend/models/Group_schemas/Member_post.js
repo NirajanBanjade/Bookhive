@@ -7,6 +7,7 @@ const PostSchema = new mongoose.Schema({
   mediaUrl:  { type: String },                                     // if image
   linkUrl:   { type: String },                                     // if link
   // lightweight counters (optional, but useful)
+  likedBy:   [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   commentsCount: { type: Number, default: 0, min: 0 },
   likesCount:    { type: Number, default: 0, min: 0 },
 }, { timestamps: true });
