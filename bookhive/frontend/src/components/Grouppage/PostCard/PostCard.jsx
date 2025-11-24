@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Trash2, Link as LinkIcon, MessageCircle, Edit2, Check, X, Heart } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Trash2, Link as LinkIcon, MessageCircle, Edit2, Check, X, Heart, MoreVertical } from 'lucide-react';
 import './PostCard.css';
 
 const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewReplies, onLike }) => {
@@ -8,9 +8,28 @@ const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewRep
   const [editLinkUrl, setEditLinkUrl] = useState(post.linkUrl || '');
   const [isLiked, setIsLiked] = useState(post.isLikedByUser || false);
   const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
 
   const isAuthor = post.userId?._id === currentUserId || post.userId === currentUserId;
   const authorName = post.userId?.name || post.userId?.username || 'Unknown User';
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
 
   const handleLike = async () => {
     const newLikedState = !isLiked;
@@ -43,6 +62,16 @@ const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewRep
     setIsEditing(false);
   };
 
+  const handleEdit = () => {
+    setIsEditing(true);
+    setShowMenu(false);
+  };
+
+  const handleDelete = () => {
+    setShowMenu(false);
+    onDelete();
+  };
+
   return (
     <div className="post-card">
       <div className="post-header">
@@ -56,23 +85,35 @@ const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewRep
           </div>
         </div>
         {isAuthor && (
-          <div className="post-actions">
+          <div className="post-actions" ref={menuRef}>
             {!isEditing ? (
               <>
                 <button 
-                  className="edit-post-button"
-                  onClick={() => setIsEditing(true)}
-                  title="Edit post"
+                  className="menu-button"
+                  onClick={() => setShowMenu(!showMenu)}
+                  title="More options"
                 >
-                  <Edit2 className="edit-icon" />
+                  <MoreVertical className="menu-icon" />
                 </button>
-                <button 
-                  className="delete-post-button"
-                  onClick={onDelete}
-                  title="Delete post"
-                >
-                  <Trash2 className="delete-icon" />
-                </button>
+                
+                {showMenu && (
+                  <div className="dropdown-menu">
+                    <button 
+                      className="menu-item"
+                      onClick={handleEdit}
+                    >
+                      <Edit2 className="menu-item-icon" />
+                      Edit post
+                    </button>
+                    <button 
+                      className="menu-item delete"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="menu-item-icon" />
+                      Delete post
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <>
