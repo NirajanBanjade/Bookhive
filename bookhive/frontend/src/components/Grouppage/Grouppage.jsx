@@ -11,8 +11,7 @@ import {
 import CreatePostModal from './CreatePostModal/CreatePostModal';
 import PostCard from './PostCard/PostCard';
 import ReplyModal from './Reply/ReplyModal';
-import { fetchGroupPosts, createGroupPost, deleteGroupPost } from '../../services/grouppostService';
-import { editGroupPost } from '../../services/grouppostService';
+import { fetchGroupPosts, createGroupPost, deleteGroupPost, editGroupPost, likeGroupPost } from '../../services/grouppostService';
 
 const GroupPage = () => {
   const { category } = useParams();
@@ -80,6 +79,7 @@ const GroupPage = () => {
       alert('Failed to delete post');
     }
   };
+
   const handleReplyCountChange = (postId, newCount) => {
     setPosts(prevPosts =>
       prevPosts.map(post =>
@@ -89,6 +89,7 @@ const GroupPage = () => {
       )
     );
   };
+
   const handleEditPost = async (postId, updatedData) => {
     try {
       const result = await editGroupPost(category, postId, updatedData);
@@ -98,6 +99,15 @@ const GroupPage = () => {
     } catch (err) {
       console.error('Error editing post:', err);
       alert('Failed to edit post');
+    }
+  };
+
+  const handleLikePost = async (postId, isLiked) => {
+    try {
+      await likeGroupPost(category, postId, isLiked);
+    } catch (err) {
+      console.error('Error liking post:', err);
+      throw err; // Re-throw to let PostCard handle the revert
     }
   };
 
@@ -190,13 +200,13 @@ const GroupPage = () => {
                     onDelete={() => handleDeletePost(post._id)}
                     onEdit={handleEditPost}
                     onViewReplies={() => setSelectedPost(post)}
+                    onLike={handleLikePost}
                     formatDate={formatDate}
                   />
                 </div>
               );
             })}
           </div>
-
         )}
       </div>
 
