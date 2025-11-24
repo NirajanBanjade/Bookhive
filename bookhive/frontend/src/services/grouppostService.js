@@ -75,3 +75,24 @@ const getAuthHeaders = () => ({
     if (!response.ok) throw await response.json();
     return response.json();
   };
+
+export const likeGroupPost = async (category, postId, isLiked) => {
+  const token = localStorage.getItem('token');
+  if (!token) throw new Error('Not authenticated');
+
+  const response = await fetch(`/api/groups/${encodeURIComponent(category)}/posts/${postId}/like`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ isLiked }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to like post');
+  }
+
+  return response.json();
+};

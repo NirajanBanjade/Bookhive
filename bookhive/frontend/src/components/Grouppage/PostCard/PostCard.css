@@ -149,7 +149,6 @@
     border-color: #3b82f6;
   }
 
- /* Add these new styles to your existing PostCard.css */
 
 .post-footer {
   margin-top: 16px;
@@ -217,7 +216,6 @@
   text-align: center;
 }
 
-/* Remove old post-stats styles if they exist */
 .post-stats {
   display: none;
 }
