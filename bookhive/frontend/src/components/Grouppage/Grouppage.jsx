@@ -6,16 +6,11 @@ import {
   MessageSquarePlus,
   Loader2,
   MessageSquare,
-} from "lucide-react";
-import CreatePostModal from "./CreatePostModal/CreatePostModal";
-import PostCard from "./PostCard/PostCard";
-import ReplyModal from "./Reply/ReplyModal";
-import {
-  fetchGroupPosts,
-  createGroupPost,
-  deleteGroupPost,
-  editGroupPost,
-} from "../../services/grouppostService";
+} from 'lucide-react';
+import CreatePostModal from './CreatePostModal/CreatePostModal';
+import PostCard from './PostCard/PostCard';
+import ReplyModal from './Reply/ReplyModal';
+import { fetchGroupPosts, createGroupPost, deleteGroupPost, editGroupPost, likeGroupPost } from '../../services/grouppostService';
 
 const GroupPage = () => {
   const { category } = useParams();
@@ -105,6 +100,15 @@ const GroupPage = () => {
     } catch (err) {
       console.error("Error editing post:", err);
       alert("Failed to edit post");
+    }
+  };
+
+  const handleLikePost = async (postId, isLiked) => {
+    try {
+      await likeGroupPost(category, postId, isLiked);
+    } catch (err) {
+      console.error('Error liking post:', err);
+      throw err; // Re-throw to let PostCard handle the revert
     }
   };
 
@@ -242,24 +246,30 @@ const GroupPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {posts.map((post) => {
-              const isMyPost =
-                post.userId?._id === currentUserId ||
-                post.userId === currentUserId;
+<div className="space-y-7 ">
+  {posts.map((post) => {
+    const isMyPost =
+      post.userId?._id === currentUserId ||
+      post.userId === currentUserId;
 
-              return (
-                <PostCard
-                  key={post._id}
-                  post={post}
-                  currentUserId={currentUserId}
-                  onDelete={() => handleDeletePost(post._id)}
-                  onEdit={handleEditPost}
-                  onViewReplies={() => setSelectedPost(post)}
-                  formatDate={formatDate}
-                  isMyPost={isMyPost}
-                />
-              );
-            })}
+    return (
+      <div 
+        key={post._id}
+        className={`post-wrapper ${isMyPost ? "my-post" : "other-post"}`}
+      >
+        <PostCard
+          post={post}
+          currentUserId={currentUserId}
+          onDelete={() => handleDeletePost(post._id)}
+          onEdit={handleEditPost}
+          onViewReplies={() => setSelectedPost(post)}
+          onLike={handleLikePost}
+          formatDate={formatDate}
+        />
+      </div>
+    );
+  })}
+</div>
           </div>
         )}
       </div>

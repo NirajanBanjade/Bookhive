@@ -199,7 +199,7 @@ const ReplyModal = ({
                     }`}
                   >
                     <div
-                      className="rounded-2xl p-4 max-w-[75%]"
+                      className="rounded-2xl p-4 min-w-[47%] max-w-[47%]"
                       style={{
                         background: isMyReply
                           ? "linear-gradient(135deg, #d4af37 0%, #b8941f 100%)"

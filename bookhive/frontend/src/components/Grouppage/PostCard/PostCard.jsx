@@ -1,30 +1,53 @@
-import React, { useState } from "react";
-import {
-  Trash2,
-  Link as LinkIcon,
-  MessageCircle,
-  Edit2,
-  Check,
-  X,
-} from "lucide-react";
+import React, { useState, useRef, useEffect } from 'react';
+import { Trash2, Link as LinkIcon, MessageCircle, Edit2, Check, X, Heart, MoreVertical } from 'lucide-react';
+import './PostCard.css';
 
-const PostCard = ({
-  post,
-  currentUserId,
-  onDelete,
-  onEdit,
-  formatDate,
-  onViewReplies,
-  isMyPost,
-}) => {
+const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewReplies, onLike }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
-  const [editLinkUrl, setEditLinkUrl] = useState(post.linkUrl || "");
+  const [editLinkUrl, setEditLinkUrl] = useState(post.linkUrl || '');
+  const [isLiked, setIsLiked] = useState(post.isLikedByUser || false);
+  const [likesCount, setLikesCount] = useState(post.likesCount || 0);
+  const [showMenu, setShowMenu] = useState(false);
+  const menuRef = useRef(null);
 
   const isAuthor =
     post.userId?._id === currentUserId || post.userId === currentUserId;
   const authorName =
     post.userId?.name || post.userId?.username || "Unknown User";
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  const handleLike = async () => {
+    const newLikedState = !isLiked;
+    const newCount = newLikedState ? likesCount + 1 : likesCount - 1;
+    
+    setIsLiked(newLikedState);
+    setLikesCount(newCount);
+    
+    try {
+      await onLike(post._id, newLikedState);
+    } catch (err) {
+      // Revert on error
+      setIsLiked(!newLikedState);
+      setLikesCount(likesCount);
+    }
+  };
 
   const handleSaveEdit = async () => {
     if (!editContent.trim()) {
@@ -39,6 +62,16 @@ const PostCard = ({
     setEditContent(post.content);
     setEditLinkUrl(post.linkUrl || "");
     setIsEditing(false);
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+    setShowMenu(false);
+  };
+
+  const handleDelete = () => {
+    setShowMenu(false);
+    onDelete();
   };
 
   return (
@@ -80,31 +113,30 @@ const PostCard = ({
         </div>
 
         {isAuthor && (
-          <div className="flex items-center gap-2">
+          <div className="post-actions" ref={menuRef}>
             {!isEditing ? (
               <>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="p-2 rounded-lg transition-all duration-300 transform hover:scale-110"
-                  style={{
-                    backgroundColor: "#dbeafe",
-                    color: "#3b82f6",
-                  }}
-                  title="Edit post"
+                <button 
+                  className="menu-button"
+                  onClick={() => setShowMenu(!showMenu)}
+                  title="More options"
                 >
-                  <Edit2 size={18} />
+                  <MoreVertical className="menu-icon" />
                 </button>
-                <button
-                  onClick={onDelete}
-                  className="p-2 rounded-lg transition-all duration-300 transform hover:scale-110"
-                  style={{
-                    backgroundColor: "#fee2e2",
-                    color: "#dc2626",
-                  }}
-                  title="Delete post"
-                >
-                  <Trash2 size={18} />
-                </button>
+                
+                {/* Dropdown Menu */}
+                {showMenu && (
+                  <div className="dropdown-menu">
+                    <button className="menu-item" onClick={handleEdit}>
+                      <Edit2 className="menu-item-icon" />
+                      Edit
+                    </button>
+                    <button className="menu-item delete" onClick={handleDelete}>
+                      <Trash2 className="menu-item-icon" />
+                      Delete
+                    </button>
+                  </div>
+                )}
               </>
             ) : (
               <>
@@ -181,8 +213,8 @@ const PostCard = ({
               {post.content}
             </p>
             {post.linkUrl && (
-              <a
-                href={post.linkUrl}
+              
+               <a href={post.linkUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-sm"
@@ -201,30 +233,26 @@ const PostCard = ({
         )}
       </div>
 
-      {/* Footer */}
-      <div
-        className="px-6 py-3 flex items-center justify-between border-t"
-        style={{
-          borderColor: isAuthor ? "#fbbf24" : "#d6d3d1",
-          backgroundColor: isAuthor ? "#fef3c7" : "#fafaf9",
-        }}
-      >
-        <span className="text-sm font-bold" style={{ color: "#57534e" }}>
-          {post.likesCount || 0} {post.likesCount === 1 ? "like" : "likes"}
-        </span>
-
-        <button
-          onClick={onViewReplies}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105"
-          style={{
-            background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
-            color: "#1a202c",
-          }}
-          title="View replies"
-        >
-          <MessageCircle size={18} />
-          <span>{post.commentsCount || 0}</span>
-        </button>
+      <div className="post-footer">
+        <div className="post-interactions">
+          <button 
+            className={`like-button ${isLiked ? 'liked' : ''}`}
+            onClick={handleLike}
+            title={isLiked ? 'Unlike' : 'Like'}
+          >
+            <Heart className={`heart-icon ${isLiked ? 'filled' : ''}`} />
+            <span className="interaction-count">{likesCount}</span>
+          </button>
+          
+          <button 
+            className="reply-button"
+            onClick={onViewReplies}
+            title="View replies"
+          >
+            <MessageCircle className="reply-icon" />
+            <span className="interaction-count">{post.commentsCount || 0}</span>
+          </button>
+        </div>
       </div>
     </div>
   );
