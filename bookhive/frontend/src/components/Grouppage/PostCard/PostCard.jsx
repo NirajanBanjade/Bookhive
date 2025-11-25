@@ -1,18 +1,34 @@
-import React, { useState } from 'react';
-import { Trash2, Link as LinkIcon, MessageCircle, Edit2, Check, X } from 'lucide-react';
-import './PostCard.css';
+import React, { useState } from "react";
+import {
+  Trash2,
+  Link as LinkIcon,
+  MessageCircle,
+  Edit2,
+  Check,
+  X,
+} from "lucide-react";
 
-const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewReplies }) => {
+const PostCard = ({
+  post,
+  currentUserId,
+  onDelete,
+  onEdit,
+  formatDate,
+  onViewReplies,
+  isMyPost,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(post.content);
-  const [editLinkUrl, setEditLinkUrl] = useState(post.linkUrl || '');
+  const [editLinkUrl, setEditLinkUrl] = useState(post.linkUrl || "");
 
-  const isAuthor = post.userId?._id === currentUserId || post.userId === currentUserId;
-  const authorName = post.userId?.name || post.userId?.username || 'Unknown User';
+  const isAuthor =
+    post.userId?._id === currentUserId || post.userId === currentUserId;
+  const authorName =
+    post.userId?.name || post.userId?.username || "Unknown User";
 
   const handleSaveEdit = async () => {
     if (!editContent.trim()) {
-      alert('Content cannot be empty');
+      alert("Content cannot be empty");
       return;
     }
     await onEdit(post._id, { content: editContent, linkUrl: editLinkUrl });
@@ -21,56 +37,98 @@ const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewRep
 
   const handleCancelEdit = () => {
     setEditContent(post.content);
-    setEditLinkUrl(post.linkUrl || '');
+    setEditLinkUrl(post.linkUrl || "");
     setIsEditing(false);
   };
 
   return (
-    <div className="post-card">
-      <div className="post-header">
-        <div className="post-author-info">
-          <div className="author-avatar">
+    <div
+      className="rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+      style={{
+        background: isAuthor
+          ? "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)"
+          : "linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%)",
+        border: isAuthor ? "2px solid #fbbf24" : "2px solid #d6d3d1",
+      }}
+    >
+      {/* Header */}
+      <div className="px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-md"
+            style={{
+              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+              color: "#ffffff",
+            }}
+          >
             {authorName.charAt(0).toUpperCase()}
           </div>
           <div>
-            <p className="author-name">{authorName}</p>
-            <p className="post-time">{formatDate(post.createdAt)}</p>
+            <p
+              className="font-bold"
+              style={{
+                fontFamily: "'Poppins', sans-serif",
+                color: "#1a202c",
+              }}
+            >
+              {authorName}
+            </p>
+            <p className="text-sm" style={{ color: "#78716c" }}>
+              {formatDate(post.createdAt)}
+            </p>
           </div>
         </div>
+
         {isAuthor && (
-          <div className="post-actions">
+          <div className="flex items-center gap-2">
             {!isEditing ? (
               <>
-                <button 
-                  className="edit-post-button"
+                <button
                   onClick={() => setIsEditing(true)}
+                  className="p-2 rounded-lg transition-all duration-300 transform hover:scale-110"
+                  style={{
+                    backgroundColor: "#dbeafe",
+                    color: "#3b82f6",
+                  }}
                   title="Edit post"
                 >
-                  <Edit2 className="edit-icon" />
+                  <Edit2 size={18} />
                 </button>
-                <button 
-                  className="delete-post-button"
+                <button
                   onClick={onDelete}
+                  className="p-2 rounded-lg transition-all duration-300 transform hover:scale-110"
+                  style={{
+                    backgroundColor: "#fee2e2",
+                    color: "#dc2626",
+                  }}
                   title="Delete post"
                 >
-                  <Trash2 className="delete-icon" />
+                  <Trash2 size={18} />
                 </button>
               </>
             ) : (
               <>
-                <button 
-                  className="save-edit-button"
+                <button
                   onClick={handleSaveEdit}
+                  className="p-2 rounded-lg transition-all duration-300 transform hover:scale-110"
+                  style={{
+                    backgroundColor: "#dcfce7",
+                    color: "#16a34a",
+                  }}
                   title="Save changes"
                 >
-                  <Check className="check-icon" />
+                  <Check size={18} />
                 </button>
-                <button 
-                  className="cancel-edit-button"
+                <button
                   onClick={handleCancelEdit}
+                  className="p-2 rounded-lg transition-all duration-300 transform hover:scale-110"
+                  style={{
+                    backgroundColor: "#f3f4f6",
+                    color: "#4b5563",
+                  }}
                   title="Cancel"
                 >
-                  <X className="x-icon" />
+                  <X size={18} />
                 </button>
               </>
             )}
@@ -78,11 +136,18 @@ const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewRep
         )}
       </div>
 
-      <div className="post-content">
+      {/* Content */}
+      <div className="px-6 pb-4">
         {isEditing ? (
-          <>
+          <div className="space-y-3">
             <textarea
-              className="edit-textarea"
+              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 resize-none transition-all shadow-sm"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "2px solid #d6d3d1",
+                fontFamily: "'Inter', sans-serif",
+                color: "#1a202c",
+              }}
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
               maxLength={3000}
@@ -91,42 +156,73 @@ const PostCard = ({ post, currentUserId, onDelete, onEdit, formatDate, onViewRep
             />
             <input
               type="url"
-              className="edit-link-input"
+              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all shadow-sm"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "2px solid #d6d3d1",
+                fontFamily: "'Inter', sans-serif",
+                color: "#1a202c",
+              }}
               placeholder="Link URL (optional)"
               value={editLinkUrl}
               onChange={(e) => setEditLinkUrl(e.target.value)}
             />
-          </>
+          </div>
         ) : (
           <>
-            <p className="post-text">{post.content}</p>
+            <p
+              className="leading-relaxed mb-3"
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "15px",
+                color: "#1a202c",
+              }}
+            >
+              {post.content}
+            </p>
             {post.linkUrl && (
-              <a 
-                href={post.linkUrl} 
-                target="_blank" 
+              <a
+                href={post.linkUrl}
+                target="_blank"
                 rel="noopener noreferrer"
-                className="post-link"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-sm"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)",
+                  color: "#1e40af",
+                  border: "1px solid #93c5fd",
+                }}
               >
-                <LinkIcon className="link-icon" />
-                {post.linkUrl}
+                <LinkIcon size={16} />
+                <span className="truncate max-w-md">{post.linkUrl}</span>
               </a>
             )}
           </>
         )}
       </div>
 
-      <div className="post-footer">
-        <div className="post-stats">
-          <span className="stat-item">
-            {post.likesCount || 0} {post.likesCount === 1 ? 'like' : 'likes'}
-          </span>
-        </div>
-        <button 
-          className="reply-button"
+      {/* Footer */}
+      <div
+        className="px-6 py-3 flex items-center justify-between border-t"
+        style={{
+          borderColor: isAuthor ? "#fbbf24" : "#d6d3d1",
+          backgroundColor: isAuthor ? "#fef3c7" : "#fafaf9",
+        }}
+      >
+        <span className="text-sm font-bold" style={{ color: "#57534e" }}>
+          {post.likesCount || 0} {post.likesCount === 1 ? "like" : "likes"}
+        </span>
+
+        <button
           onClick={onViewReplies}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 transform hover:scale-105"
+          style={{
+            background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+            color: "#1a202c",
+          }}
           title="View replies"
         >
-          <MessageCircle className="reply-icon" />
+          <MessageCircle size={18} />
           <span>{post.commentsCount || 0}</span>
         </button>
       </div>

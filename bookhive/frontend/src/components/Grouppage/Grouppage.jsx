@@ -129,14 +129,21 @@ const GroupPage = () => {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#fef3c7" }}>
+    <div className="min-h-screen" style={{ backgroundColor: "#1a1a1a" }}>
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
+      <div
+        className="border-b shadow-sm"
+        style={{
+          background: "linear-gradient(135deg, #2d3748 0%, #1a202c 100%)",
+          borderColor: "#4a5568",
+        }}
+      >
         <div className="max-w-5xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate("/my-groups")}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors font-medium px-4 py-2 hover:bg-gray-50 rounded-lg"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors font-medium px-4 py-2 rounded-lg"
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               <ArrowLeft size={20} />
               <span>Back</span>
@@ -144,7 +151,11 @@ const GroupPage = () => {
 
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-semibold"
+              className="flex items-center gap-2 px-6 py-3 text-gray-900 font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
+              style={{
+                background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+                fontFamily: "'Poppins', sans-serif",
+              }}
             >
               <MessageSquarePlus size={20} />
               New Post
@@ -152,17 +163,25 @@ const GroupPage = () => {
           </div>
 
           <div className="flex items-center gap-4 mt-6">
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100">
-              <Users size={40} color="#6366f1" strokeWidth={1.5} />
+            <div
+              className="p-4 rounded-2xl"
+              style={{
+                background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+              }}
+            >
+              <Users size={40} color="#1a202c" strokeWidth={2} />
             </div>
             <div>
               <h1
-                className="text-3xl font-bold text-gray-900 mb-1"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
+                className="text-4xl font-bold mb-1"
+                style={{
+                  color: "#fbbf24",
+                  fontFamily: "'Poppins', sans-serif",
+                }}
               >
                 {decodeCategory(category)}
               </h1>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-400 text-sm">
                 {posts.length} {posts.length === 1 ? "post" : "posts"}
               </p>
             </div>
@@ -174,31 +193,55 @@ const GroupPage = () => {
       <div className="max-w-3xl mx-auto px-6 py-8">
         {loading ? (
           <div className="text-center py-20">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-indigo-200 border-t-indigo-600 mb-4"></div>
-            <p className="text-gray-700 text-lg font-medium">
+            <div
+              className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-700 mb-4"
+              style={{ borderTopColor: "#fbbf24" }}
+            ></div>
+            <p className="text-gray-400 text-lg font-medium">
               Loading posts...
             </p>
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl shadow-md p-12">
-            <div className="inline-block p-8 rounded-2xl mb-6 bg-gradient-to-br from-indigo-50 to-purple-50">
-              <MessageSquare size={64} color="#6366f1" strokeWidth={1.5} />
+          <div
+            className="text-center py-20 rounded-2xl shadow-xl p-12"
+            style={{
+              backgroundColor: "#2d2d2d",
+              border: "1px solid #404040",
+            }}
+          >
+            <div
+              className="inline-block p-8 rounded-2xl mb-6 shadow-lg"
+              style={{
+                background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+              }}
+            >
+              <MessageSquare size={64} color="#1a202c" strokeWidth={1.5} />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            <h2
+              className="text-3xl font-bold mb-3"
+              style={{
+                color: "#e5e5e5",
+                fontFamily: "'Poppins', sans-serif",
+              }}
+            >
               No posts yet
             </h2>
-            <p className="text-gray-600 text-lg mb-8">
+            <p className="text-gray-400 text-lg mb-8">
               Be the first to start a conversation in this group!
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-8 py-4 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-semibold text-lg"
+              className="px-8 py-4 text-gray-900 font-bold rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 text-lg"
+              style={{
+                background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+                fontFamily: "'Poppins', sans-serif",
+              }}
             >
               Create First Post
             </button>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-4">
             {posts.map((post) => {
               const isMyPost =
                 post.userId?._id === currentUserId ||

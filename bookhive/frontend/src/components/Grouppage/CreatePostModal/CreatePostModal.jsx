@@ -48,23 +48,35 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 flex items-center justify-center z-50 p-4"
+      style={{ backgroundColor: "rgba(0, 0, 0, 0.6)" }}
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        className="rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        style={{
+          background: "linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%)",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="sticky top-0 bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-5 flex items-center justify-between rounded-t-2xl">
+        <div
+          className="sticky top-0 px-6 py-5 flex items-center justify-between rounded-t-2xl"
+          style={{
+            background: "linear-gradient(135deg, #2d3748 0%, #1a202c 100%)",
+          }}
+        >
           <h2
-            className="text-2xl font-bold text-white"
-            style={{ fontFamily: "'Poppins', sans-serif" }}
+            className="text-2xl font-bold"
+            style={{
+              color: "#fbbf24",
+              fontFamily: "'Poppins', sans-serif",
+            }}
           >
             Create Post
           </h2>
           <button
             onClick={onClose}
-            className="text-white hover:bg-white hover:bg-opacity-20 transition-colors p-2 rounded-lg"
+            className="text-gray-300 hover:text-white transition-colors p-2 rounded-lg"
           >
             <X size={24} />
           </button>
@@ -72,7 +84,13 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label
+              className="block text-sm font-bold mb-2"
+              style={{
+                color: "#1a202c",
+                fontFamily: "'Poppins', sans-serif",
+              }}
+            >
               What's on your mind?
             </label>
             <textarea
@@ -82,16 +100,30 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
               rows={6}
               maxLength={3000}
               required
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none transition-all"
-              style={{ fontFamily: "'Inter', sans-serif" }}
+              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 resize-none transition-all shadow-sm"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "2px solid #d6d3d1",
+                fontFamily: "'Inter', sans-serif",
+                color: "#1a202c",
+              }}
             />
-            <div className="text-right text-sm text-gray-500 mt-2">
+            <div
+              className="text-right text-sm mt-2"
+              style={{ color: "#78716c" }}
+            >
               {content.length} / 3000
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
+            <label
+              className="block text-sm font-bold mb-2"
+              style={{
+                color: "#1a202c",
+                fontFamily: "'Poppins', sans-serif",
+              }}
+            >
               Link (optional)
             </label>
             <input
@@ -99,8 +131,13 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
               placeholder="https://example.com"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              style={{ fontFamily: "'Inter', sans-serif" }}
+              className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 transition-all shadow-sm"
+              style={{
+                backgroundColor: "#ffffff",
+                border: "2px solid #d6d3d1",
+                fontFamily: "'Inter', sans-serif",
+                color: "#1a202c",
+              }}
             />
           </div>
 
@@ -109,14 +146,24 @@ const CreatePostModal = ({ category, onClose, onPostCreated }) => {
               type="button"
               onClick={onClose}
               disabled={submitting}
-              className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-semibold disabled:opacity-50"
+              className="flex-1 px-6 py-3 rounded-xl transition-all font-bold disabled:opacity-50 shadow-md"
+              style={{
+                backgroundColor: "#d6d3d1",
+                color: "#1a202c",
+                fontFamily: "'Poppins', sans-serif",
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting || !content.trim()}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-xl hover:shadow-lg transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 rounded-xl transition-all duration-300 font-bold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg transform hover:scale-105"
+              style={{
+                background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
+                color: "#1a202c",
+                fontFamily: "'Poppins', sans-serif",
+              }}
             >
               {submitting ? (
                 <>
