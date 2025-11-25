@@ -55,7 +55,12 @@ const notificationSchema = new Schema({
     'STATUS_CHANGED',        
     'COLLECTION_REMOVED',    
     'TO_READ_REMOVED',       
-    'BOOK_MOVED'             
+    'BOOK_MOVED' ,
+    'PROFILE_UPDATED',       
+    'PROFILE_PICTURE_UPDATED', 
+    'USERNAME_UPDATED',      
+    'BIO_UPDATED',          
+    'LOCATION_UPDATED'            
   ],
 },
 

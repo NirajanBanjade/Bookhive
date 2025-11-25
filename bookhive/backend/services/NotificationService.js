@@ -92,7 +92,6 @@ class NotificationService {
   }
 
   /**
-   * Shortcut for KAN-69: create "To-Read added" notification.
    * Uses existing normalization/validation from createNotification.
    * @param {Object} p
    * @param {string|ObjectId} p.recipientId
@@ -192,6 +191,62 @@ async createReviewNotification(userId, bookTitle, rating) {
       eventType: 'BOOK_MOVED',
       entityType: 'BOOK',
       metadata: { bookTitle, statusLabel },
+    });
+  }
+
+  async createProfileUpdatedNotification(userId, updatedFields) {
+    const fieldsList = updatedFields.join(', ');
+    return this.createNotification({
+      toUserId: userId,
+      message: `Your profile has been updated (${fieldsList}).`,
+      type: 'success',
+      eventType: 'PROFILE_UPDATED',
+      entityType: 'USER',
+      metadata: { updatedFields },
+    });
+  }
+
+  async createProfilePictureUpdatedNotification(userId) {
+    return this.createNotification({
+      toUserId: userId,
+      message: 'Your profile picture has been updated.',
+      type: 'success',
+      eventType: 'PROFILE_PICTURE_UPDATED',
+      entityType: 'USER',
+      metadata: {},
+    });
+  }
+
+  async createUsernameUpdatedNotification(userId, oldUsername, newUsername) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `Your username has been changed from "${oldUsername}" to "${newUsername}".`,
+      type: 'success',
+      eventType: 'USERNAME_UPDATED',
+      entityType: 'USER',
+      metadata: { oldUsername, newUsername },
+    });
+  }
+
+  async createBioUpdatedNotification(userId) {
+    return this.createNotification({
+      toUserId: userId,
+      message: 'Your bio has been updated.',
+      type: 'success',
+      eventType: 'BIO_UPDATED',
+      entityType: 'USER',
+      metadata: {},
+    });
+  }
+
+  async createLocationUpdatedNotification(userId, newLocation) {
+    return this.createNotification({
+      toUserId: userId,
+      message: `Your location has been updated to "${newLocation}".`,
+      type: 'success',
+      eventType: 'LOCATION_UPDATED',
+      entityType: 'USER',
+      metadata: { location: newLocation },
     });
   }
 }
