@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const NotificationService = require("../services/NotificationService"); // KAN-92: Import notification service
 
 /**
  * GET /api/profile/:userId
@@ -55,13 +56,36 @@ const updateProfile = async (req, res) => {
     // Extract allowed fields from request body
     const { username, name, bio, location, profileImageUrl } = req.body;
 
+    // KAN-92: Get current user data to track changes
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
     // Build update object with only allowed fields
     const updateData = {};
-    if (username !== undefined) updateData.username = username;
-    if (name !== undefined) updateData.name = name;
-    if (bio !== undefined) updateData.bio = bio;
-    if (location !== undefined) updateData.location = location;
-    if (profileImageUrl !== undefined) updateData.profileImageUrl = profileImageUrl;
+    const updatedFields = []; // KAN-92: Track which fields were updated
+
+    if (username !== undefined && username !== currentUser.username) {
+      updateData.username = username;
+      updatedFields.push('username');
+    }
+    if (name !== undefined && name !== currentUser.name) {
+      updateData.name = name;
+      updatedFields.push('name');
+    }
+    if (bio !== undefined && bio !== currentUser.bio) {
+      updateData.bio = bio;
+      updatedFields.push('bio');
+    }
+    if (location !== undefined && location !== currentUser.location) {
+      updateData.location = location;
+      updatedFields.push('location');
+    }
+    if (profileImageUrl !== undefined && profileImageUrl !== currentUser.profileImageUrl) {
+      updateData.profileImageUrl = profileImageUrl;
+      updatedFields.push('profile picture');
+    }
 
     // Update user profile fields in MongoDB
     // new: true returns updated document
@@ -73,6 +97,37 @@ const updateProfile = async (req, res) => {
 
     if (!updatedUser) {
       return res.status(404).json({ error: "User not found" });
+    }
+
+    // KAN-92: Create specific notifications for profile updates
+    try {
+      if (updatedFields.length > 0) {
+        // Create specific notifications for certain field updates
+        if (updatedFields.includes('username')) {
+          await NotificationService.createUsernameUpdatedNotification(
+            userId,
+            currentUser.username,
+            updatedUser.username
+          );
+        }
+        if (updatedFields.includes('bio')) {
+          await NotificationService.createBioUpdatedNotification(userId);
+        }
+        if (updatedFields.includes('location')) {
+          await NotificationService.createLocationUpdatedNotification(
+            userId,
+            updatedUser.location
+          );
+        }
+        
+        // If multiple fields or other fields updated, create general notification
+        if (updatedFields.length > 1 || 
+            updatedFields.some(field => !['username', 'bio', 'location'].includes(field))) {
+          await NotificationService.createProfileUpdatedNotification(userId, updatedFields);
+        }
+      }
+    } catch (notifErr) {
+      console.error('Error creating profile update notification:', notifErr);
     }
 
     // Return success message and updated user data
@@ -127,6 +182,13 @@ const uploadAvatar = async (req, res) => {
 
     if (!updatedUser) {
       return res.status(404).json({ error: 'User not found' });
+    }
+
+    // KAN-92: Create notification for profile picture update
+    try {
+      await NotificationService.createProfilePictureUpdatedNotification(userId);
+    } catch (notifErr) {
+      console.error('Error creating profile picture notification:', notifErr);
     }
 
     res.json({
