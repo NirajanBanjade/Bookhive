@@ -1,0 +1,292 @@
+{
+  "stats": {
+    "suites": 3,
+    "tests": 3,
+    "passes": 3,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-11-25T17:56:25.734Z",
+    "end": "2025-11-25T17:56:31.390Z",
+    "duration": 5656,
+    "testsRegistered": 3,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "8bf1f9c3-07ab-469b-83a3-dceaa5e7b62f",
+      "title": "",
+      "fullFile": "",
+      "file": "",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "6cf039e5-cb82-411e-aa67-c848f4235773",
+          "title": "Review Controller - Create Review",
+          "fullFile": "C:\\Users\\aevin\\cs3398\\swe_project\\bookhive\\backend\\TESTS\\reviewController.test.js",
+          "file": "\\TESTS\\reviewController.test.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"Review Controller - Create Review\"",
+              "fullTitle": "Review Controller - Create Review \"before all\" hook in \"Review Controller - Create Review\"",
+              "timedOut": false,
+              "duration": 1623,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Ensure DB connection\nif (mongoose.connection.readyState === 0) {\n  await mongoose.connect(process.env.MONGO_URI, {\n    dbName: process.env.MONGO_DB_NAME || \"Bookhive\",\n  });\n}\n// Clean possible leftovers\nawait User.deleteMany({ email: \"reviewtest@example.com\" });\nawait Review.deleteMany({});\nawait Collection.deleteMany({});\nawait Notification.deleteMany({});\n// Create test user\nconst passwordHash = await bcrypt.hash(\"Test@12345\", 10);\nconst user = await User.create({\n  username: \"ReviewTestUser\",\n  email: \"reviewtest@example.com\",\n  passwordHash,\n});\nuserId = user._id.toString();\n// Create JWT token\ntoken = \"Bearer \" + jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: \"1h\" });\n// IMPORTANT: Create collection with a book so review can be created\n// (Business rule: Book must be in collection to review)\nawait Collection.create({\n  userId: user._id,\n  books: [\n    {\n      googleBookId: testGoogleBookId,\n      status: \"completed\",\n      title: \"Test Book for Review\",\n      addedAt: new Date(),\n    },\n  ],\n});",
+              "err": {},
+              "uuid": "55412cbb-5214-4a08-a1d3-7295fbe81cbf",
+              "parentUUID": "6cf039e5-cb82-411e-aa67-c848f4235773",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"Review Controller - Create Review\"",
+              "fullTitle": "Review Controller - Create Review \"after all\" hook in \"Review Controller - Create Review\"",
+              "timedOut": false,
+              "duration": 198,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Cleanup test data\nawait Review.deleteMany({ userId });\nawait Collection.deleteMany({ userId });\nawait Notification.deleteMany({ userId });\nawait User.deleteOne({ _id: userId });\nif (mongoose.connection.readyState !== 0) {\n  await mongoose.connection.close();\n}",
+              "err": {},
+              "uuid": "4ff9a7db-212a-43ae-b23b-8e6825a145f6",
+              "parentUUID": "6cf039e5-cb82-411e-aa67-c848f4235773",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "creates a review for a book in user's collection",
+              "fullTitle": "Review Controller - Create Review creates a review for a book in user's collection",
+              "timedOut": false,
+              "duration": 345,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const reviewData = {\n  userId: userId,\n  googleBookId: testGoogleBookId,\n  rating: 5,\n  comment: \"This is an excellent test book!\",\n  authorName: \"Test Author\",\n};\nconst res = await request(app)\n  .post(baseUrl)\n  .set(\"Authorization\", token)\n  .send(reviewData);\n// Validate response status\nif (res.status !== 201) {\n  throw new Error(`Expected 201, got ${res.status}. Error: ${JSON.stringify(res.body)}`);\n}\n// Validate response body has all required fields\nif (!res.body._id) throw new Error(\"Response missing _id field\");\nif (res.body.userId !== userId) throw new Error(\"Response userId mismatch\");\nif (res.body.googleBookId !== testGoogleBookId) throw new Error(\"Response googleBookId mismatch\");\nif (res.body.rating !== 5) throw new Error(\"Response rating mismatch\");\nif (res.body.comment !== \"This is an excellent test book!\") throw new Error(\"Response comment mismatch\");\nif (res.body.authorName !== \"Test Author\") throw new Error(\"Response authorName mismatch\");\nif (!res.body.reviewedAt) throw new Error(\"Response missing reviewedAt timestamp\");\n// Verify review was actually saved to database\nconst savedReview = await Review.findOne({ \n  userId, \n  googleBookId: testGoogleBookId \n});\n\nif (!savedReview) throw new Error(\"Review not found in database\");\nif (savedReview.rating !== 5) throw new Error(\"Database rating mismatch\");\nif (savedReview.authorName !== \"Test Author\") throw new Error(\"Database authorName mismatch\");\n// Verify notification was created (business rule)\nconst notification = await Notification.findOne({ \n  userId,\n  message: { $regex: /review/i }\n});\n\nif (!notification) throw new Error(\"Review notification was not created\");",
+              "err": {},
+              "uuid": "7319bd34-4b36-4bbc-a45d-5ba909aaa558",
+              "parentUUID": "6cf039e5-cb82-411e-aa67-c848f4235773",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "7319bd34-4b36-4bbc-a45d-5ba909aaa558"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 345,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 15000
+        },
+        {
+          "uuid": "abf9b337-3073-4224-b89b-c5fcd3edfdd7",
+          "title": "Collections Controller - Add Book to Collection",
+          "fullFile": "C:\\Users\\aevin\\cs3398\\swe_project\\bookhive\\backend\\TESTS\\collectionsController.test.js",
+          "file": "\\TESTS\\collectionsController.test.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"Collections Controller - Add Book to Collection\"",
+              "fullTitle": "Collections Controller - Add Book to Collection \"before all\" hook in \"Collections Controller - Add Book to Collection\"",
+              "timedOut": false,
+              "duration": 1342,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Ensure DB connection\nif (mongoose.connection.readyState === 0) {\n  await mongoose.connect(process.env.MONGO_URI, {\n    dbName: process.env.MONGO_DB_NAME || \"Bookhive\",\n  });\n}\n// Clean possible leftovers\nawait User.deleteMany({ email: \"collectiontest@example.com\" });\nawait Collection.deleteMany({});\n// Create test user\nconst passwordHash = await bcrypt.hash(\"Test@12345\", 10);\nconst user = await User.create({\n  username: \"CollectionTestUser\",\n  email: \"collectiontest@example.com\",\n  passwordHash,\n});\nuserId = user._id.toString();\n// Create JWT token\ntoken = \"Bearer \" + jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: \"1h\" });",
+              "err": {},
+              "uuid": "f9093eea-43c3-4b46-8577-18c7b7342b8d",
+              "parentUUID": "abf9b337-3073-4224-b89b-c5fcd3edfdd7",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"Collections Controller - Add Book to Collection\"",
+              "fullTitle": "Collections Controller - Add Book to Collection \"after all\" hook in \"Collections Controller - Add Book to Collection\"",
+              "timedOut": false,
+              "duration": 93,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Cleanup test data\nawait Collection.deleteMany({ userId });\nawait User.deleteOne({ _id: userId });\nif (mongoose.connection.readyState !== 0) {\n  await mongoose.connection.close();\n}",
+              "err": {},
+              "uuid": "176ea527-8e60-46f6-a2e0-94ffa36ec102",
+              "parentUUID": "abf9b337-3073-4224-b89b-c5fcd3edfdd7",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "adds a book to user's collection with status",
+              "fullTitle": "Collections Controller - Add Book to Collection adds a book to user's collection with status",
+              "timedOut": false,
+              "duration": 211,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const bookData = {\n  googleBookId: \"test-collection-book-456\",\n  title: \"Test Collection Book\",\n  authors: [\"Test Author\"],\n  thumbnail: \"http://example.com/thumbnail.jpg\",\n  categories: [\"Fiction\", \"Test\"],\n  status: \"currently-reading\",\n};\nconst baseUrl = `/api/collections/${userId}`;\n\nconst res = await request(app)\n  .post(baseUrl)\n  .set(\"Authorization\", token)\n  .send(bookData);\n// Validate response status\nif (res.status !== 201) {\n  throw new Error(`Expected 201, got ${res.status}. Error: ${JSON.stringify(res.body)}`);\n}\n// Validate response has userId and books array\nif (!res.body.userId) throw new Error(\"Response missing userId field\");\nif (!Array.isArray(res.body.books)) throw new Error(\"Response missing books array\");\nif (res.body.books.length === 0) throw new Error(\"Books array is empty\");\n// Find the added book in the response\nconst addedBook = res.body.books.find(b => b.googleBookId === \"test-collection-book-456\");\nif (!addedBook) throw new Error(\"Book not found in response books array\");\n\n// Validate book fields\nif (addedBook.title !== \"Test Collection Book\") throw new Error(\"Book title mismatch\");\nif (addedBook.status !== \"currently-reading\") throw new Error(\"Book status mismatch\");\nif (!Array.isArray(addedBook.authors)) throw new Error(\"Authors should be an array\");\nif (addedBook.authors[0] !== \"Test Author\") throw new Error(\"Author name mismatch\");\n// Verify book was actually saved to database\nconst savedCollection = await Collection.findOne({ userId });\n\nif (!savedCollection) throw new Error(\"Collection not found in database\");\n\nconst savedBook = savedCollection.books.find(b => b.googleBookId === \"test-collection-book-456\");\nif (!savedBook) throw new Error(\"Book not found in database collection\");\nif (savedBook.status !== \"currently-reading\") throw new Error(\"Database status mismatch\");\nif (savedBook.title !== \"Test Collection Book\") throw new Error(\"Database title mismatch\");",
+              "err": {},
+              "uuid": "adb603ca-4cd6-4054-bfdd-12d392673f68",
+              "parentUUID": "abf9b337-3073-4224-b89b-c5fcd3edfdd7",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "adb603ca-4cd6-4054-bfdd-12d392673f68"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 211,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 15000
+        },
+        {
+          "uuid": "fdac1974-f57a-4b59-b4ff-666f21edab3f",
+          "title": "To-Read Controller - Add Book to To-Read List",
+          "fullFile": "C:\\Users\\aevin\\cs3398\\swe_project\\bookhive\\backend\\TESTS\\toReadController.test.js",
+          "file": "\\TESTS\\toReadController.test.js",
+          "beforeHooks": [
+            {
+              "title": "\"before all\" hook in \"To-Read Controller - Add Book to To-Read List\"",
+              "fullTitle": "To-Read Controller - Add Book to To-Read List \"before all\" hook in \"To-Read Controller - Add Book to To-Read List\"",
+              "timedOut": false,
+              "duration": 1384,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Ensure DB connection\nif (mongoose.connection.readyState === 0) {\n  await mongoose.connect(process.env.MONGO_URI, {\n    dbName: process.env.MONGO_DB_NAME || \"Bookhive\",\n  });\n}\n// Clean possible leftovers\nawait User.deleteMany({ email: \"toreadtest@example.com\" });\nawait ToRead.deleteMany({});\nawait Notification.deleteMany({});\n// Create test user\nconst passwordHash = await bcrypt.hash(\"Test@12345\", 10);\nconst user = await User.create({\n  username: \"ToReadTestUser\",\n  email: \"toreadtest@example.com\",\n  passwordHash,\n});\nuserId = user._id.toString();\n// Create JWT token\ntoken = \"Bearer \" + jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: \"1h\" });",
+              "err": {},
+              "uuid": "3f4ae62a-5c80-4eed-b303-67dfeb8928e2",
+              "parentUUID": "fdac1974-f57a-4b59-b4ff-666f21edab3f",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "afterHooks": [
+            {
+              "title": "\"after all\" hook in \"To-Read Controller - Add Book to To-Read List\"",
+              "fullTitle": "To-Read Controller - Add Book to To-Read List \"after all\" hook in \"To-Read Controller - Add Book to To-Read List\"",
+              "timedOut": false,
+              "duration": 144,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Cleanup test data\nawait ToRead.deleteMany({ userId });\nawait Notification.deleteMany({ userId });\nawait User.deleteOne({ _id: userId });\nif (mongoose.connection.readyState !== 0) {\n  await mongoose.connection.close();\n}",
+              "err": {},
+              "uuid": "563a245d-4886-4659-b05e-15b808a0e3eb",
+              "parentUUID": "fdac1974-f57a-4b59-b4ff-666f21edab3f",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "adds a book to user's to-read list and creates notification",
+              "fullTitle": "To-Read Controller - Add Book to To-Read List adds a book to user's to-read list and creates notification",
+              "timedOut": false,
+              "duration": 298,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "const bookData = {\n  googleBookId: \"test-toread-book-789\",\n  title: \"Test To-Read Book\",\n  authors: [\"Test Author\"],\n  thumbnail: \"http://example.com/toread-thumbnail.jpg\",\n  categories: [\"Fiction\", \"Adventure\"],\n};\nconst baseUrl = `/api/to-read/${userId}`;\n\nconst res = await request(app)\n  .post(baseUrl)\n  .set(\"Authorization\", token)\n  .send(bookData);\n// Validate response status (201 for new addition)\nif (res.status !== 201 && res.status !== 200) {\n  throw new Error(`Expected 201 or 200, got ${res.status}. Error: ${JSON.stringify(res.body)}`);\n}\n// Validate response has userId and books array\nif (!res.body.userId) throw new Error(\"Response missing userId field\");\nif (!Array.isArray(res.body.books)) throw new Error(\"Response missing books array\");\nif (res.body.books.length === 0) throw new Error(\"Books array is empty\");\n// Find the added book in the response\nconst addedBook = res.body.books.find(b => b.googleBookId === \"test-toread-book-789\");\nif (!addedBook) throw new Error(\"Book not found in response books array\");\n\n// Validate book fields\nif (addedBook.title !== \"Test To-Read Book\") throw new Error(\"Book title mismatch\");\nif (!Array.isArray(addedBook.authors)) throw new Error(\"Authors should be an array\");\nif (addedBook.authors[0] !== \"Test Author\") throw new Error(\"Author name mismatch\");\n// Note: addedAt may not be in response, but should be in database\n// Verify book was actually saved to database\nconst savedToRead = await ToRead.findOne({ userId });\n\nif (!savedToRead) throw new Error(\"To-Read list not found in database\");\n\nconst savedBook = savedToRead.books.find(b => b.googleBookId === \"test-toread-book-789\");\nif (!savedBook) throw new Error(\"Book not found in database to-read list\");\nif (savedBook.title !== \"Test To-Read Book\") throw new Error(\"Database title mismatch\");\n// Verify notification was created (business rule: domain event triggers notification)\nconst notification = await Notification.findOne({ \n  userId,\n  message: { $regex: /to-read|added/i }\n});\n\nif (!notification) throw new Error(\"To-Read notification was not created\");",
+              "err": {},
+              "uuid": "28d924c5-0881-429a-bb37-00b5b894ffeb",
+              "parentUUID": "fdac1974-f57a-4b59-b4ff-666f21edab3f",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "28d924c5-0881-429a-bb37-00b5b894ffeb"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 298,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 15000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 10000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "11.7.4"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.4"
+    },
+    "marge": {
+      "options": null,
+      "version": "6.3.2"
+    }
+  }
+}
