@@ -1,5 +1,5 @@
 const User = require("../models/User");
-const NotificationService = require("../services/NotificationService"); // KAN-92: Import notification service
+const NotificationService = require("../services/NotificationService"); 
 
 /**
  * GET /api/profile/:userId

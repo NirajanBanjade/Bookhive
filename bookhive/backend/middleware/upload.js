@@ -2,17 +2,23 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// Use absolute path from the backend directory
+// __dirname is the directory where upload.js is located (backend/middleware)
+// So we go up one level (..) to get to backend, then into public/uploads/profiles
+const uploadDir = path.join(__dirname, '..', 'public', 'uploads', 'profiles');
+
 // Ensure upload directory exists
-const uploadDir = 'public/uploads/profiles';
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
   console.log(`Created upload directory: ${uploadDir}`);
+} else {
+  console.log(`Upload directory already exists: ${uploadDir}`);
 }
 
 // Configure storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // Save uploaded files to public/uploads/profiles directory
+    // Save uploaded files to the absolute path
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
