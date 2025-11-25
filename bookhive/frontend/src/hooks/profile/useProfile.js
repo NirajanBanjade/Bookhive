@@ -83,10 +83,13 @@ export const useProfile = () => {
         }
       );
 
+      // FIXED: Add cache-busting timestamp to force image reload
+      const imageUrlWithTimestamp = `${response.data.profileImageUrl}?t=${Date.now()}`;
+
       // Update the formData state with the new image URL
       setFormData((prev) => ({
         ...prev,
-        profileImageUrl: response.data.profileImageUrl,
+        profileImageUrl: imageUrlWithTimestamp,
       }));
 
       alert('Profile picture updated successfully!');

@@ -1,11 +1,19 @@
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
+
+// Ensure upload directory exists
+const uploadDir = 'public/uploads/profiles';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log(`Created upload directory: ${uploadDir}`);
+}
 
 // Configure storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     // Save uploaded files to public/uploads/profiles directory
-    cb(null, 'public/uploads/profiles');
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     // Create unique filename: userId-timestamp.extension
