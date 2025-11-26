@@ -1,0 +1,333 @@
+{
+  "stats": {
+    "suites": 4,
+    "tests": 10,
+    "passes": 10,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-11-26T03:05:10.406Z",
+    "end": "2025-11-26T03:05:10.410Z",
+    "duration": 4,
+    "testsRegistered": 10,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "8b830c06-a997-4980-99c7-7aeafc55bf20",
+      "title": "",
+      "fullFile": "/Users/prashantpanta/Desktop/swe_project/bookhive/backend/TESTS/genreMapping.test.js",
+      "file": "/TESTS/genreMapping.test.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "c83a3679-edd5-462d-b6b5-e588b9828d04",
+          "title": "Genre Mapping Functions",
+          "fullFile": "/Users/prashantpanta/Desktop/swe_project/bookhive/backend/TESTS/genreMapping.test.js",
+          "file": "/TESTS/genreMapping.test.js",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [],
+          "suites": [
+            {
+              "uuid": "35641cb8-1622-422c-975d-e046cb1761c4",
+              "title": "getGenreQuery()",
+              "fullFile": "/Users/prashantpanta/Desktop/swe_project/bookhive/backend/TESTS/genreMapping.test.js",
+              "file": "/TESTS/genreMapping.test.js",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "returns correct query string for all 12 primary genres",
+                  "fullTitle": "Genre Mapping Functions getGenreQuery() returns correct query string for all 12 primary genres",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const expectedMappings = {\n  fiction: \"subject:Fiction\",\n  fantasy: \"subject:Fantasy\",\n  mystery: \"subject:Mystery\",\n  romance: \"subject:Romance\",\n  scifi: \"subject:Science Fiction\",\n  horror: \"subject:Horror\",\n  biography: \"subject:Biography\",\n  history: \"subject:History\",\n  selfhelp: \"subject:Self-Help\",\n  business: \"subject:Business\",\n  cooking: \"subject:Cooking\",\n  poetry: \"subject:Poetry\",\n};\n// Test each genre\nfor (const [genreId, expectedQuery] of Object.entries(expectedMappings)) {\n  const result = getGenreQuery(genreId);\n  if (result !== expectedQuery) {\n    throw new Error(\n      `Genre mapping failed for '${genreId}': expected '${expectedQuery}', got '${result}'`\n    );\n  }\n}\n// Verify all 12 genres were tested\nconst testedGenres = Object.keys(expectedMappings);\nif (testedGenres.length !== 12) {\n  throw new Error(\n    `Expected 12 genres, only tested ${testedGenres.length}`\n  );\n}",
+                  "err": {},
+                  "uuid": "a78f1c7f-ae69-430b-8eb3-ce129196e6ec",
+                  "parentUUID": "35641cb8-1622-422c-975d-e046cb1761c4",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "returns null for invalid genre",
+                  "fullTitle": "Genre Mapping Functions getGenreQuery() returns null for invalid genre",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const invalidGenres = [\"invalid\", \"notaGenre\", \"xyz123\", \"\"];\nfor (const invalidGenre of invalidGenres) {\n  const result = getGenreQuery(invalidGenre);\n  if (result !== null) {\n    throw new Error(\n      `Expected null for invalid genre '${invalidGenre}', got '${result}'`\n    );\n  }\n}",
+                  "err": {},
+                  "uuid": "9e8ff691-96e7-491d-a463-e42ae9bf6f8f",
+                  "parentUUID": "35641cb8-1622-422c-975d-e046cb1761c4",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "a78f1c7f-ae69-430b-8eb3-ce129196e6ec",
+                "9e8ff691-96e7-491d-a463-e42ae9bf6f8f"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 0,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 10000
+            },
+            {
+              "uuid": "70da05b9-f7b5-445f-9d74-5e180f15dd26",
+              "title": "resolveGenreAlias()",
+              "fullFile": "/Users/prashantpanta/Desktop/swe_project/bookhive/backend/TESTS/genreMapping.test.js",
+              "file": "/TESTS/genreMapping.test.js",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "resolves common sci-fi aliases to 'scifi'",
+                  "fullTitle": "Genre Mapping Functions resolveGenreAlias() resolves common sci-fi aliases to 'scifi'",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const scifiAliases = [\n  \"sci-fi\",\n  \"science-fiction\",\n  \"sciencefiction\",\n  \"Sci-Fi\",\n  \"SCIENCE-FICTION\",\n];\nfor (const alias of scifiAliases) {\n  const result = resolveGenreAlias(alias);\n  if (result !== \"scifi\") {\n    throw new Error(\n      `Alias resolution failed for '${alias}': expected 'scifi', got '${result}'`\n    );\n  }\n}",
+                  "err": {},
+                  "uuid": "2195aedd-d242-4e76-bb00-5d989cd34c07",
+                  "parentUUID": "70da05b9-f7b5-445f-9d74-5e180f15dd26",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "resolves all defined aliases correctly",
+                  "fullTitle": "Genre Mapping Functions resolveGenreAlias() resolves all defined aliases correctly",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const aliasTests = [\n  { input: \"self-help\", expected: \"selfhelp\" },\n  { input: \"bio\", expected: \"biography\" },\n  { input: \"biographies\", expected: \"biography\" },\n  { input: \"histories\", expected: \"history\" },\n  { input: \"biz\", expected: \"business\" },\n  { input: \"cook\", expected: \"cooking\" },\n  { input: \"cookbooks\", expected: \"cooking\" },\n  { input: \"poems\", expected: \"poetry\" },\n];\nfor (const test of aliasTests) {\n  const result = resolveGenreAlias(test.input);\n  if (result !== test.expected) {\n    throw new Error(\n      `Alias '${test.input}' should resolve to '${test.expected}', got '${result}'`\n    );\n  }\n}",
+                  "err": {},
+                  "uuid": "b8cee397-2055-40d8-b0be-3c594f4c002f",
+                  "parentUUID": "70da05b9-f7b5-445f-9d74-5e180f15dd26",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "handles case-insensitive alias resolution",
+                  "fullTitle": "Genre Mapping Functions resolveGenreAlias() handles case-insensitive alias resolution",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const testCases = [\n  { input: \"SCI-FI\", expected: \"scifi\" },\n  { input: \"Sci-Fi\", expected: \"scifi\" },\n  { input: \"SELF-HELP\", expected: \"selfhelp\" },\n  { input: \"Self-Help\", expected: \"selfhelp\" },\n  { input: \"BIO\", expected: \"biography\" },\n  { input: \"Bio\", expected: \"biography\" },\n];\nfor (const test of testCases) {\n  const result = resolveGenreAlias(test.input);\n  if (result !== test.expected) {\n    throw new Error(\n      `Case-insensitive resolution failed for '${test.input}': expected '${test.expected}', got '${result}'`\n    );\n  }\n}",
+                  "err": {},
+                  "uuid": "a598bbdf-253f-4a0d-b276-966ff4dd4c97",
+                  "parentUUID": "70da05b9-f7b5-445f-9d74-5e180f15dd26",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "returns normalized input when no alias exists",
+                  "fullTitle": "Genre Mapping Functions resolveGenreAlias() returns normalized input when no alias exists",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const testInputs = [\n  \"fiction\",\n  \"mystery\",\n  \"romance\",\n  \"horror\",\n  \"Fantasy\",\n  \"POETRY\",\n];\nfor (const input of testInputs) {\n  const result = resolveGenreAlias(input);\n  const expectedLowercase = input.toLowerCase();\n  if (result !== expectedLowercase) {\n    throw new Error(\n      `Non-alias genre '${input}' should return lowercase '${expectedLowercase}', got '${result}'`\n    );\n  }\n}",
+                  "err": {},
+                  "uuid": "0c93f6ba-cb53-4eb2-9dde-de70c1422962",
+                  "parentUUID": "70da05b9-f7b5-445f-9d74-5e180f15dd26",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "handles empty and whitespace inputs",
+                  "fullTitle": "Genre Mapping Functions resolveGenreAlias() handles empty and whitespace inputs",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const emptyInputs = [\"\", \"   \", \"\\t\", \"\\n\"];\nfor (const input of emptyInputs) {\n  const result = resolveGenreAlias(input);\n  const normalized = input.toLowerCase();\n  if (result !== normalized) {\n    throw new Error(\n      `Empty/whitespace input should return normalized version, got '${result}'`\n    );\n  }\n}",
+                  "err": {},
+                  "uuid": "ebb66803-9572-4313-b159-4dbe14b7f30a",
+                  "parentUUID": "70da05b9-f7b5-445f-9d74-5e180f15dd26",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "2195aedd-d242-4e76-bb00-5d989cd34c07",
+                "b8cee397-2055-40d8-b0be-3c594f4c002f",
+                "a598bbdf-253f-4a0d-b276-966ff4dd4c97",
+                "0c93f6ba-cb53-4eb2-9dde-de70c1422962",
+                "ebb66803-9572-4313-b159-4dbe14b7f30a"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 0,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 10000
+            },
+            {
+              "uuid": "10e9389f-c6fa-45e4-81d8-6ed8692ddb2d",
+              "title": "GENRE_MAPPING constant",
+              "fullFile": "/Users/prashantpanta/Desktop/swe_project/bookhive/backend/TESTS/genreMapping.test.js",
+              "file": "/TESTS/genreMapping.test.js",
+              "beforeHooks": [],
+              "afterHooks": [],
+              "tests": [
+                {
+                  "title": "contains exactly 12 genres",
+                  "fullTitle": "Genre Mapping Functions GENRE_MAPPING constant contains exactly 12 genres",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const genreCount = Object.keys(GENRE_MAPPING).length;\nif (genreCount !== 12) {\n  throw new Error(\n    `Expected 12 genres in GENRE_MAPPING, found ${genreCount}`\n  );\n}",
+                  "err": {},
+                  "uuid": "f74893f4-752f-473c-bb3d-d351e948fcbd",
+                  "parentUUID": "10e9389f-c6fa-45e4-81d8-6ed8692ddb2d",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "all query strings start with 'subject:'",
+                  "fullTitle": "Genre Mapping Functions GENRE_MAPPING constant all query strings start with 'subject:'",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "for (const [genreId, queryString] of Object.entries(GENRE_MAPPING)) {\n  if (!queryString.startsWith(\"subject:\")) {\n    throw new Error(\n      `Genre '${genreId}' query string '${queryString}' does not start with 'subject:'`\n    );\n  }\n}",
+                  "err": {},
+                  "uuid": "cd936f7b-7b9c-4c8c-a05f-8b7aaa46b3e2",
+                  "parentUUID": "10e9389f-c6fa-45e4-81d8-6ed8692ddb2d",
+                  "isHook": false,
+                  "skipped": false
+                },
+                {
+                  "title": "has unique query values for each genre",
+                  "fullTitle": "Genre Mapping Functions GENRE_MAPPING constant has unique query values for each genre",
+                  "timedOut": false,
+                  "duration": 0,
+                  "state": "passed",
+                  "speed": "fast",
+                  "pass": true,
+                  "fail": false,
+                  "pending": false,
+                  "context": null,
+                  "code": "const queryValues = Object.values(GENRE_MAPPING);\nconst uniqueQueries = new Set(queryValues);\nif (queryValues.length !== uniqueQueries.size) {\n  throw new Error(\n    `Duplicate query values found in GENRE_MAPPING. Expected ${queryValues.length} unique values, found ${uniqueQueries.size}`\n  );\n}",
+                  "err": {},
+                  "uuid": "35cfbc85-cf8b-4894-8339-157aa5669c4a",
+                  "parentUUID": "10e9389f-c6fa-45e4-81d8-6ed8692ddb2d",
+                  "isHook": false,
+                  "skipped": false
+                }
+              ],
+              "suites": [],
+              "passes": [
+                "f74893f4-752f-473c-bb3d-d351e948fcbd",
+                "cd936f7b-7b9c-4c8c-a05f-8b7aaa46b3e2",
+                "35cfbc85-cf8b-4894-8339-157aa5669c4a"
+              ],
+              "failures": [],
+              "pending": [],
+              "skipped": [],
+              "duration": 0,
+              "root": false,
+              "rootEmpty": false,
+              "_timeout": 10000
+            }
+          ],
+          "passes": [],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 0,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 10000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 10000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "11.7.4"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "genre-mapping-report",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.4"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "TESTS/prashant-report",
+        "reportFilename": "genre-mapping-report"
+      },
+      "version": "6.3.2"
+    }
+  }
+}

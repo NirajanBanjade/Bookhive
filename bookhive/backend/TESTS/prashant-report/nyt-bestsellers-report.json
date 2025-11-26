@@ -1,0 +1,198 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 5,
+    "passes": 5,
+    "pending": 0,
+    "failures": 0,
+    "start": "2025-11-26T02:52:54.831Z",
+    "end": "2025-11-26T02:52:54.856Z",
+    "duration": 25,
+    "testsRegistered": 5,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "765f5ca4-8932-4837-86ac-8ebf5099e2b8",
+      "title": "",
+      "fullFile": "/Users/prashantpanta/Desktop/swe_project/bookhive/backend/TESTS/nytBestsellers.test.js",
+      "file": "/TESTS/nytBestsellers.test.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "695be989-5302-4385-af2e-54d3248ceeeb",
+          "title": "NYT Bestsellers Service",
+          "fullFile": "/Users/prashantpanta/Desktop/swe_project/bookhive/backend/TESTS/nytBestsellers.test.js",
+          "file": "/TESTS/nytBestsellers.test.js",
+          "beforeHooks": [],
+          "afterHooks": [
+            {
+              "title": "\"after each\" hook in \"NYT Bestsellers Service\"",
+              "fullTitle": "NYT Bestsellers Service \"after each\" hook in \"NYT Bestsellers Service\"",
+              "timedOut": false,
+              "duration": 0,
+              "state": null,
+              "speed": null,
+              "pass": false,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Clean up all HTTP mocks after each test\nnock.cleanAll();",
+              "err": {},
+              "uuid": "23147f55-e1b1-4c14-8db8-d65ef041caf7",
+              "parentUUID": "695be989-5302-4385-af2e-54d3248ceeeb",
+              "isHook": true,
+              "skipped": false
+            }
+          ],
+          "tests": [
+            {
+              "title": "successfully fetches and maps NYT bestseller data",
+              "fullTitle": "NYT Bestsellers Service successfully fetches and maps NYT bestseller data",
+              "timedOut": false,
+              "duration": 8,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Mock NYT API response with sample data\nconst mockNYTResponse = {\n  status: \"OK\",\n  results: {\n    list_name: \"Combined Print and E-Book Fiction\",\n    books: [\n      {\n        rank: 1,\n        title: \"THE WOMAN IN ME\",\n        author: \"Britney Spears\",\n        description: \"The pop star shares her story.\",\n        book_image: \"https://example.com/image1.jpg\",\n        primary_isbn13: \"9781668009048\",\n        weeks_on_list: 5,\n        publisher: \"Gallery Books\",\n      },\n      {\n        rank: 2,\n        title: \"HOLLY\",\n        author: \"Stephen King\",\n        description: \"The private detective takes on a case.\",\n        book_image: \"https://example.com/image2.jpg\",\n        primary_isbn13: \"9781668016138\",\n        weeks_on_list: 3,\n        publisher: \"Scribner\",\n      },\n    ],\n  },\n};\n// Setup nock to intercept the API call\nnock(NYT_BASE_URL)\n  .get(/\\/svc\\/books\\/v3\\/lists\\/current\\/.*/)\n  .query(true) // Accept any query parameters\n  .reply(200, mockNYTResponse);\n// Call the function\nconst result = await getBestsellerList(listName);\n// Validate the result\nif (!Array.isArray(result)) {\n  throw new Error(\"Result should be an array\");\n}\nif (result.length !== 2) {\n  throw new Error(`Expected 2 books, got ${result.length}`);\n}\n// Validate first book mapping\nconst firstBook = result[0];\nif (firstBook.title !== \"THE WOMAN IN ME\") {\n  throw new Error(\"First book title mismatch\");\n}\nif (\n  !Array.isArray(firstBook.authors) ||\n  firstBook.authors[0] !== \"Britney Spears\"\n) {\n  throw new Error(\"First book author mismatch\");\n}\nif (firstBook.description !== \"The pop star shares her story.\") {\n  throw new Error(\"First book description mismatch\");\n}\nif (firstBook.thumbnail !== \"https://example.com/image1.jpg\") {\n  throw new Error(\"First book thumbnail mismatch\");\n}\nif (firstBook.isbn !== \"9781668009048\") {\n  throw new Error(\"First book ISBN mismatch\");\n}\nif (firstBook.rank !== 1) {\n  throw new Error(\"First book rank mismatch\");\n}\nif (firstBook.weeksOnList !== 5) {\n  throw new Error(\"First book weeksOnList mismatch\");\n}\nif (firstBook.publisher !== \"Gallery Books\") {\n  throw new Error(\"First book publisher mismatch\");\n}\n// Validate second book basics\nconst secondBook = result[1];\nif (secondBook.title !== \"HOLLY\") {\n  throw new Error(\"Second book title mismatch\");\n}\nif (secondBook.authors[0] !== \"Stephen King\") {\n  throw new Error(\"Second book author mismatch\");\n}\nif (secondBook.rank !== 2) {\n  throw new Error(\"Second book rank mismatch\");\n}",
+              "err": {},
+              "uuid": "88b50825-1d12-4f58-b66a-e2ebc462811a",
+              "parentUUID": "695be989-5302-4385-af2e-54d3248ceeeb",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "returns empty array when NYT API returns no books",
+              "fullTitle": "NYT Bestsellers Service returns empty array when NYT API returns no books",
+              "timedOut": false,
+              "duration": 4,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Mock NYT API response with empty books array\nconst mockEmptyResponse = {\n  status: \"OK\",\n  results: {\n    list_name: \"Combined Print and E-Book Fiction\",\n    books: [],\n  },\n};\nnock(NYT_BASE_URL)\n  .get(/\\/svc\\/books\\/v3\\/lists\\/current\\/.*/)\n  .query(true)\n  .reply(200, mockEmptyResponse);\nconst result = await getBestsellerList(listName);\nif (!Array.isArray(result)) {\n  throw new Error(\"Result should be an array\");\n}\nif (result.length !== 0) {\n  throw new Error(`Expected empty array, got ${result.length} items`);\n}",
+              "err": {},
+              "uuid": "fbc9269e-244a-468d-839c-ba82ccf633c7",
+              "parentUUID": "695be989-5302-4385-af2e-54d3248ceeeb",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "handles NYT API errors gracefully",
+              "fullTitle": "NYT Bestsellers Service handles NYT API errors gracefully",
+              "timedOut": false,
+              "duration": 2,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Mock NYT API to return 500 error\nnock(NYT_BASE_URL)\n  .get(/\\/svc\\/books\\/v3\\/lists\\/current\\/.*/)\n  .query(true)\n  .reply(500, { error: \"Internal Server Error\" });\ntry {\n  await getBestsellerList(listName);\n  // If we reach here, the test should fail\n  throw new Error(\"Expected function to throw an error, but it didn't\");\n} catch (error) {\n  // Verify that an error was thrown\n  if (\n    !error.message.includes(\"NYT API error\") &&\n    !error.message.includes(\"500\") &&\n    !error.message.includes(\"fetch\")\n  ) {\n    throw new Error(`Expected NYT API error, got: ${error.message}`);\n  }\n  // Test passed - error was thrown as expected\n}",
+              "err": {},
+              "uuid": "adc58102-98ef-42e7-a496-be33b3fc3260",
+              "parentUUID": "695be989-5302-4385-af2e-54d3248ceeeb",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "handles malformed API responses",
+              "fullTitle": "NYT Bestsellers Service handles malformed API responses",
+              "timedOut": false,
+              "duration": 3,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Mock NYT API response with missing results.books\nconst mockMalformedResponse = {\n  status: \"OK\",\n  results: {\n    list_name: \"Combined Print and E-Book Fiction\",\n    // books array is missing\n  },\n};\nnock(NYT_BASE_URL)\n  .get(/\\/svc\\/books\\/v3\\/lists\\/current\\/.*/)\n  .query(true)\n  .reply(200, mockMalformedResponse);\nconst result = await getBestsellerList(listName);\n// Should return empty array for malformed response\nif (!Array.isArray(result)) {\n  throw new Error(\"Result should be an array\");\n}\nif (result.length !== 0) {\n  throw new Error(\n    `Expected empty array for malformed response, got ${result.length} items`\n  );\n}",
+              "err": {},
+              "uuid": "cd01ffd3-49cb-403d-b234-452f3ecc4eb9",
+              "parentUUID": "695be989-5302-4385-af2e-54d3248ceeeb",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "correctly maps all book fields from NYT format to internal format",
+              "fullTitle": "NYT Bestsellers Service correctly maps all book fields from NYT format to internal format",
+              "timedOut": false,
+              "duration": 2,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "// Mock with comprehensive book data\nconst mockResponse = {\n  status: \"OK\",\n  results: {\n    books: [\n      {\n        rank: 5,\n        title: \"TEST BOOK\",\n        author: \"Test Author Name\",\n        description: \"A comprehensive test description.\",\n        book_image: \"https://test.com/cover.jpg\",\n        primary_isbn13: \"9781234567890\",\n        weeks_on_list: 10,\n        publisher: \"Test Publisher Inc\",\n      },\n    ],\n  },\n};\nnock(NYT_BASE_URL)\n  .get(/\\/svc\\/books\\/v3\\/lists\\/current\\/.*/)\n  .query(true)\n  .reply(200, mockResponse);\nconst result = await getBestsellerList(listName);\nif (result.length !== 1) {\n  throw new Error(`Expected 1 book, got ${result.length}`);\n}\nconst book = result[0];\n// Verify all fields are correctly mapped\nconst requiredFields = [\n  \"title\",\n  \"authors\",\n  \"description\",\n  \"thumbnail\",\n  \"isbn\",\n  \"rank\",\n  \"weeksOnList\",\n  \"publisher\",\n];\nfor (const field of requiredFields) {\n  if (!(field in book)) {\n    throw new Error(`Missing required field: ${field}`);\n  }\n}\n// Verify authors is an array (even for single author)\nif (!Array.isArray(book.authors)) {\n  throw new Error(\"Authors field should be an array\");\n}\nif (book.authors.length !== 1) {\n  throw new Error(`Expected 1 author, got ${book.authors.length}`);\n}",
+              "err": {},
+              "uuid": "21562df6-aa29-4742-b3c6-7f8c98f5b647",
+              "parentUUID": "695be989-5302-4385-af2e-54d3248ceeeb",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "88b50825-1d12-4f58-b66a-e2ebc462811a",
+            "fbc9269e-244a-468d-839c-ba82ccf633c7",
+            "adc58102-98ef-42e7-a496-be33b3fc3260",
+            "cd01ffd3-49cb-403d-b234-452f3ecc4eb9",
+            "21562df6-aa29-4742-b3c6-7f8c98f5b647"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 19,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 10000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 10000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "11.7.4"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "nyt-bestsellers-report",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.4"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "TESTS/prashant-report",
+        "reportFilename": "nyt-bestsellers-report"
+      },
+      "version": "6.3.2"
+    }
+  }
+}
