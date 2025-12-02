@@ -231,6 +231,25 @@ For example, the genre section required defining 12 different genres with the sa
 - **Jira Task:** Prashant – Fix the fetching error in genre section
   ◦ [KAN-84 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-84), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/bugfix/KAN-84-fix-the-fetching-error-in-genre-s)
 
+## Sprint 3 — Contributions
+
+**Prajwal Kunwar:** "Implemented age verification during registration, mature content warnings for minors accessing adult-rated books, comprehensive unit testing with automated reporting, and extended the notification system to include profile update notifications."
+
+- **Jira Task:** Prajwal – Implement age verification during user registration  
+  ◦ [KAN-90 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-90), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feat/KAN-90-age-verification-modal)
+
+- **Jira Task:** Prajwal – Add mature content warning popup for minors  
+  ◦ [KAN-91 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-91), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feat/KAN-91-mature-content-warning-popup)
+
+- **Jira Task:** Prajwal – Extend notification system for profile updates  
+  ◦ [KAN-92 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-92), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-92-extend-notification-system)
+
+- **Jira Task:** Prajwal – Create comprehensive testing plan with unit tests  
+  ◦ [KAN-93 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-93), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-93-testing-plan)
+
+- **Jira Task:** Prajwal – Implement unit tests with Mocha and Mochawesome reporting  
+  ◦ [KAN-94 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-94), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-94-test-execution)
+
 
 ### Next Sprint(3) Goals
 - **Nirajan**
