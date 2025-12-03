@@ -250,6 +250,26 @@ For example, the genre section required defining 12 different genres with the sa
 - **Jira Task:** Prajwal – Implement unit tests with Mocha and Mochawesome reporting  
   ◦ [KAN-94 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-94), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-94-test-execution)
 
+  **Alan Garcia:** "Improved upon the recommendation feature by making it dynamic and including a users "currently-reading" and "finished" book collection to be considered for recommending books. Added route protection to improve user experience and safety measures."
+
+  - **Jira Task:** Alan - Make recommendations to be dynamic
+    ◦ [KAN-109 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-109), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-109-make-recommendations-dynamic)
+
+  - **Jira Task:** Alan - Apply middleware to routes that require authentication
+    ◦ [KAN-109 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-107), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-107-apply-middleware-to-routes-for-authentication)
+
+  - **Jira Task:** Alan - Create ProtectedRoute Component that redirects to home page or login
+    ◦ [KAN-109 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-111), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-111-create-protectedroute-component)
+
+  - **Jira Task:** Alan - Include Currently Reading collection for User Interest Profile
+    ◦ [KAN-109 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-110), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-110-include-currently-reading-collection-to-UIP)
+
+  - **Jira Task:** Alan - Include Finished collections for User Interest Profile
+    ◦ [KAN-109 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-108), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/feature/KAN-108-include-finished-collections-to-UIP)
+
+  - **Jira Task:** Alan - Unit testing of book recommendations
+    ◦ [KAN-109 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-113), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-113-unit-testing-of-book-recommendations)
+
 
 ### Next Sprint(3) Goals
 - **Nirajan**
