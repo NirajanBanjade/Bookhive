@@ -270,6 +270,23 @@ For example, the genre section required defining 12 different genres with the sa
   - **Jira Task:** Alan - Unit testing of book recommendations
     ◦ [KAN-109 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-113), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-113-unit-testing-of-book-recommendations)
 
+  **Nirajan Banjade:** "Implemented Group replies, group likes from frontend to backend, added logout button and token clear policy, added test cases for auth components, and refactored group related code to follow SOLID principle."
+
+- **Jira Task:** Nirajan - Logout functionality and token clear policy added.
+  ◦ [KAN-103 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-103), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-103-logout-functionality)
+
+- **Jira Task:** Nirajan – Group replies functionality. 
+  ◦ [KAN-104 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-104), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-104-implementation-group-replies)
+
+- **Jira Task:** Nirajan – Testing and refactoring of group files.
+  ◦ [KAN-105 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-105), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-105-testing-and-refactor-group-files)
+
+- **Jira Task:** Nirajan – Implemented Post likes and UI polishing of group post.
+  ◦ [KAN-106 (Jira)](https://cs3398-hutts-fall.atlassian.net/jira/software/projects/KAN/boards/1?selectedIssue=KAN-106), [Bitbucket](https://bitbucket.org/cs3398-hutts-f25/swe_project/branch/KAN-106-implementation-post-likes-and-reply-likes-and-ui-polishing-of-group-post)
+
+
+  
+
 
 ### Next Sprint(3) Goals
 - **Nirajan**
