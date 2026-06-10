@@ -53,7 +53,9 @@ app.get('/api/test-google-books', (req, res) => {
   }
 });
 
-app.get('/', (_req, res) => res.send('BookHive API running'));
+if (process.env.NODE_ENV !== 'production') {
+  app.get('/', (_req, res) => res.send('BookHive API running'));
+}
 app.get('/health', (_req, res) => res.json({ ok: true, service: 'bookhive-backend' }));
 
 // Import and register routes
