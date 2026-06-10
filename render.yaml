@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: bookhive
+    runtime: node
+    plan: free
+    buildCommand: cd bookhive && npm ci && npm run build
+    startCommand: cd bookhive && npm start
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false
+      - key: MONGO_DB_NAME
+        value: Bookhive
+      - key: JWT_SECRET
+        sync: false
+      - key: GOOGLE_BOOKS_API_KEY
+        sync: false
+      - key: NYT_API_KEY
+        sync: false
+      - key: SMTP_TOKEN
+        sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
