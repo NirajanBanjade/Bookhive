@@ -19,10 +19,10 @@ export const useBooks = (userId) => {
         const token = localStorage.getItem("token");
 
         const [toReadRes, collectionsRes] = await Promise.all([
-          axios.get(`http://localhost:5050/api/to-read/${userId}`, {
+          axios.get(`/api/to-read/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          axios.get(`http://localhost:5050/api/collections/${userId}`, {
+          axios.get(`/api/collections/${userId}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -52,12 +52,12 @@ export const useBooks = (userId) => {
 
       if (currentStatus === "want-to-read") {
         await axios.delete(
-          `http://localhost:5050/api/to-read/${userId}/${googleBookId}`,
+          `/api/to-read/${userId}/${googleBookId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
         await axios.delete(
-          `http://localhost:5050/api/collections/${userId}/${googleBookId}`,
+          `/api/collections/${userId}/${googleBookId}`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
       }
@@ -84,13 +84,13 @@ export const useBooks = (userId) => {
 
       if (currentStatus === "want-to-read") {
         await axios.post(
-          `http://localhost:5050/api/to-read/${userId}/${googleBookId}/move`,
+          `/api/to-read/${userId}/${googleBookId}/move`,
           { status: newStatus },
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
         await axios.patch(
-          `http://localhost:5050/api/collections/${userId}/${googleBookId}`,
+          `/api/collections/${userId}/${googleBookId}`,
           { status: newStatus },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -117,7 +117,7 @@ export const useBooks = (userId) => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5050/api/groups/${encodeURIComponent(
+        `/api/groups/${encodeURIComponent(
           categoryKey
         )}/join`,
         {

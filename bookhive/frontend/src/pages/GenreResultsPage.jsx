@@ -28,7 +28,7 @@ const GenreResultsPage = () => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        const response = await fetch("http://localhost:5050/api/user/me", {
+        const response = await fetch("/api/user/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -129,7 +129,7 @@ const GenreResultsPage = () => {
       const token = localStorage.getItem("token");
 
       await axios.post(
-        `http://localhost:5050/api/to-read/${userId}`,
+        `/api/to-read/${userId}`,
         {
           googleBookId: book.googleBookId,
           title: book.title,

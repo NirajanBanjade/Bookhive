@@ -24,7 +24,7 @@ const ProfileHeader = ({
           <div className="w-32 h-32 rounded-full bg-gradient-to-br from-amber-300 to-orange-300 flex items-center justify-center text-white text-xl font-bold shadow-lg overflow-hidden ring-4 ring-amber-500/30">
             {formData.profileImageUrl ? (
               <img
-                src={`http://localhost:5050${formData.profileImageUrl}`}
+                src={formData.profileImageUrl}
                 alt="Profile"
                 className="w-full h-full object-cover"
               />

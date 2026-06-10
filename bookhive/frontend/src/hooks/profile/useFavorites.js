@@ -19,7 +19,7 @@ export const useFavorites = (userId) => {
         setLoading(true);
         const token = localStorage.getItem("token");
         const response = await axios.get(
-          `http://localhost:5050/api/favorites/${userId}`,
+          `/api/favorites/${userId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -51,7 +51,7 @@ export const useFavorites = (userId) => {
       
       // Call toggle endpoint
       const response = await axios.post(
-        `http://localhost:5050/api/favorites/${userId}/toggle`,
+        `/api/favorites/${userId}/toggle`,
         {
           googleBookId,
           title,

@@ -26,7 +26,7 @@ export const useProfile = () => {
           return;
         }
 
-        const response = await axios.get("http://localhost:5050/api/user/me", {
+        const response = await axios.get("/api/user/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -73,7 +73,7 @@ export const useProfile = () => {
       formDataUpload.append('avatar', file);
 
       const response = await axios.post(
-        'http://localhost:5050/api/user/upload-avatar',
+        '/api/user/upload-avatar',
         formDataUpload,
         {
           headers: {
@@ -118,7 +118,7 @@ export const useProfile = () => {
       }
 
       const response = await axios.put(
-        "http://localhost:5050/api/user/profile",
+        "/api/user/profile",
         {
           username: formData.name,
           bio: formData.bio,

@@ -18,7 +18,7 @@ const ToReadPage = () => {
         }
 
         // Get current user info
-        const response = await axios.get('http://localhost:5050/api/user/me', {
+        const response = await axios.get('/api/user/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -41,7 +41,7 @@ const ToReadPage = () => {
 
     const fetchBooks = async () => {
       try {
-        const response = await axios.get(`http://localhost:5050/api/to-read/${userId}`);
+        const response = await axios.get(`/api/to-read/${userId}`);
         setBooks(response.data.books || []);
       } catch (err) {
         console.error('Error fetching to-read list:', err);
@@ -67,7 +67,7 @@ const ToReadPage = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:5050/api/to-read/${userId}`,
+        `/api/to-read/${userId}`,
         demoBook
       );
       console.log('Book added:', response.data.books || response.data.list?.books);
@@ -89,7 +89,7 @@ const ToReadPage = () => {
 
     try {
       const response = await axios.delete(
-        `http://localhost:5050/api/to-read/${userId}/${bookId}`
+        `/api/to-read/${userId}/${bookId}`
       );
       setBooks(response.data.list.books);
       

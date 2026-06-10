@@ -30,7 +30,7 @@ export default function SearchPage() {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const response = await axios.get("http://localhost:5050/api/user/me", {
+        const response = await axios.get("/api/user/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -154,7 +154,7 @@ export default function SearchPage() {
   // Actual function to add book to To-Read
   const addBookToRead = async (book) => {
     try {
-      await axios.post(`http://localhost:5050/api/to-read/${userId}`, book);
+      await axios.post(`/api/to-read/${userId}`, book);
 
       // Trigger notification refresh
       window.dispatchEvent(new Event("notifications:refresh"));

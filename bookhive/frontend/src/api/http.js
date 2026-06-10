@@ -4,9 +4,9 @@ import axios from "axios";
 /**
  * Base URL: use env if provided, otherwise default to your local backend.
  * Example .env (frontend):
- *   REACT_APP_API_BASE=http://localhost:5050/api
+ *   REACT_APP_API_BASE=/api
  */
-const BASE_URL = process.env.REACT_APP_API_BASE || "http://localhost:5050/api";
+const BASE_URL = process.env.REACT_APP_API_BASE || "/api";
 
 const http = axios.create({
   baseURL: BASE_URL,
